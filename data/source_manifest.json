@@ -1,0 +1,15 @@
+{
+  "source_workbook": "C:\\Study\\STesting\\Pro2\\CC01.G03-krecorder\\Testcase-CC01.G03.xlsx",
+  "source_sha256": "7b57c5b9dd34778ba781b822b8a3da8e3f112777e0cfa69d6457d0e87ef04375",
+  "sheet": "003 - Moodle Grading",
+  "case_count": 36,
+  "owner": "Bùi Quốc Thái",
+  "execution_status": "NOT RUN",
+  "source": "Excel manual steps and expected results",
+  "mapping_notes": [
+    "Structured saved-field assertions expand the workbook's reopen-and-verify instructions.",
+    "Recovery error wording is taken from relation-validation cases in the same sheet.",
+    "Run IDs namespace the source ID number at execution; names and bounds stay unchanged.",
+    "Empty minimum normalization is specified by TC-003-022's title."
+  ]
+}

@@ -1,0 +1,1632 @@
+[
+  {
+    "case_id": "TC-003-001",
+    "title": "Save an empty optional Item name",
+    "description": "Verify save an empty optional Item name.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA length 0 / ECP empty / main flow. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 6,
+    "steps": [
+      {
+        "row": 6,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 7,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 8,
+        "action": "Enter Item name = '' and ID number = F003-TC001.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 9,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 10,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 11,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-002",
+    "title": "Save a one-character Item name",
+    "description": "Verify save a one-character Item name.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA length 1 / ECP text. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 12,
+    "steps": [
+      {
+        "row": 12,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 13,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 14,
+        "action": "Enter Item name = 'A' and ID number = F003-TC002.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 15,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 16,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 17,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-003",
+    "title": "Save a two-character Item name",
+    "description": "Verify save a two-character Item name.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP text representative. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 18,
+    "steps": [
+      {
+        "row": 18,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 19,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 20,
+        "action": "Enter Item name = 'Q1' and ID number = F003-TC003.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 21,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 22,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 23,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-004",
+    "title": "Save a negative Minimum grade",
+    "description": "Verify save a negative Minimum grade.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP valid negative numeric; no zero lower bound. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 24,
+    "steps": [
+      {
+        "row": 24,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 25,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 26,
+        "action": "Enter Item name = 'F003 004' and ID number = F003-TC004.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 27,
+        "action": "Select Grade type Value; clear and enter Minimum grade '-1' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 28,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [-1,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 29,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-005",
+    "title": "Save Minimum grade 1",
+    "description": "Verify save Minimum grade 1.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP / use-case. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 30,
+    "steps": [
+      {
+        "row": 30,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 31,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 32,
+        "action": "Enter Item name = 'F003 005' and ID number = F003-TC005.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 33,
+        "action": "Select Grade type Value; clear and enter Minimum grade '1' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 34,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [1,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 35,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-006",
+    "title": "Save a narrow valid range [99,100]",
+    "description": "Verify save a narrow valid range [99,100].",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA integer Min=Max-1. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 36,
+    "steps": [
+      {
+        "row": 36,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 37,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 38,
+        "action": "Enter Item name = 'F003 006' and ID number = F003-TC006.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 39,
+        "action": "Select Grade type Value; clear and enter Minimum grade '99' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 40,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [99,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 41,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-007",
+    "title": "Reject equal Minimum and Maximum grades",
+    "description": "Verify reject equal Minimum and Maximum grades.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA equality / decision R2. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 42,
+    "steps": [
+      {
+        "row": 42,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 43,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 44,
+        "action": "Enter Item name = 'F003 007' and ID number = F003-TC007.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 45,
+        "action": "Select Grade type Value; clear and enter Minimum grade '100' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 46,
+        "action": "Click Save changes and inspect validation next to grademin.",
+        "expected": "The form remains available and a visible inline message says: The minimum must be lower than the maximum"
+      },
+      {
+        "row": 47,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-008",
+    "title": "Reject Maximum immediately below Minimum [100,99.99]",
+    "description": "Verify reject Maximum immediately below Minimum [100,99.99].",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA decimal Max=Min-0.01. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 48,
+    "steps": [
+      {
+        "row": 48,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 49,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 50,
+        "action": "Enter Item name = 'F003 008' and ID number = F003-TC008.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 51,
+        "action": "Select Grade type Value; clear and enter Minimum grade '100' and Maximum grade '99.99'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 52,
+        "action": "Click Save changes and inspect validation next to grademin.",
+        "expected": "The form remains available and a visible inline message says: The minimum must be lower than the maximum"
+      },
+      {
+        "row": 53,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-009",
+    "title": "Save Maximum immediately above Minimum [100,100.01]",
+    "description": "Verify save Maximum immediately above Minimum [100,100.01].",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA decimal Max=Min+0.01. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 54,
+    "steps": [
+      {
+        "row": 54,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 55,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 56,
+        "action": "Enter Item name = 'F003 009' and ID number = F003-TC009.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 57,
+        "action": "Select Grade type Value; clear and enter Minimum grade '100' and Maximum grade '100.01'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 58,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [100,100.01] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 59,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-010",
+    "title": "Save Maximum grade 101",
+    "description": "Verify save Maximum grade 101.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP valid numeric above the default 100. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 60,
+    "steps": [
+      {
+        "row": 60,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 61,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 62,
+        "action": "Enter Item name = 'F003 010' and ID number = F003-TC010.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 63,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '101'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 64,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,101] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 65,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-011",
+    "title": "Save Value type with custom range [10,50]",
+    "description": "Verify save Value type with custom range [10,50].",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP / decision R1 / main flow. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 66,
+    "steps": [
+      {
+        "row": 66,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 67,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 68,
+        "action": "Enter Item name = 'F003 011' and ID number = F003-TC011.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 69,
+        "action": "Select Grade type Value; clear and enter Minimum grade '10' and Maximum grade '50'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 70,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [10,50] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 71,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-012",
+    "title": "Save a Scale item with the named scale",
+    "description": "Verify save a Scale item with the named scale.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP Scale / decision R3 / alternative flow. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 72,
+    "steps": [
+      {
+        "row": 72,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 73,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 74,
+        "action": "Enter Item name = 'F003 012' and ID number = F003-TC012.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 75,
+        "action": "Select Grade type Scale and choose Separate and Connected ways of knowing.",
+        "expected": "Scale is editable; Min/Max are disabled; the named scale is selected."
+      },
+      {
+        "row": 76,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 77,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-013",
+    "title": "Reject Scale type with Use no scale",
+    "description": "Verify reject Scale type with Use no scale.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP missing scale / decision R4. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 78,
+    "steps": [
+      {
+        "row": 78,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 79,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 80,
+        "action": "Enter Item name = 'F003 013' and ID number = F003-TC013.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 81,
+        "action": "Select Grade type Scale and choose Use no scale.",
+        "expected": "Scale is editable; Min/Max are disabled; the named scale is selected."
+      },
+      {
+        "row": 82,
+        "action": "Click Save changes and inspect validation next to scaleid.",
+        "expected": "The form remains available and a visible inline message says: Scale must be selected"
+      },
+      {
+        "row": 83,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-014",
+    "title": "Save a Text feedback item",
+    "description": "Verify save a Text feedback item.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP Text / decision R5 / alternative flow. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 84,
+    "steps": [
+      {
+        "row": 84,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 85,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 86,
+        "action": "Enter Item name = 'F003 014' and ID number = F003-TC014.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 87,
+        "action": "Select Grade type Text.",
+        "expected": "Scale, Min and Max are disabled."
+      },
+      {
+        "row": 88,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 89,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-015",
+    "title": "Verify available Grade types and cancel creation",
+    "description": "Verify verify available Grade types and cancel creation.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP categorical options / cancel path. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 90,
+    "steps": [
+      {
+        "row": 90,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 91,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 92,
+        "action": "Enter Item name = 'F003 015' and ID number = F003-TC015.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 93,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 94,
+        "action": "Inspect the complete Grade type option list.",
+        "expected": "Exactly Value, Scale and Text are offered; None is absent."
+      },
+      {
+        "row": 95,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-016",
+    "title": "Reject representative inverted bounds [80,40]",
+    "description": "Verify reject representative inverted bounds [80,40].",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP Min>Max / decision R2. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 96,
+    "steps": [
+      {
+        "row": 96,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 97,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 98,
+        "action": "Enter Item name = 'F003 016' and ID number = F003-TC016.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 99,
+        "action": "Select Grade type Value; clear and enter Minimum grade '80' and Maximum grade '40'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 100,
+        "action": "Click Save changes and inspect validation next to grademin.",
+        "expected": "The form remains available and a visible inline message says: The minimum must be lower than the maximum"
+      },
+      {
+        "row": 101,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-017",
+    "title": "Reject non-numeric Minimum grade",
+    "description": "Verify reject non-numeric Minimum grade.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP invalid Min format / decision R6. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 102,
+    "steps": [
+      {
+        "row": 102,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 103,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 104,
+        "action": "Enter Item name = 'F003 017' and ID number = F003-TC017.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 105,
+        "action": "Select Grade type Value; clear and enter Minimum grade 'abc' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 106,
+        "action": "Click Save changes and inspect validation next to grademin.",
+        "expected": "The form remains available and a visible inline message says: You must enter a number here."
+      },
+      {
+        "row": 107,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-018",
+    "title": "Recover from invalid bounds on the same form",
+    "description": "Verify recover from invalid bounds on the same form.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "Use-case error-recovery / decision R2 then R1. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 108,
+    "steps": [
+      {
+        "row": 108,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 109,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 110,
+        "action": "Enter Item name = 'F003 018' and ID number = F003-TC018.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 111,
+        "action": "Select Grade type Value; clear and enter Minimum grade '80' and Maximum grade '40'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 112,
+        "action": "Submit invalid bounds [80,40], verify the visible relation error, then correct Min=0 and Max=100 on the same form.",
+        "expected": "The exact relation error is shown before editing; the form then contains valid bounds."
+      },
+      {
+        "row": 113,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 114,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-019",
+    "title": "Save decimal Minimum immediately below Maximum",
+    "description": "Verify save decimal Minimum immediately below Maximum.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA decimal Min=Max-0.01. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 115,
+    "steps": [
+      {
+        "row": 115,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 116,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 117,
+        "action": "Enter Item name = 'F003 019' and ID number = F003-TC019.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 118,
+        "action": "Select Grade type Value; clear and enter Minimum grade '99.99' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 119,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [99.99,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 120,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-020",
+    "title": "Reject decimal Minimum immediately above Maximum",
+    "description": "Verify reject decimal Minimum immediately above Maximum.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA decimal Min=Max+0.01. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 121,
+    "steps": [
+      {
+        "row": 121,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 122,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 123,
+        "action": "Enter Item name = 'F003 020' and ID number = F003-TC020.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 124,
+        "action": "Select Grade type Value; clear and enter Minimum grade '100.01' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 125,
+        "action": "Click Save changes and inspect validation next to grademin.",
+        "expected": "The form remains available and a visible inline message says: The minimum must be lower than the maximum"
+      },
+      {
+        "row": 126,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-021",
+    "title": "Reject non-numeric Maximum grade",
+    "description": "Verify reject non-numeric Maximum grade.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP invalid Max format / decision R6. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 127,
+    "steps": [
+      {
+        "row": 127,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 128,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 129,
+        "action": "Enter Item name = 'F003 021' and ID number = F003-TC021.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 130,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade 'abc'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 131,
+        "action": "Click Save changes and inspect validation next to grademax.",
+        "expected": "The form remains available and a visible inline message says: You must enter a number here."
+      },
+      {
+        "row": 132,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-022",
+    "title": "Normalize an empty Minimum grade to zero",
+    "description": "Verify normalize an empty Minimum grade to zero.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP optional numeric normalization. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 133,
+    "steps": [
+      {
+        "row": 133,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 134,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 135,
+        "action": "Enter Item name = 'F003 022' and ID number = F003-TC022.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 136,
+        "action": "Select Grade type Value; clear and enter Minimum grade '' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 137,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 138,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-023",
+    "title": "Save a whitespace-only Item name",
+    "description": "Verify save a whitespace-only Item name.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP whitespace / observed optional-name behavior. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 139,
+    "steps": [
+      {
+        "row": 139,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 140,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 141,
+        "action": "Enter exactly three ASCII spaces into Item name (length=3, no other characters) and ID number = F003-TC023.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 142,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 143,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 144,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-024",
+    "title": "Save an Item name of 256 characters",
+    "description": "Verify save an Item name of 256 characters.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP long text / checks the former false 255-character assumption. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 145,
+    "steps": [
+      {
+        "row": 145,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 146,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 147,
+        "action": "Enter exactly 256 uppercase X characters into Item name and ID number = F003-TC024.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 148,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 149,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 150,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-025",
+    "title": "Save Item info, unique ID number and Grade to pass",
+    "description": "Verify save Item info, unique ID number and Grade to pass.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP metadata and numeric passing grade. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 151,
+    "steps": [
+      {
+        "row": 151,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 152,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 153,
+        "action": "Enter Item name = 'F003 025' and ID number = F003-TC025.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 154,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 155,
+        "action": "Enter iteminfo = 'Offline oral assessment'.",
+        "expected": "The field contains the specified test value."
+      },
+      {
+        "row": 156,
+        "action": "Enter gradepass = '50'.",
+        "expected": "The field contains the specified test value."
+      },
+      {
+        "row": 157,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 158,
+        "action": "Recheck iteminfo after reopening.",
+        "expected": "The entered value is retained."
+      },
+      {
+        "row": 159,
+        "action": "Recheck gradepass after reopening.",
+        "expected": "The entered value is retained."
+      },
+      {
+        "row": 160,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-026",
+    "title": "Reject a duplicate ID number",
+    "description": "Verify reject a duplicate ID number.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP duplicate ID / error path. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 161,
+    "steps": [
+      {
+        "row": 161,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 162,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 163,
+        "action": "Enter Item name = 'F003 026' and ID number = F003-TC026.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 164,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 165,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 166,
+        "action": "Cancel to return to setup; record the current count including the original item.",
+        "expected": "The original item is still present."
+      },
+      {
+        "row": 167,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 168,
+        "action": "Enter Item name = 'F003 duplicate ID attempt' and ID number = F003-TC026.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 169,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 170,
+        "action": "Submit a second item with the same ID number.",
+        "expected": "Visible ID number feedback says This ID number is already taken; the duplicate is not saved."
+      },
+      {
+        "row": 171,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      },
+      {
+        "row": 172,
+        "action": "Open the original item by its recorded ID.",
+        "expected": "The original ID number is unchanged."
+      },
+      {
+        "row": 173,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-027",
+    "title": "Save Percentage display and zero decimal places",
+    "description": "Verify save Percentage display and zero decimal places.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP display / BVA decimals lower endpoint 0. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 174,
+    "steps": [
+      {
+        "row": 174,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 175,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 176,
+        "action": "Enter Item name = 'F003 027' and ID number = F003-TC027.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 177,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 178,
+        "action": "Set display to option value 2.",
+        "expected": "The selected option is displayed."
+      },
+      {
+        "row": 179,
+        "action": "Set decimals to option value 0.",
+        "expected": "The selected option is displayed."
+      },
+      {
+        "row": 180,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 181,
+        "action": "Recheck display after reopening.",
+        "expected": "The exact option value is retained."
+      },
+      {
+        "row": 182,
+        "action": "Recheck decimals after reopening.",
+        "expected": "The exact option value is retained."
+      },
+      {
+        "row": 183,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-028",
+    "title": "Reject non-numeric Grade to pass",
+    "description": "Verify reject non-numeric Grade to pass.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP invalid numeric Grade to pass. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 184,
+    "steps": [
+      {
+        "row": 184,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 185,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 186,
+        "action": "Enter Item name = 'F003 028' and ID number = F003-TC028.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 187,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 188,
+        "action": "Enter gradepass = 'abc'.",
+        "expected": "The field contains the specified test value."
+      },
+      {
+        "row": 189,
+        "action": "Click Save changes and inspect validation next to gradepass.",
+        "expected": "The form remains available and a visible inline message says: You must enter a number here."
+      },
+      {
+        "row": 190,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-029",
+    "title": "Save Hidden and Locked enabled",
+    "description": "Verify save Hidden and Locked enabled.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP Boolean On; Off covered by default cases. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 191,
+    "steps": [
+      {
+        "row": 191,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 192,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 193,
+        "action": "Enter Item name = 'F003 029' and ID number = F003-TC029.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 194,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 195,
+        "action": "Enable hidden.",
+        "expected": "The checkbox is checked and its change/click handlers run."
+      },
+      {
+        "row": 196,
+        "action": "Enable locked.",
+        "expected": "The checkbox is checked and its change/click handlers run."
+      },
+      {
+        "row": 197,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 198,
+        "action": "Recheck hidden after reopening.",
+        "expected": "The saved checkbox is checked."
+      },
+      {
+        "row": 199,
+        "action": "Recheck locked after reopening.",
+        "expected": "The saved checkbox is checked."
+      },
+      {
+        "row": 200,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-030",
+    "title": "Save enabled future Hidden until and Lock after dates",
+    "description": "Verify save enabled future Hidden until and Lock after dates.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP optional date-time controls / dependency checks. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 201,
+    "steps": [
+      {
+        "row": 201,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 202,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 203,
+        "action": "Enter Item name = 'F003 030' and ID number = F003-TC030.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 204,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 205,
+        "action": "Enable Hidden until and Lock after. Set both to 31 December 2030, 12:00, Asia/Bangkok.",
+        "expected": "Date controls are enabled; Hidden is disabled when Hidden until is enabled."
+      },
+      {
+        "row": 206,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 207,
+        "action": "Inspect both enabled date-time values after reopening.",
+        "expected": "Both retain 31 December 2030 at 12:00."
+      },
+      {
+        "row": 208,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-031",
+    "title": "Save adjusted weight and Extra credit",
+    "description": "Verify save adjusted weight and Extra credit.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP optional weight/extra-credit configuration. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 209,
+    "steps": [
+      {
+        "row": 209,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 210,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 211,
+        "action": "Enter Item name = 'F003 031' and ID number = F003-TC031.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 212,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 213,
+        "action": "Enable weightoverride.",
+        "expected": "The checkbox is checked and its change/click handlers run."
+      },
+      {
+        "row": 214,
+        "action": "Enable aggregationcoef.",
+        "expected": "The checkbox is checked and its change/click handlers run."
+      },
+      {
+        "row": 215,
+        "action": "Enter aggregationcoef2 = '10'.",
+        "expected": "The field contains the specified test value."
+      },
+      {
+        "row": 216,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 217,
+        "action": "Recheck weightoverride after reopening.",
+        "expected": "The saved checkbox is checked."
+      },
+      {
+        "row": 218,
+        "action": "Recheck aggregationcoef after reopening.",
+        "expected": "The saved checkbox is checked."
+      },
+      {
+        "row": 219,
+        "action": "Recheck aggregationcoef2 after reopening.",
+        "expected": "The entered value is retained."
+      },
+      {
+        "row": 220,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-032",
+    "title": "Save one decimal place",
+    "description": "Verify save one decimal place.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA decimals lower endpoint +1. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 221,
+    "steps": [
+      {
+        "row": 221,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 222,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 223,
+        "action": "Enter Item name = 'F003 032' and ID number = F003-TC032.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 224,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 225,
+        "action": "Set decimals to option value 1.",
+        "expected": "The selected option is displayed."
+      },
+      {
+        "row": 226,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 227,
+        "action": "Recheck decimals after reopening.",
+        "expected": "The exact option value is retained."
+      },
+      {
+        "row": 228,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-033",
+    "title": "Save four decimal places",
+    "description": "Verify save four decimal places.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA decimals upper endpoint -1. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 229,
+    "steps": [
+      {
+        "row": 229,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 230,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 231,
+        "action": "Enter Item name = 'F003 033' and ID number = F003-TC033.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 232,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 233,
+        "action": "Set decimals to option value 4.",
+        "expected": "The selected option is displayed."
+      },
+      {
+        "row": 234,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 235,
+        "action": "Recheck decimals after reopening.",
+        "expected": "The exact option value is retained."
+      },
+      {
+        "row": 236,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-034",
+    "title": "Save five decimal places",
+    "description": "Verify save five decimal places.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "BVA decimals upper endpoint 5. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 237,
+    "steps": [
+      {
+        "row": 237,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 238,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 239,
+        "action": "Enter Item name = 'F003 034' and ID number = F003-TC034.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 240,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 241,
+        "action": "Set decimals to option value 5.",
+        "expected": "The selected option is displayed."
+      },
+      {
+        "row": 242,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 243,
+        "action": "Recheck decimals after reopening.",
+        "expected": "The exact option value is retained."
+      },
+      {
+        "row": 244,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-035",
+    "title": "Verify Letter display disables decimal places",
+    "description": "Verify verify Letter display disables decimal places.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "ECP display dependency / decision R7. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+    "source_row": 245,
+    "steps": [
+      {
+        "row": 245,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 246,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 247,
+        "action": "Enter Item name = 'F003 035' and ID number = F003-TC035.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 248,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade '100'.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 249,
+        "action": "Set display to option value 3.",
+        "expected": "The selected option is displayed."
+      },
+      {
+        "row": 250,
+        "action": "Inspect decimal places after choosing Letter display.",
+        "expected": "Decimal places is disabled."
+      },
+      {
+        "row": 251,
+        "action": "Click Save changes. After redirecting to Gradebook setup, identify the newly appended manual row, record its item ID, and open its full edit form.",
+        "expected": "The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained."
+      },
+      {
+        "row": 252,
+        "action": "Recheck display after reopening.",
+        "expected": "The exact option value is retained."
+      },
+      {
+        "row": 253,
+        "action": "Click Cancel to leave the verified edit form. In the row with the recorded item ID, open Cell actions -> Delete and confirm Delete.",
+        "expected": "Only this case's item is deleted; its row disappears and the original manual-item count is restored."
+      }
+    ]
+  },
+  {
+    "case_id": "TC-003-036",
+    "title": "Reject empty Maximum grade with inline numeric feedback",
+    "description": "Verify reject empty Maximum grade with inline numeric feedback.",
+    "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+    "notes": "Robustness / ECP missing Maximum; known defect F003-D01. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI. KNOWN DEFECT F003-D01: current Moodle returns a database error instead of inline numeric feedback. Expected remains graceful validation; do not mark Pass.",
+    "source_row": 254,
+    "steps": [
+      {
+        "row": 254,
+        "action": "Open Gradebook setup for course id=2. Record the number of manual-item rows before this case.",
+        "expected": "Gradebook setup is visible; the existing manual-item count is recorded."
+      },
+      {
+        "row": 255,
+        "action": "Open the full New grade item form directly at http://127.0.0.1:9501/grade/edit/tree/item.php?courseid=2.",
+        "expected": "The full form is shown; Value is selected and numeric controls are enabled."
+      },
+      {
+        "row": 256,
+        "action": "Enter Item name = 'F003 036' and ID number = F003-TC036.",
+        "expected": "The supplied test data is entered. The ID number identifies this case without changing the name-length data."
+      },
+      {
+        "row": 257,
+        "action": "Select Grade type Value; clear and enter Minimum grade '0' and Maximum grade ''.",
+        "expected": "Min/Max are editable, Scale is disabled, and the specified values are entered."
+      },
+      {
+        "row": 258,
+        "action": "Click Save changes and inspect validation next to grademax.",
+        "expected": "The form remains available and a visible inline message says: You must enter a number here."
+      },
+      {
+        "row": 259,
+        "action": "Click Cancel and return to Gradebook setup. Compare the manual-item count with the recorded count.",
+        "expected": "No additional item is present."
+      }
+    ]
+  }
+]
