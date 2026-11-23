@@ -1,0 +1,503 @@
+{
+  "generated_at": "2026-11-23T20:03:42.002660+07:00",
+  "environment": {
+    "moodle_version": "5.1.8 (Build: 20261005)",
+    "timezone": "Asia/Bangkok",
+    "course_id": 2,
+    "minimum_grade_enabled": "1",
+    "manual_items": []
+  },
+  "baseline_manual_item_count": 0,
+  "after_manual_item_count": 0,
+  "manual_item_baseline_restored": true,
+  "datasets": {
+    "level1": {
+      "rows": 36,
+      "sha256": "e0fb1d7b805802a5ac062b0ddf486ea0c141262b3d795198ff7c64483fd66208"
+    },
+    "level2": {
+      "rows": 36,
+      "sha256": "e0fb1d7b805802a5ac062b0ddf486ea0c141262b3d795198ff7c64483fd66208"
+    }
+  },
+  "suites": {
+    "compatibility": {
+      "executed_at": "2026-11-23T19:56:02.578277+07:00",
+      "sources": [
+        {
+          "result_file": "results/final-headless/compatibility-20261123-194216-c8c5779e/results.json",
+          "metadata": {
+            "run_id": "20261123-194216-c8c5779e",
+            "executed_at": "2026-11-23T19:56:02.578277+07:00",
+            "type": "compatibility",
+            "python": "3.12.7",
+            "platform": "Windows-11-10.0.26200-SP0",
+            "selenium": "4.53.0",
+            "source_csv": "C:\\Study\\STesting\\Pro3\\level2\\data\\gradebook_cases.csv",
+            "site_base_url": "http://127.0.0.1:9501",
+            "course_id": "2",
+            "headless": true,
+            "window": [
+              1440,
+              900
+            ],
+            "page_load_strategy": "eager",
+            "interaction_fallbacks_enabled": false,
+            "automation_password_manager_enabled": false,
+            "reuse_browser": true,
+            "session_isolation": "cookies and web storage cleared before every case",
+            "planned_executions": 10,
+            "completed_executions": 10,
+            "stopped": false
+          },
+          "counts": {
+            "PASS": 10,
+            "FAIL": 0,
+            "ERROR": 0,
+            "SKIP": 0
+          }
+        }
+      ],
+      "expected_executions": 10,
+      "actual_executions": 10,
+      "total_attempts": 10,
+      "retry_history": [],
+      "coverage_complete": true,
+      "counts": {
+        "PASS": 10,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "headless": true,
+      "native_fallback_events": 0,
+      "event_logs_complete": true,
+      "interaction_fallbacks_enabled": false,
+      "browser_capabilities": {
+        "chrome": {
+          "browserName": "chrome",
+          "browserVersion": "157.0.8103.79",
+          "platformName": "windows",
+          "window": {
+            "height": 900,
+            "width": 1440,
+            "x": 10,
+            "y": 10
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 900,
+            "width": 1440
+          },
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+        },
+        "edge": {
+          "browserName": "MicrosoftEdge",
+          "browserVersion": "158.0.4370.33",
+          "platformName": "windows",
+          "window": {
+            "height": 900,
+            "width": 1440,
+            "x": 10,
+            "y": 10
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 900,
+            "width": 1440
+          },
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36 Edg/158.0.0.0"
+        }
+      },
+      "failures": [],
+      "cleanup_errors": []
+    },
+    "level1": {
+      "executed_at": "2026-11-23T20:03:40.794533+07:00",
+      "sources": [
+        {
+          "result_file": "results/final-headless/level1-20261123-191903-39461056/results.json",
+          "metadata": {
+            "run_id": "20261123-191903-39461056",
+            "executed_at": "2026-11-23T19:33:15.069069+07:00",
+            "type": "functional",
+            "python": "3.12.7",
+            "platform": "Windows-11-10.0.26200-SP0",
+            "selenium": "4.53.0",
+            "source_csv": "C:\\Study\\STesting\\Pro3\\level1\\data\\gradebook_cases.csv",
+            "site_base_url": "http://127.0.0.1:9501",
+            "course_id": "2",
+            "headless": true,
+            "window": [
+              1440,
+              900
+            ],
+            "page_load_strategy": "eager",
+            "interaction_fallbacks_enabled": false,
+            "automation_password_manager_enabled": false,
+            "reuse_browser": true,
+            "session_isolation": "cookies and web storage cleared before every case",
+            "planned_executions": 36,
+            "completed_executions": 36,
+            "stopped": false
+          },
+          "counts": {
+            "PASS": 34,
+            "FAIL": 1,
+            "ERROR": 1,
+            "SKIP": 0
+          }
+        },
+        {
+          "result_file": "results/final-headless/level1-20261123-200237-4451eb7b/results.json",
+          "metadata": {
+            "run_id": "20261123-200237-4451eb7b",
+            "executed_at": "2026-11-23T20:03:40.794533+07:00",
+            "type": "functional",
+            "python": "3.12.7",
+            "platform": "Windows-11-10.0.26200-SP0",
+            "selenium": "4.53.0",
+            "source_csv": "C:\\Study\\STesting\\Pro3\\level1\\data\\gradebook_cases.csv",
+            "site_base_url": "http://127.0.0.1:9501",
+            "course_id": "2",
+            "headless": true,
+            "window": [
+              1440,
+              900
+            ],
+            "page_load_strategy": "eager",
+            "interaction_fallbacks_enabled": false,
+            "automation_password_manager_enabled": false,
+            "reuse_browser": true,
+            "session_isolation": "cookies and web storage cleared before every case",
+            "planned_executions": 1,
+            "completed_executions": 1,
+            "stopped": false
+          },
+          "counts": {
+            "PASS": 1,
+            "FAIL": 0,
+            "ERROR": 0,
+            "SKIP": 0
+          }
+        }
+      ],
+      "expected_executions": 36,
+      "actual_executions": 36,
+      "total_attempts": 37,
+      "retry_history": [
+        {
+          "browser": "chrome",
+          "case_id": "TC-003-005",
+          "attempts": [
+            {
+              "case_id": "TC-003-005",
+              "title": "Save Minimum grade 1",
+              "level": 1,
+              "browser": "chrome",
+              "status": "ERROR",
+              "duration_seconds": 2.949857,
+              "expected": "1. Gradebook setup is visible; the existing manual-item count is recorded.\n2. The full form is shown; Value is selected and numeric controls are enabled.\n3. The supplied test data is entered. The ID number identifies this case without changing the name-length data.\n4. Min/Max are editable, Scale is disabled, and the specified values are entered.\n5. The same item is stored with the exact ID number, name and Grade type; numeric range is [1,100] for Value, or the selected scale is retained.\n6. Only this case's item is deleted; its row disappears and the original manual-item count is restored.",
+              "expected_json": {
+                "saved": {
+                  "fields": {
+                    "grademin": "1",
+                    "grademax": "100",
+                    "itemname": "F003 005",
+                    "idnumber": "F003-TC005"
+                  },
+                  "selects": {},
+                  "checks": {},
+                  "dates": {},
+                  "grade_type": "Value"
+                }
+              },
+              "actual": "Traceback (most recent call last):\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\runner.py\", line 99, in setUp\n    self.page.login(os.environ.get(\"MOODLE_USERNAME\", \"teacher01\"),\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 132, in login\n    self.click(\"login_button\")\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 91, in click\n    self.wait.until(attempt, f\"Control is not exposed for a native click: {key}\")\n  File \"C:\\Study\\STesting\\Pro3\\.venv\\Lib\\site-packages\\selenium\\webdriver\\support\\wait.py\", line 112, in until\n    value = method(self._driver)\n            ^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 80, in attempt\n    delivered = driver.execute_script(\"return arguments[0].__testboxClickSeen===true\", element)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Study\\STesting\\Pro3\\.venv\\Lib\\site-packages\\selenium\\webdriver\\remote\\webdriver.py\", line 680, in execute_script\n    return self.execute(command, {\"script\": script, \"args\": converted_args})[\"value\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Study\\STesting\\Pro3\\.venv\\Lib\\site-packages\\selenium\\webdriver\\remote\\webdriver.py\", line 569, in execute\n    self.error_handler.check_response(response)\n  File \"C:\\Study\\STesting\\Pro3\\.venv\\Lib\\site-packages\\selenium\\webdriver\\remote\\errorhandler.py\", line 234, in check_response\n    raise exception_class(message, screen, stacktrace)\nselenium.common.exceptions.WebDriverException: Message: unknown error: unhandled inspector error: {\"code\":-32000,\"message\":\"Node with given id does not belong to the document\"}\n  (Session info: chrome=157.0.8103.79)\nStacktrace:\n\tchromedriver!GetHandleVerifier [0x7ff7fbbcd655+4c05]\n\tchromedriver!(No symbol) [0x7ff7fbac4790]\n\tchromedriver!(No symbol) [0x7ff7fb932fb3]\n\tchromedriver!GetHandleVerifier [0x7ff7fc1378f7+56eea7]\n\tchromedriver!(No symbol) [0x7ff7fb926946]\n\tchromedriver!(No symbol) [0x7ff7fb92763f]\n\tchromedriver!GetHandleVerifier [0x7ff7fc14d3ba+58496a]\n\tchromedriver!GetHandleVerifier [0x7ff7fc14fa88+587038]\n\tchromedriver!GetHandleVerifier [0x7ff7fc14eca9+586259]\n\tchromedriver!(No symbol) [0x7ff7fb93712d]\n\tchromedriver!(No symbol) [0x7ff7fb936fc0]\n\tchromedriver!(No symbol) [0x7ff7fb934eda]\n\tchromedriver!(No symbol) [0x7ff7fb93849c]\n\tchromedriver!(No symbol) [0x7ff7fb967dcf]\n\tchromedriver!(No symbol) [0x7ff7fb95e11a]\n\tchromedriver!(No symbol) [0x7ff7fb966bf1]\n\tchromedriver!(No symbol) [0x7ff7fb94c109]\n\tchromedriver!(No symbol) [0x7ff7fb94d433]\n\tchromedriver!GetHandleVerifier [0x7ff7fc067041+49e5f1]\n\tchromedriver!GetHandleVerifier [0x7ff7fc085c76+4bd226]\n\tchromedriver!GetHandleVerifier [0x7ff7fc07c340+4b38f0]\n\tchromedriver!GetHandleVerifier [0x7ff7fbcfc9be+133f6e]\n\tchromedriver!(No symbol) [0x7ff7fbad2fa5]\n\tchromedriver!(No symbol) [0x7ff7fbace2d4]\n\tchromedriver!(No symbol) [0x7ff7fbace464]\n\tchromedriver!(No symbol) [0x7ff7fbab731c]\n\tKERNEL32!BaseThreadInitThunk [0x7ff8e164dda7+17]\n\tntdll!RtlUserThreadStart [0x7ff8e3519c5c+2c]\n\n",
+              "known_defect": "",
+              "runtime_id": "P3F003-39461056-585f417f52",
+              "cleanup_error": "",
+              "evidence": [
+                "C:\\Study\\STesting\\Pro3\\results\\final-headless\\level1-20261123-191903-39461056\\evidence\\L1.chrome.TC-003-005-setup.png",
+                "C:\\Study\\STesting\\Pro3\\results\\final-headless\\level1-20261123-191903-39461056\\evidence\\L1.chrome.TC-003-005-setup.html"
+              ],
+              "capabilities": {
+                "browserName": "chrome",
+                "browserVersion": "157.0.8103.79",
+                "platformName": "windows",
+                "window": {
+                  "height": 900,
+                  "width": 1440,
+                  "x": 10,
+                  "y": 10
+                },
+                "viewport": {
+                  "devicePixelRatio": 1,
+                  "height": 900,
+                  "width": 1440
+                },
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+              },
+              "result_file": "results/final-headless/level1-20261123-191903-39461056/results.json",
+              "executed_at": "2026-11-23T19:33:15.069069+07:00"
+            },
+            {
+              "case_id": "TC-003-005",
+              "title": "Save Minimum grade 1",
+              "level": 1,
+              "browser": "chrome",
+              "status": "PASS",
+              "duration_seconds": 19.65608,
+              "expected": "1. Gradebook setup is visible; the existing manual-item count is recorded.\n2. The full form is shown; Value is selected and numeric controls are enabled.\n3. The supplied test data is entered. The ID number identifies this case without changing the name-length data.\n4. Min/Max are editable, Scale is disabled, and the specified values are entered.\n5. The same item is stored with the exact ID number, name and Grade type; numeric range is [1,100] for Value, or the selected scale is retained.\n6. Only this case's item is deleted; its row disappears and the original manual-item count is restored.",
+              "expected_json": {
+                "saved": {
+                  "fields": {
+                    "grademin": "1",
+                    "grademax": "100",
+                    "itemname": "F003 005",
+                    "idnumber": "F003-TC005"
+                  },
+                  "selects": {},
+                  "checks": {},
+                  "dates": {},
+                  "grade_type": "Value"
+                }
+              },
+              "actual": "All assertions and cleanup completed",
+              "known_defect": "",
+              "runtime_id": "P3F003-4451eb7b-585f417f52",
+              "cleanup_error": "",
+              "evidence": [],
+              "capabilities": {
+                "browserName": "chrome",
+                "browserVersion": "157.0.8103.79",
+                "platformName": "windows",
+                "window": {
+                  "height": 900,
+                  "width": 1440,
+                  "x": 10,
+                  "y": 10
+                },
+                "viewport": {
+                  "devicePixelRatio": 1,
+                  "height": 900,
+                  "width": 1440
+                },
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+              },
+              "result_file": "results/final-headless/level1-20261123-200237-4451eb7b/results.json",
+              "executed_at": "2026-11-23T20:03:40.794533+07:00"
+            }
+          ]
+        }
+      ],
+      "coverage_complete": true,
+      "counts": {
+        "PASS": 35,
+        "FAIL": 1,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "headless": true,
+      "native_fallback_events": 0,
+      "event_logs_complete": true,
+      "interaction_fallbacks_enabled": false,
+      "browser_capabilities": {
+        "chrome": {
+          "browserName": "chrome",
+          "browserVersion": "157.0.8103.79",
+          "platformName": "windows",
+          "window": {
+            "height": 900,
+            "width": 1440,
+            "x": 10,
+            "y": 10
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 900,
+            "width": 1440
+          },
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+        }
+      },
+      "failures": [
+        {
+          "case_id": "TC-003-036",
+          "browser": "chrome",
+          "status": "FAIL",
+          "known_defect": "F003-D01",
+          "actual": "Traceback (most recent call last):\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\runner.py\", line 124, in runTest\n    self.page.execute(self.case.workflow, self.case.inputs, self.case.expected)\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 358, in execute\n    self.cancel()\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 331, in expect_validation\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 118, in assert_until\n    return False\n       ^^^^^^^^^^\n  File \"C:\\Study\\STesting\\Pro3\\.venv\\Lib\\site-packages\\selenium\\webdriver\\support\\wait.py\", line 112, in until\n    value = method(self._driver)\n            ^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 113, in condition\n    for text in self.site.get(\"application_error_texts\", []):\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Expected visible inline error: You must enter a number here.; application returned: Error writing to database\n",
+          "evidence": [
+            "C:\\Study\\STesting\\Pro3\\results\\final-headless\\level1-20261123-191903-39461056\\evidence\\L1.chrome.TC-003-036-failure.png",
+            "C:\\Study\\STesting\\Pro3\\results\\final-headless\\level1-20261123-191903-39461056\\evidence\\L1.chrome.TC-003-036-failure.html"
+          ]
+        }
+      ],
+      "cleanup_errors": []
+    },
+    "level2": {
+      "executed_at": "2026-11-23T19:42:12.066052+07:00",
+      "sources": [
+        {
+          "result_file": "results/final-headless/level2-20261123-193316-9568f8a0/results.json",
+          "metadata": {
+            "run_id": "20261123-193316-9568f8a0",
+            "executed_at": "2026-11-23T19:42:12.066052+07:00",
+            "type": "functional",
+            "python": "3.12.7",
+            "platform": "Windows-11-10.0.26200-SP0",
+            "selenium": "4.53.0",
+            "source_csv": "C:\\Study\\STesting\\Pro3\\level2\\data\\gradebook_cases.csv",
+            "site_base_url": "http://127.0.0.1:9501",
+            "course_id": "2",
+            "headless": true,
+            "window": [
+              1440,
+              900
+            ],
+            "page_load_strategy": "eager",
+            "interaction_fallbacks_enabled": false,
+            "automation_password_manager_enabled": false,
+            "reuse_browser": true,
+            "session_isolation": "cookies and web storage cleared before every case",
+            "planned_executions": 36,
+            "completed_executions": 36,
+            "stopped": false
+          },
+          "counts": {
+            "PASS": 35,
+            "FAIL": 1,
+            "ERROR": 0,
+            "SKIP": 0
+          }
+        }
+      ],
+      "expected_executions": 36,
+      "actual_executions": 36,
+      "total_attempts": 36,
+      "retry_history": [],
+      "coverage_complete": true,
+      "counts": {
+        "PASS": 35,
+        "FAIL": 1,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "headless": true,
+      "native_fallback_events": 0,
+      "event_logs_complete": true,
+      "interaction_fallbacks_enabled": false,
+      "browser_capabilities": {
+        "chrome": {
+          "browserName": "chrome",
+          "browserVersion": "157.0.8103.79",
+          "platformName": "windows",
+          "window": {
+            "height": 900,
+            "width": 1440,
+            "x": 10,
+            "y": 10
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 900,
+            "width": 1440
+          },
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+        }
+      },
+      "failures": [
+        {
+          "case_id": "TC-003-036",
+          "browser": "chrome",
+          "status": "FAIL",
+          "known_defect": "F003-D01",
+          "actual": "Traceback (most recent call last):\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\runner.py\", line 124, in runTest\n    self.page.execute(self.case.workflow, self.case.inputs, self.case.expected)\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 362, in execute\n    self.expect_validation(expected[\"error\"])\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 335, in expect_validation\n    self.assert_until(lambda: self.visible(key), f\"Expected visible inline error: {error['text']}\")\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 120, in assert_until\n    return self.wait.until(condition)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Study\\STesting\\Pro3\\.venv\\Lib\\site-packages\\selenium\\webdriver\\support\\wait.py\", line 112, in until\n    value = method(self._driver)\n            ^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Study\\STesting\\Pro3\\gradebook\\page.py\", line 115, in condition\n    raise AssertionError(f\"{message}; application returned: {text}\")\nAssertionError: Expected visible inline error: You must enter a number here.; application returned: Error writing to database\n",
+          "evidence": [
+            "C:\\Study\\STesting\\Pro3\\results\\final-headless\\level2-20261123-193316-9568f8a0\\evidence\\L2.chrome.TC-003-036-failure.png",
+            "C:\\Study\\STesting\\Pro3\\results\\final-headless\\level2-20261123-193316-9568f8a0\\evidence\\L2.chrome.TC-003-036-failure.html"
+          ]
+        }
+      ],
+      "cleanup_errors": []
+    },
+    "opera": {
+      "executed_at": "2026-11-23T20:02:35.751446+07:00",
+      "sources": [
+        {
+          "result_file": "results/final-headless/level2-20261123-195606-02ffb8a5/results.json",
+          "metadata": {
+            "run_id": "20261123-195606-02ffb8a5",
+            "executed_at": "2026-11-23T20:02:35.751446+07:00",
+            "type": "functional",
+            "python": "3.12.7",
+            "platform": "Windows-11-10.0.26200-SP0",
+            "selenium": "4.53.0",
+            "source_csv": "C:\\Study\\STesting\\Pro3\\level2\\data\\gradebook_cases.csv",
+            "site_base_url": "http://127.0.0.1:9501",
+            "course_id": "2",
+            "headless": true,
+            "window": [
+              1440,
+              900
+            ],
+            "page_load_strategy": "eager",
+            "interaction_fallbacks_enabled": false,
+            "automation_password_manager_enabled": false,
+            "reuse_browser": true,
+            "session_isolation": "cookies and web storage cleared before every case",
+            "planned_executions": 5,
+            "completed_executions": 5,
+            "stopped": false
+          },
+          "counts": {
+            "PASS": 5,
+            "FAIL": 0,
+            "ERROR": 0,
+            "SKIP": 0
+          }
+        }
+      ],
+      "expected_executions": 5,
+      "actual_executions": 5,
+      "total_attempts": 5,
+      "retry_history": [],
+      "coverage_complete": true,
+      "counts": {
+        "PASS": 5,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "headless": true,
+      "native_fallback_events": 0,
+      "event_logs_complete": true,
+      "interaction_fallbacks_enabled": false,
+      "browser_capabilities": {
+        "opera": {
+          "browserName": "chrome",
+          "browserVersion": "155.0.8059.85",
+          "platformName": "windows",
+          "window": {
+            "height": 900,
+            "width": 1440,
+            "x": -8,
+            "y": -8
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 900,
+            "width": 1440
+          },
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 OPR/139.0.0.0"
+        }
+      },
+      "failures": [],
+      "cleanup_errors": []
+    }
+  },
+  "all_planned_coverage_complete": true,
+  "all_native_interactions": true,
+  "all_assertions_passed": false,
+  "exploratory_runs": "Earlier diagnostics and the browser-password-dialog-interrupted run are excluded; their local logs are retained."
+}

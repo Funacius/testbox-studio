@@ -49,10 +49,11 @@ Mở app không khởi động kiểm thử hay thay đổi Moodle. Cách sử d
    workspace; folder rỗng được giữ trong workspace JSON.
 7. **Khi muốn chạy kiểm thử:** bật Moodle Project 2, kiểm tra URL/course và
    tài khoản có quyền sửa Gradebook. Trong **Run configuration**, chọn Level,
-   trình duyệt và chế độ. Chọn **Selected items** hoặc **All cases**, rồi bấm
+   trình duyệt và chế độ. **Headless (background)** mặc định bật để chạy nền.
+   Chọn **Selected items** hoặc **All cases**, rồi bấm
    **Run**. Chế độ Compatibility tự dùng Level 2 và Chrome/Edge cho 5 case
-   quy định. Yêu cầu môi trường cụ thể nằm ở phần **Preconditions before a
-   future run** bên dưới.
+   quy định. Yêu cầu môi trường cụ thể nằm ở phần **Moodle preconditions**
+   bên dưới.
 8. **Execution:** theo dõi Live steps và Case results; bấm **Open results** để
    mở file kết quả. **Stop after case** chờ case hiện tại và cleanup hoàn tất.
 
@@ -65,10 +66,11 @@ liệu và workflow vẫn thể hiện đúng chức năng Gradebook hiện đan
 Python 3.12 + Selenium WebDriver + unittest. This submission implements the
 36 manual grade-item cases from Project 2 as data-driven automation.
 
-**Current state: desktop app, code and data prepared; browser tests NOT RUN.**
-The desktop UI and file exchange have been checked offline. No Project 2
-execution result is presented as a Project 3 result. Moodle has not been
-started or changed during preparation.
+**Current state: browser verification completed on 23 November 2026.**
+Level 1 and Level 2 each have 35 PASS and 1 FAIL: TC-003-036 reproduces the
+known Moodle defect F003-D01. Chrome/Edge compatibility passed 10/10, and
+supplementary Opera GX coverage passed 5/5. See **Verification results** below
+for the report files and the retained history of one infrastructure recheck.
 
 The teacher's updated hint permits Python 3 and requires **at least one
 non-functional requirement per student**, superseding the PDF's two-requirement
@@ -110,6 +112,10 @@ when an actual Run is started.
   the current executable Gradebook workflow.
 - **Run configuration:** Level 1/2, Chrome/Edge/both, site/course, credentials,
   site JSON and functional/compatibility mode.
+  Opera GX is also available as an experimental Chromium adapter. Headless
+  mode is enabled by default so runs can continue while other applications
+  occupy the display. Compatibility mode runs Chrome and Edge in the selected
+  headless/windowed mode.
 - **Execution:** live action events, per-case results and links to the actual
   output folder. Browser tests only start when **Run** is pressed. **Stop after
   case** finishes the active case and its cleanup rather than killing a browser.
@@ -159,7 +165,8 @@ Offline checks performed: CSV/XLS/XLSX round trips for all 36 cases, exact
 three-space/256-character names, folder path retention, workspace save/load,
 moving cases and rejecting cyclic folder moves, five workflow templates,
 direct original Excel import, editor apply/undo/redo, Python syntax and GUI
-startup/visual inspection. **No Moodle/Selenium suite was executed.**
+startup/visual inspection. These were the initial offline checks; browser
+execution is recorded separately below and in its actual result files.
 
 ## Files
 
@@ -178,7 +185,7 @@ level2/
 gradebook/
   data.py                        CSV reader; preserves significant whitespace
   config.py                      Level-specific configuration loading
-  browser.py                     Chrome/Edge creation
+  browser.py                     Chrome/Edge/Opera creation
   page.py                        Shared Gradebook workflows and assertions
   runner.py                      unittest suite, cleanup and result reporting
 nonfunctional/
@@ -203,6 +210,10 @@ Source: `../Pro2/CC01.G03-krecorder/Testcase-CC01.G03.xlsx`, sheet
 results come from that workbook. The existing Project 2 Gradebook Recorder
 was inspected to identify UI locators; no Katalon files are needed to run this
 Python project.
+
+`execution_status_at_extraction: NOT RUN` in the source manifest records the
+initial extraction stage. Later Python execution outcomes are stored in the
+verification reports separately.
 
 To regenerate both CSV files and the provenance files, without a browser:
 
@@ -250,7 +261,7 @@ The empty-minimum-to-zero oracle comes from TC-003-022. Recovery error wording
 comes from the relation-error cases in the same sheet. The JSON expands the
 workbook's generic instructions to reopen the saved item and verify its fields.
 
-## Preconditions before a future run
+## Moodle preconditions
 
 Use the existing Project 2 Moodle fixture, not a production course:
 
@@ -267,7 +278,71 @@ Use the existing Project 2 Moodle fixture, not a production course:
 The source preconditions are also present in each CSV row. This code does not
 install Moodle, create the course, change site settings or restore backups.
 
-## Installation for a future run
+## VS Code, Docker and Opera GX
+
+The prepared `.vscode/tasks.json` provides repeatable commands through
+**Terminal → Run Task** (or **Tasks: Run Task** in the Command Palette):
+
+- `Testbox: smoke Level 2 (Chrome)` runs TC-003-011.
+- `Testbox: all Level 1 (Chrome)` and `Testbox: all Level 2 (Chrome)` each run
+  the entire 36-row dataset.
+- `Testbox: compatibility (Chrome + Edge)` runs the fixed ten executions.
+- `Testbox: smoke Opera GX (headless)` runs the same smoke case with GX.
+- `Testbox: open desktop app` opens the editor without starting any tests.
+
+The test tasks use `--headless --reuse-browser`, first start the existing `pro2-moodle` container and wait for
+its HTTP login page. Docker Desktop must already be running and the Project 2
+container/fixture must already exist. These tasks do not install or reset
+Moodle. Python and Docker extensions can help inspect the environment, while
+the actual test assertions run in the Python/unittest process.
+
+Run the suites sequentially against Course 1; each suite records baseline item
+IDs and checks cleanup. Browser sessions use fresh profiles rather than the
+user's normal Chrome, Edge or Opera profile. With `--reuse-browser`, one profile
+per browser is reused for the suite, while cookies and web storage are cleared
+before each case. Every case still authenticates and checks its own data and
+cleanup. This avoids repeated browser startup/shutdown overhead.
+
+Headless sessions use a fixed 1440 × 900 CSS viewport and device scale factor
+1. No browser window needs to stay visible or compete with another fullscreen
+application. WebDriver commands have a 60-second transport limit in addition
+to page/element waits. Browser teardown closes the owned temporary browser
+through its debugging connection before stopping its driver service.
+
+Opera GX 139.0.6053.63 on the inspected machine embeds Chromium
+155.0.8059.85. The Opera adapter therefore uses ChromeDriver for Chromium 155,
+not a driver chosen from the Opera product version. The current site settings
+contain `opera_chromium_version: "155"`. Update that setting after a GX engine
+update. The default binary location is the Windows per-user Opera GX install;
+override it with `opera_binary` in site JSON or `TESTBOX_OPERA_BINARY`.
+`TESTBOX_OPERA_CHROMIUM_VERSION` overrides the configured engine version.
+
+Example of an explicit GX run:
+
+```powershell
+.\.venv\Scripts\python.exe -m level2.test_gradebook --browser opera --headless --reuse-browser --cases TC-003-011
+```
+
+The result records both the requested browser and its actual user agent, so
+Opera sessions must identify themselves with `OPR/`. GX is supplementary
+coverage; it does not replace either browser in NF-003-COMPAT.
+
+Browser navigation uses the `eager` strategy plus explicit waits for actual
+controls and persisted state. Input values are read back before submission.
+Selenium's temporary profiles disable password saving and password-leak
+prompts. This is scoped to automated browser sessions; the user's normal
+browser profile and Moodle passwords are not changed. During the first
+exploratory run, Chrome's native "Change your password" warning intercepted
+mouse/keyboard input. That run was stopped after cleanup and is excluded
+from final verification.
+
+Final verification uses native WebDriver text/click actions with interaction
+fallbacks disabled. A blocked native action is an error, not silently bypassed.
+An optional `allow_interaction_fallbacks` setting exists for diagnostics only;
+when explicitly enabled, CDP text and DOM click fallbacks are logged. Such a
+diagnostic run is not used to establish native interaction compatibility.
+
+## Installation
 
 For a fresh machine, create the environment and install the full dependencies:
 
@@ -299,12 +374,12 @@ python -m nonfunctional.compatibility --list
 ```
 
 These commands only read data and print the planned cases. Listing does not
-require Selenium. All browser commands below are opt-in for a later session.
+require Selenium. The commands below start browser execution explicitly.
 
-## Level 1 — future execution
+## Level 1
 
 ```powershell
-.\.venv\Scripts\python.exe -m level1.test_gradebook
+.\.venv\Scripts\python.exe -m level1.test_gradebook --headless --reuse-browser
 ```
 
 This runs all 36 CSV cases on Chrome, using URLs and locators from
@@ -316,10 +391,10 @@ Example of selecting one case:
 .\.venv\Scripts\python.exe -m level1.test_gradebook --cases TC-003-011
 ```
 
-## Level 2 — future execution
+## Level 2
 
 ```powershell
-.\.venv\Scripts\python.exe -m level2.test_gradebook
+.\.venv\Scripts\python.exe -m level2.test_gradebook --headless --reuse-browser
 ```
 
 This runs all 36 CSV cases on Chrome, reading URLs and locators from
@@ -333,11 +408,13 @@ provide a different JSON file:
 .\.venv\Scripts\python.exe -m level2.test_gradebook --browser edge
 ```
 
-Each case gets a fresh browser session and a teacher login. Official runs use
-a visible browser at 1440 × 900 and 100% zoom. `--headless` is available for
-development, and its use is recorded in results.
+Each case gets a teacher login and independent setup/cleanup. Without
+`--reuse-browser`, each case also gets a fresh browser profile. The desktop
+app and VS Code tasks reuse a suite profile with per-case cookies/storage
+reset. Verification can run headless at 1440 × 900; mode, actual viewport,
+device scale and session-isolation policy are recorded in results.
 
-## Non-functional requirement NF-003-COMPAT — future execution
+## Non-functional requirement NF-003-COMPAT
 
 Requirement: the selected Gradebook workflows work on **Chrome and Edge**
 at 1440 × 900, with the necessary controls visible and operable.
@@ -345,7 +422,7 @@ at 1440 × 900, with the necessary controls visible and operable.
 Run:
 
 ```powershell
-.\.venv\Scripts\python.exe -m nonfunctional.compatibility
+.\.venv\Scripts\python.exe -m nonfunctional.compatibility --headless --reuse-browser
 ```
 
 The fixed sample is:
@@ -386,10 +463,57 @@ use the recorded runtime ID to identify leftovers manually.
 **TC-003-036 / F003-D01:** Expected behavior remains visible inline numeric
 validation for empty Maximum grade. A database-error page is a **FAIL**.
 The case is not skipped, marked as expected failure or changed to accept the
-known defect. The old Project 2 result of 35/36 passing is not a result of
-this code; no current execution outcome is known yet.
+known defect. Project 3 browser execution has reproduced this defect in both
+levels. See the verification results below and the
+[captured error page](artifacts/F003-D01-maximum-empty.png). Project 2 outcomes
+are reference material, separate from these new Python executions.
 
-## Outputs after future execution
+## Verification results
+
+Verified on **23 November 2026**, against the existing `pro2-moodle` Docker
+fixture: Moodle 5.1.8, Course 1 / ID 2, English UI and Asia/Bangkok timezone.
+All final runs used `--headless --reuse-browser`, a 1440 × 900 CSS viewport,
+device scale 1, and native WebDriver text/click/select actions with diagnostic
+interaction fallbacks disabled.
+
+| Suite | Browser | Executions | PASS | FAIL | ERROR / SKIP |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Level 1 | Chrome 157.0.8103.79 | 36 | 35 | 1 | 0 / 0 |
+| Level 2 | Chrome 157.0.8103.79 | 36 | 35 | 1 | 0 / 0 |
+| NF-003-COMPAT | Chrome 157 + Edge 158.0.4370.33 | 10 | 10 | 0 | 0 / 0 |
+| Supplementary GX sample | Opera GX / Chromium 155.0.8059.85 | 5 | 5 | 0 | 0 / 0 |
+
+The two FAIL executions are TC-003-036 in the two levels. Both captured
+**Error writing to database** instead of the expected inline numeric message.
+The functional runners therefore correctly returned exit code 1; the
+compatibility and Opera runners returned 0.
+
+These are **87 unique planned executions**, with **88 total attempts**.
+Level 1 TC-003-005 initially recorded ERROR when the post-click check referenced
+a document already replaced by login navigation. The helper now recognizes
+that specific detached-document response and continues checking the resulting
+page. A targeted rerun passed; its original ERROR and subsequent PASS are both
+retained in `retry_history`. The table uses the latest outcome per case/browser.
+Level 2 ran all 36 cases with the corrected helper.
+
+Every final case completed cleanup. A separate read-only Moodle audit confirmed
+that manual grade items returned to the original baseline: **0 before, 0 after**.
+No diagnostic interaction fallback events occurred.
+
+- [Verification summary, environment, failures and retry history](artifacts/verification-summary.json)
+- [Consolidated case results for Excel](artifacts/verification-cases.csv)
+- [F003-D01 screenshot](artifacts/F003-D01-maximum-empty.png)
+
+Full raw reports, traces and evidence remain locally in `results/final-headless/`;
+live logs are `results/final-headless-*-live.log`. Earlier exploratory and
+interrupted windowed runs are outside this final run directory. To regenerate
+the consolidated files from these retained local outputs and environment audits:
+
+```powershell
+.\.venv\Scripts\python.exe tools/summarize_verification.py
+```
+
+## Execution outputs
 
 Each invocation creates its own folder under `results/`:
 
@@ -415,14 +539,15 @@ Keep `level1/` and `level2/` separated in the submission ZIP, and include
 README at the archive root. The shared Python package is required by both
 levels; neither level folder is standalone. Do not include `.venv`, browser
 drivers or Katalon projects. Add actual results and the PDF report after
-running the tests in a later session.
+running the tests; local raw results are retained under `results/`.
 
 ## AI usage record for the eventual report
 
 AI assistance was used to inspect the Project 2 workbook and Recorder,
 design the data mapping, extract CSV data, and write/review the Python
 automation, desktop app, file exchange and documentation. The tool was OpenAI Codex in this conversation.
-No browser tests were executed during preparation. Use the actual prompts
+Initial preparation did not execute browser tests; subsequent verification
+and its automation fixes are recorded in the execution results. Use the actual prompts
 and responses from the conversation in the final `AI Usage Declaration`;
 do not use the statement that no AI assistance was used. This README is an
 implementation record, not the final declaration or PDF report.
@@ -435,3 +560,6 @@ implementation record, not the final declaration or PDF report.
 - [Tk themed widgets](https://docs.python.org/3.12/library/tkinter.ttk.html)
 - [XLS reading with xlrd](https://xlrd.readthedocs.io/en/latest/)
 - [XLS writing with xlwt](https://xlwt.readthedocs.io/en/latest/)
+- [VS Code task configuration](https://code.visualstudio.com/docs/debugtest/tasks)
+- [ChromeDriver version selection](https://developer.chrome.com/docs/chromedriver/downloads/version-selection)
+- [Opera's Chromium WebDriver project](https://github.com/operasoftware/operachromiumdriver)

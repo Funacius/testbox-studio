@@ -37,7 +37,7 @@ def check_date_precondition(case: Case) -> None:
 
 class GradebookCase(unittest.TestCase):
     def __init__(self, case: Case, level: int, browser: str, site: dict,
-                 output: Path, run_id: str, headless: bool = False, on_event=None):
+                 output: Path, run_id: str, headless: bool = False, on_event=None, shared_drivers=None):
         super().__init__("runTest")
         self.case = case
         self.level = level
@@ -54,6 +54,7 @@ class GradebookCase(unittest.TestCase):
         self.capabilities = {}
         self.cleanup_error = ""
         self.on_event = on_event
+        self.shared_drivers = shared_drivers
 
     def notify(self, kind: str, **details):
         if self.on_event:
@@ -71,12 +72,26 @@ class GradebookCase(unittest.TestCase):
     def setUp(self):
         check_date_precondition(self.case)
         # Import lazily: extracting/listing data never needs Selenium or a browser.
-        from gradebook.browser import create_browser
+        from gradebook.browser import close_browser, create_browser
         from gradebook.page import GradebookPage
         self.notify("step", message=f"Start {self.browser} browser")
-        self.driver = create_browser(self.browser, self.site, self.headless)
-        self.addCleanup(self.driver.quit)
+        if self.shared_drivers is None:
+            self.driver = create_browser(self.browser, self.site, self.headless)
+            self.addCleanup(close_browser, self.driver)
+        else:
+            if self.browser not in self.shared_drivers:
+                self.shared_drivers[self.browser] = create_browser(self.browser, self.site, self.headless)
+            self.driver = self.shared_drivers[self.browser]
+            self.driver.delete_all_cookies()
+            if self.driver.current_url.startswith(self.site["base_url"]):
+                self.driver.execute_script("localStorage.clear();sessionStorage.clear();")
         self.capabilities = {k: self.driver.capabilities.get(k) for k in ("browserName", "browserVersion", "platformName")}
+        self.capabilities["window"] = self.driver.get_window_rect()
+        self.capabilities["viewport"] = self.driver.execute_script(
+            "return {width:innerWidth,height:innerHeight,devicePixelRatio:devicePixelRatio}")
+        self.capabilities["userAgent"] = self.driver.execute_script("return navigator.userAgent")
+        if self.browser == "opera" and "OPR/" not in self.capabilities["userAgent"]:
+            raise RuntimeError("Requested Opera GX, but this session does not identify as Opera")
         self.page = GradebookPage(self.driver, self.site, self,
                                   on_step=lambda message: self.notify("step", message=message))
         self.addCleanup(self.cleanup_owned_items)
@@ -184,14 +199,15 @@ def build_parser(default_level: int) -> argparse.ArgumentParser:
     parser.add_argument("--level", type=int, choices=[1, 2], default=default_level)
     parser.add_argument("--data", type=Path, help="Defaults to the selected level's CSV")
     parser.add_argument("--config", type=Path, help="Level 2 site JSON")
-    parser.add_argument("--browser", choices=["chrome", "edge", "both"], default="chrome")
+    parser.add_argument("--browser", choices=["chrome", "edge", "opera", "both"], default="chrome")
     parser.add_argument("--cases", nargs="+", help="Exact case IDs; omit for the whole CSV")
     parser.add_argument("--base-url")
     parser.add_argument("--course-id")
     parser.add_argument("--output", type=Path, default=ROOT / "results")
-    parser.add_argument("--headless", action="store_true", help="Development only; official runs use a visible browser")
+    parser.add_argument("--headless", action="store_true", help="Run in the background at the configured viewport")
     parser.add_argument("--list", action="store_true", help="List CSV cases only; no tests or browser")
     parser.add_argument("--events", action="store_true", help="Emit structured live events for the desktop app")
+    parser.add_argument("--reuse-browser", action="store_true", help="Reuse one fresh browser per suite and clear cookies/storage before each case")
     parser.add_argument("--stop-file", type=Path, help="Stop after current case and its cleanup when this file exists")
     return parser
 
@@ -199,8 +215,8 @@ def build_parser(default_level: int) -> argparse.ArgumentParser:
 def main(default_level: int = 1, argv=None, compatibility: bool = False) -> int:
     parser = build_parser(default_level)
     args = parser.parse_args(argv)
-    if compatibility and (args.level != 2 or args.headless or args.cases or args.browser not in {"chrome", "both"}):
-        parser.error("Compatibility uses Level 2, both visible browsers and its fixed five-case selection")
+    if compatibility and (args.level != 2 or args.cases or args.browser not in {"chrome", "both"}):
+        parser.error("Compatibility uses Level 2, both browsers and its fixed five-case selection")
     if args.config and args.level != 2:
         parser.error("--config belongs to Level 2")
     path = args.data or ROOT / f"level{args.level}/data/gradebook_cases.csv"
@@ -239,16 +255,28 @@ def main(default_level: int = 1, argv=None, compatibility: bool = False) -> int:
                 pass
     planned = len(browsers) * len(cases)
     emit("run_start", total=planned, output=str(output), run_id=run_id)
-    suite = unittest.TestSuite(GradebookCase(case, args.level, browser, site, output, run_id, args.headless, emit)
+    shared_drivers = {} if args.reuse_browser else None
+    suite = unittest.TestSuite(GradebookCase(case, args.level, browser, site, output, run_id, args.headless, emit, shared_drivers)
                                for browser in browsers for case in cases)
-    with (output / "unittest.log").open("w", encoding="utf-8") as log:
-        result = unittest.TextTestRunner(stream=log, verbosity=2,
-                    resultclass=lambda *a, **kw: CsvResult(*a, on_event=emit, stop_file=args.stop_file, **kw)).run(suite)
+    try:
+        with (output / "unittest.log").open("w", encoding="utf-8") as log:
+            result = unittest.TextTestRunner(stream=log, verbosity=2,
+                        resultclass=lambda *a, **kw: CsvResult(*a, on_event=emit, stop_file=args.stop_file, **kw)).run(suite)
+    finally:
+        if shared_drivers:
+            from gradebook.browser import close_browser
+            for driver in shared_drivers.values():
+                close_browser(driver)
     metadata = dict(run_id=run_id, executed_at=datetime.now(BANGKOK).isoformat(),
                     type="compatibility" if compatibility else "functional",
                     python=platform.python_version(), platform=platform.platform(), selenium=version("selenium"),
                     source_csv=str(path.resolve()), site_base_url=site["base_url"],
-                    course_id=site["course_id"], headless=args.headless, window=site["window"])
+                    course_id=site["course_id"], headless=args.headless, window=site["window"],
+                    page_load_strategy=site.get("page_load_strategy", "eager"),
+                    interaction_fallbacks_enabled=site.get("allow_interaction_fallbacks", False),
+                    automation_password_manager_enabled=False)
+    metadata["reuse_browser"] = args.reuse_browser
+    metadata["session_isolation"] = "cookies and web storage cleared before every case" if args.reuse_browser else "fresh temporary profile for every case"
     metadata["planned_executions"] = planned
     metadata["completed_executions"] = result.testsRun
     metadata["stopped"] = result.testsRun < planned

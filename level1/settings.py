@@ -5,6 +5,9 @@ SITE = {
     "course_id": "2",
     "timeout": 15,
     "page_load_timeout": 30,
+    "command_timeout": 60,
+    "page_load_strategy": "eager",
+    "opera_chromium_version": "155",
     "poll_frequency": 0.1,
     "window": [1440, 900],
     "urls": {

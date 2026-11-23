@@ -1,0 +1,144 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Moodle: start Docker container",
+      "type": "process",
+      "command": "docker",
+      "args": [
+        "start",
+        "pro2-moodle"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Moodle: wait until ready",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": [
+        "tools/wait_for_moodle.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Moodle: start Docker container",
+      "problemMatcher": []
+    },
+    {
+      "label": "Testbox: smoke Level 2 (Chrome)",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": [
+        "-u",
+        "-m",
+        "level2.test_gradebook",
+        "--headless",
+        "--reuse-browser",
+        "--cases",
+        "TC-003-011",
+        "--events"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Moodle: wait until ready",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Testbox: all Level 1 (Chrome)",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": [
+        "-u",
+        "-m",
+        "level1.test_gradebook",
+        "--headless",
+        "--reuse-browser",
+        "--events"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Moodle: wait until ready",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Testbox: all Level 2 (Chrome)",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": [
+        "-u",
+        "-m",
+        "level2.test_gradebook",
+        "--headless",
+        "--reuse-browser",
+        "--events"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Moodle: wait until ready",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Testbox: compatibility (Chrome + Edge)",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": [
+        "-u",
+        "-m",
+        "nonfunctional.compatibility",
+        "--headless",
+        "--reuse-browser",
+        "--events"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Moodle: wait until ready",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Testbox: smoke Opera GX (headless)",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": [
+        "-u",
+        "-m",
+        "level2.test_gradebook",
+        "--browser",
+        "opera",
+        "--headless",
+        "--reuse-browser",
+        "--cases",
+        "TC-003-011",
+        "--events"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Moodle: wait until ready",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Testbox: open desktop app",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/pythonw.exe",
+      "args": [
+        "app.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

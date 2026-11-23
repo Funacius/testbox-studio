@@ -201,7 +201,7 @@ def main() -> None:
     (provenance / "source_manifest.json").write_text(json.dumps({
         "source_workbook": str(source), "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "sheet": args.sheet, "case_count": len(cases), "owner": "Bùi Quốc Thái",
-        "execution_status": "NOT RUN", "source": "Excel manual steps and expected results",
+        "execution_status_at_extraction": "NOT RUN", "source": "Excel manual steps and expected results",
         "mapping_notes": [
             "Structured saved-field assertions expand the workbook's reopen-and-verify instructions.",
             "Recovery error wording is taken from relation-validation cases in the same sheet.",

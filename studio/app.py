@@ -298,7 +298,7 @@ class Studio(tk.Tk):
         self.run_vars = {}
         settings = [("mode", "Mode", "Functional", ("Functional", "Compatibility NFR")),
                     ("level", "Automation level", "Level 2", ("Level 1", "Level 2")),
-                    ("browser", "Browser", "Chrome", ("Chrome", "Edge", "Both")),
+                    ("browser", "Browser", "Chrome", ("Chrome", "Edge", "Opera GX", "Both")),
                     ("base_url", "Moodle URL", "http://127.0.0.1:9501", None),
                     ("course_id", "Course ID", "2", None),
                     ("username", "Teacher username", os.environ.get("MOODLE_USERNAME", "teacher01"), None),
@@ -309,6 +309,8 @@ class Studio(tk.Tk):
             self.run_vars[key] = variable
             widget = ttk.Combobox(self.inspector, textvariable=variable, values=choices, state="readonly", width=23) if choices else ttk.Entry(self.inspector, textvariable=variable, show="●" if key == "password" else "", width=25)
             widget.pack(fill="x", pady=(0, 5))
+        self.headless = tk.BooleanVar(self, True)
+        ttk.Checkbutton(self.inspector, text="Headless (background)", variable=self.headless).pack(anchor="w", pady=(5, 0))
         self.config_path = ROOT / "level2/config/site.json"
         ttk.Button(self.inspector, text="URLs & locators…", command=self._edit_config).pack(fill="x", pady=(13, 0))
         ttk.Button(self.inspector, text="Choose config file…", style="Small.TButton", command=self._choose_config).pack(fill="x", pady=(6, 0))
@@ -991,10 +993,13 @@ class Studio(tk.Tk):
             if sys.platform == "win32" and executable.name.lower() == "pythonw.exe":
                 executable = executable.with_name("python.exe")
             command = [str(executable), "-u", "-m", "nonfunctional.compatibility" if compatibility else "gradebook.runner",
-                       "--data", str(data_path), "--output", str(run_home), "--events", "--stop-file", str(self.stop_file)]
+                       "--data", str(data_path), "--output", str(run_home), "--events", "--reuse-browser", "--stop-file", str(self.stop_file)]
             level = 2 if compatibility else int(self.run_vars["level"].get()[-1])
             if not compatibility:
-                command += ["--level", str(level), "--browser", self.run_vars["browser"].get().lower()]
+                browser_name = "opera" if self.run_vars["browser"].get() == "Opera GX" else self.run_vars["browser"].get().lower()
+                command += ["--level", str(level), "--browser", browser_name]
+            if self.headless.get():
+                command.append("--headless")
             if level == 2:
                 command += ["--config", str(self.config_path)]
             command += ["--base-url", self.run_vars["base_url"].get().strip(), "--course-id", self.run_vars["course_id"].get().strip()]

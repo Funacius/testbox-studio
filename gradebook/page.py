@@ -11,8 +11,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from urllib.parse import urljoin
 
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
-from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException, StaleElementReferenceException, TimeoutException, WebDriverException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
@@ -57,6 +56,42 @@ class GradebookPage:
     def visible(self, key: str, **values) -> bool:
         return any(e.is_displayed() for e in self.present(key, **values))
 
+    def click(self, key: str, **values) -> None:
+        """Check visibility/hit testing; use a logged fallback if native click is lost."""
+        locator = self.locator(key, **values)
+        def attempt(driver):
+            try:
+                element = EC.element_to_be_clickable(locator)(driver)
+                if not element:
+                    return False
+                driver.execute_script(
+                    "arguments[0].scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});", element)
+                exposed = driver.execute_script(
+                    "const e=arguments[0],r=e.getBoundingClientRect();"
+                    "const t=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);"
+                    "return !!t && (t===e || e.contains(t));", element)
+                if not exposed:
+                    return False
+                driver.execute_script(
+                    "arguments[0].__testboxClickSeen=false;"
+                    "arguments[0].addEventListener('click',function(){this.__testboxClickSeen=true},{once:true,capture:true});", element)
+                element.click()
+                try:
+                    delivered = driver.execute_script("return arguments[0].__testboxClickSeen===true", element)
+                except WebDriverException as exc:
+                    if isinstance(exc, StaleElementReferenceException) or "Node with given id does not belong to the document" in str(exc):
+                        return True  # Successful navigation replaced the clicked document.
+                    raise
+                if not delivered:
+                    if not self.site.get("allow_interaction_fallbacks", False):
+                        raise RuntimeError(f"Native click was blocked for {key}; check browser-owned dialogs")
+                    self.trace.append(f"Native click not delivered; use DOM click fallback for {key}")
+                    driver.execute_script("arguments[0].click()", element)
+                return True
+            except (ElementClickInterceptedException, StaleElementReferenceException):
+                return False
+        self.wait.until(attempt, f"Control is not exposed for a native click: {key}")
+
     def describe_response(self) -> str:
         errors = []
         for key in self.site["locators"]:
@@ -88,13 +123,25 @@ class GradebookPage:
 
     def login(self, username: str, password: str) -> None:
         self.trace.append("Log in with the configured teacher account")
-        self.driver.get(self.url("login"))
-        self.type_text("username", username)
-        self.type_text("password", password)
-        self.element("login_button").click()
-        self.wait.until(lambda _: self.visible("logged_in") or self.visible("login_error"))
-        if self.visible("login_error"):
-            raise RuntimeError("Teacher login failed; check MOODLE_USERNAME/MOODLE_PASSWORD")
+        for attempt in range(3):
+            try:
+                self.driver.get(self.url("login"))
+                self.wait.until(lambda _: self.visible("logged_in") or self.visible("username"))
+                if not self.visible("logged_in"):
+                    self.type_text("username", username)
+                    self.type_text("password", password)
+                    if not self.visible("logged_in"):
+                        self.click("login_button")
+                self.wait.until(lambda _: self.visible("logged_in") or self.visible("login_error"))
+                if self.visible("login_error"):
+                    raise RuntimeError("Teacher login failed; check MOODLE_USERNAME/MOODLE_PASSWORD")
+                break
+            except WebDriverException as exc:
+                if not isinstance(exc, StaleElementReferenceException) and "Node with given id does not belong to the document" not in str(exc):
+                    raise
+                if attempt == 2:
+                    raise
+                self.trace.append(f"Login DOM was replaced; retry authentication ({attempt + 2}/3)")
         self.go_gradebook()
 
     def go_gradebook(self) -> None:
@@ -125,11 +172,49 @@ class GradebookPage:
         if key not in {"username", "password"}:
             self.trace.append(f"Enter {key} = {value!r}")
         field = self.element(key)
+        self.wait.until(lambda _: self.enabled(key), f"Field is not editable: {key}")
         field.clear()
         if value:
             field.send_keys(value)
+            if field.get_property("value") != value:
+                if not self.site.get("allow_interaction_fallbacks", False):
+                    raise RuntimeError(f"Native text entry was blocked for {key}; check browser-owned dialogs")
+                # Some Windows IME/browser combinations acknowledge SendKeys
+                # without inserting its text. Chromium's text-input command
+                # emits the input event and avoids that keyboard-layout path.
+                self.trace.append(f"Use Chromium text input fallback for {key}")
+                field.clear()
+                self.driver.execute_script("arguments[0].focus()", field)
+                self.driver.execute_cdp_cmd("Input.insertText", {"text": value})
+        actual = field.get_property("value")
+        if actual != value:
+            raise RuntimeError(f"Could not enter exact data in {key}: expected {value!r}, got {actual!r}")
         # Trigger Moodle's change handlers without trimming spaces or changing data.
-        field.send_keys(Keys.TAB)
+        self.driver.execute_script(
+            "arguments[0].dispatchEvent(new Event('change',{bubbles:true})); arguments[0].blur();", field)
+
+    def select_option(self, key: str, value: str | None = None, label: str | None = None) -> None:
+        field = self.element(key)
+        self.wait.until(lambda _: self.enabled(key), f"Select is not editable: {key}")
+        control = Select(field)
+        if label is not None:
+            matches = [o for o in control.options if o.text.strip() == label]
+            if len(matches) != 1:
+                raise RuntimeError(f"Expected one {key} option labelled {label!r}")
+            target = matches[0].get_attribute("value")
+            control.select_by_visible_text(label)
+        else:
+            target = str(value)
+            control.select_by_value(target)
+        if field.get_property("value") != target:
+            if not self.site.get("allow_interaction_fallbacks", False):
+                raise RuntimeError(f"Native selection was blocked for {key}; check browser-owned dialogs")
+            self.trace.append(f"Use DOM selection fallback for {key} = {target}")
+            self.driver.execute_script(
+                "arguments[0].value=arguments[1];"
+                "arguments[0].dispatchEvent(new Event('input',{bubbles:true}));"
+                "arguments[0].dispatchEvent(new Event('change',{bubbles:true}));", field, target)
+        self.assertion.assertEqual(field.get_property("value"), target, f"Selected {key}")
 
     def enabled(self, key: str) -> bool:
         elements = self.present(key)
@@ -148,7 +233,7 @@ class GradebookPage:
         if require_initial_off:
             self.assertion.assertFalse(element.is_selected(), f"{key} should initially be unchecked")
         if element.is_selected() != checked:
-            element.click()
+            self.click(key)
         self.assert_until(lambda: self.element(key).is_selected() == checked,
                           f"Expected {key} checked={checked}")
 
@@ -163,11 +248,11 @@ class GradebookPage:
         self.type_text("itemname", fields["itemname"])
         self.type_text("idnumber", self.runtime_id)
         self.trace.append(f"Select grade type {inputs['grade_type']}")
-        Select(self.element("gradetype")).select_by_value(self.site["grade_types"][inputs["grade_type"]])
+        self.select_option("gradetype", value=self.site["grade_types"][inputs["grade_type"]])
         self.check_dependencies(inputs["grade_type"])
         if inputs["grade_type"] == "Scale":
             self.trace.append(f"Select scale {inputs['scale']}")
-            Select(self.element("scaleid")).select_by_visible_text(inputs["scale"])
+            self.select_option("scaleid", label=inputs["scale"])
         for key, value in fields.items():
             if key not in {"itemname", "idnumber", "aggregationcoef2"}:
                 self.type_text(key, value)
@@ -177,18 +262,18 @@ class GradebookPage:
             self.set_checkbox(key, checked, require_initial_off=True)
         for key, value in inputs.get("selects", {}).items():
             self.trace.append(f"Select {key} = {value}")
-            Select(self.element(key)).select_by_value(value)
+            self.select_option(key, value=value)
         for prefix, parts in inputs.get("dates", {}).items():
             self.trace.append(f"Configure {prefix}: {parts}")
             self.set_checkbox(prefix + "_enabled", True, require_initial_off=True)
             for part in ("year", "month", "day", "hour", "minute"):
-                Select(self.element(prefix + "_" + part)).select_by_value(parts[part])
+                self.select_option(prefix + "_" + part, value=parts[part])
         if "aggregationcoef2" in fields:
             self.type_text("aggregationcoef2", fields["aggregationcoef2"])
 
     def submit(self) -> None:
         self.trace.append("Click Save changes")
-        self.element("save").click()
+        self.click("save")
 
     def open_item(self, item_id: str) -> None:
         self.trace.append(f"Reopen saved item {item_id}")
@@ -255,7 +340,7 @@ class GradebookPage:
 
     def cancel(self) -> None:
         self.trace.append("Cancel and return to Gradebook")
-        self.element("cancel").click()
+        self.click("cancel")
         self.element("gradebook_ready")
 
     def assert_rows(self, expected: set[str]) -> None:
@@ -312,9 +397,9 @@ class GradebookPage:
             if not owned:
                 self.trace.append(f"Did not delete unowned new item {item_id}")
                 continue
-            self.element("row_menu", item_id=item_id).click()
-            self.element("row_delete", item_id=item_id).click()
-            self.element("confirm_delete").click()
+            self.click("row_menu", item_id=item_id)
+            self.click("row_delete", item_id=item_id)
+            self.click("confirm_delete")
             self.assert_until(lambda i=item_id: not self.present("item_row", item_id=i),
                               f"Cleanup did not remove owned item {item_id}")
             self.trace.append(f"Deleted owned item {item_id}")

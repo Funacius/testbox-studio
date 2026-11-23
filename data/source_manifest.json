@@ -4,7 +4,7 @@
   "sheet": "003 - Moodle Grading",
   "case_count": 36,
   "owner": "Bùi Quốc Thái",
-  "execution_status": "NOT RUN",
+  "execution_status_at_extraction": "NOT RUN",
   "source": "Excel manual steps and expected results",
   "mapping_notes": [
     "Structured saved-field assertions expand the workbook's reopen-and-verify instructions.",
