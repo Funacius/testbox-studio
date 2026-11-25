@@ -1,0 +1,109 @@
+{
+  "objective": "General-purpose Testbox Studio with import mapping, editable executable steps, datasets, portable projects, Python export, NFR and visible playback",
+  "features": [
+    {
+      "id": "F01",
+      "name": "Portable mixed project and editable executable step model",
+      "status": "implemented_initial_verification",
+      "evidence_summary": "Workspace format 2 loads legacy format 1 without changing records/source steps; explicit Save preserves a v1 backup.",
+      "initial_verification": "artifacts/studio-core-verification.json"
+    },
+    {
+      "id": "F02",
+      "name": "Generic Selenium runner, assertions, setup and cleanup",
+      "status": "implemented_initial_verification",
+      "evidence_summary": "Generic runner, assertions, setup/cleanup, timers, dataset iterations; Chrome fixture covers success, failure, evidence and cleanup. Full command/context and regression audit remains.",
+      "initial_verification": "artifacts/studio-core-verification.json"
+    },
+    {
+      "id": "F03",
+      "name": "Steps editor, reorder, duplicate, enable/disable and undo",
+      "status": "implemented_initial_verification",
+      "evidence_summary": "Editable action/target/value/expected/phase/timeout, duplicate/reorder/toggle, drag/drop, undo/redo; Tk editing and snapshot tests pass.",
+      "initial_verification": "artifacts/studio-core-verification.json"
+    },
+    {
+      "id": "F04",
+      "name": "CSV/XLS/XLSX import wizard, sheet/header/column mapping and preview",
+      "status": "implemented_initial_verification",
+      "evidence_summary": "Sheet/header/mode/mapping/preview and reusable profiles; explicit Gradebook adapter; prose imports as disabled notes. More encoding/large-file UI checks remain.",
+      "initial_verification": "artifacts/studio-core-verification.json"
+    },
+    {
+      "id": "F05",
+      "name": "Dataset and variable editors with data-driven execution",
+      "status": "implemented_initial_verification",
+      "evidence_summary": "Editable data and variable tables preserve empty strings/spaces; imported three-row login example executes three real Chrome cases.",
+      "initial_verification": "artifacts/studio-core-verification.json"
+    },
+    {
+      "id": "F06",
+      "name": "Locator library, checking and element highlighting",
+      "status": "pending"
+    },
+    {
+      "id": "F07",
+      "name": "Visible/headless, slow playback, pause/resume, step and breakpoints",
+      "status": "partial",
+      "evidence_summary": "Visible/headless and slow/highlight settings exist. Pause/resume, single-step and breakpoint enforcement are still missing.",
+      "initial_verification": "artifacts/studio-core-verification.json"
+    },
+    {
+      "id": "F08",
+      "name": "Environment profiles and preflight readiness",
+      "status": "implemented_initial_verification",
+      "evidence_summary": "Read-only origin connection checks block browser launch on unreachable website; project environments save/apply URL, browser, viewport and timeout. Wider UI audit remains.",
+      "initial_verification": "artifacts/studio-core-verification.json"
+    },
+    {
+      "id": "F09",
+      "name": "Per-step and per-dataset reports, screenshots and exports",
+      "status": "partial",
+      "evidence_summary": "Per-step JSON, per-case CSV, screenshots/HTML evidence and metrics exist. Consolidated HTML report, row-aware exports and report UI remain.",
+      "initial_verification": "artifacts/studio-core-verification.json"
+    },
+    {
+      "id": "F10",
+      "name": "Standalone Python/unittest export for Level 1 and Level 2",
+      "status": "pending"
+    },
+    {
+      "id": "F11",
+      "name": "Compatibility and elapsed-time NFR configuration for both levels",
+      "status": "partial",
+      "evidence_summary": "Named elapsed-time steps exist. Generic NFR configuration and compatibility selection for both levels remain; existing Gradebook preset still uses Level 2.",
+      "initial_verification": "artifacts/studio-core-verification.json"
+    },
+    {
+      "id": "F12",
+      "name": "Reusable templates, browser element picker/recorder, conditions and loops",
+      "status": "pending"
+    }
+  ],
+  "invariants": [
+    "Open existing Gradebook workspaces and preserve their data, expected assertions, folders and manual sources",
+    "Browser execution uses an immutable snapshot and only begins after an explicit Run",
+    "Missing variables, incomplete execution, assertion failures and cleanup failures cannot be reported as PASS",
+    "Existing user workspace files and running app instances are not overwritten or closed automatically",
+    "General-purpose projects do not require Moodle-specific columns or credentials"
+  ],
+  "current_stage": "General-purpose core and import/dataset path implemented; goal remains active.",
+  "next_features": [
+    "F06",
+    "F07",
+    "F09",
+    "F10",
+    "F11",
+    "F12"
+  ],
+  "completion_gates": [
+    "All twelve feature scopes are implemented and verified, including advanced picker/recorder and conditions/loops.",
+    "Imported arbitrary supported spreadsheet schemas can become editable executable tests without Gradebook columns.",
+    "Full command catalog, browser contexts, error/stop/cleanup paths and real GUI workflows have matching tests/evidence.",
+    "Level 1/2 exported Python packages execute outside this repository without the desktop app.",
+    "Generic compatibility and elapsed-time NFRs can run with both level configurations.",
+    "Gradebook native regression retains the original data/oracles and expected TC-003-036 failure.",
+    "Rendered desktop views, dialogs and reports are inspected for layout/readability.",
+    "Readme, examples and release artifacts describe the final supported behavior and limitations."
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "scope": "Initial general-purpose core: workspace migration, mixed import/export, editable steps and datasets, explicit mapping, readiness, environment selection, and real Chrome fixture execution. Remaining roadmap features are not certified by this report.",
+  "executed_at": "2026-11-25T20:34:15.572526+07:00",
+  "command": "TESTBOX_BROWSER_TESTS=1; python -m unittest discover -s tests -v",
+  "tests_run": 26,
+  "counts": {
+    "PASS": 26,
+    "FAIL": 0,
+    "ERROR": 0,
+    "SKIP": 0
+  },
+  "successful": true,
+  "duration_seconds": 29.307,
+  "source_unchanged_during_verification": true,
+  "source_sha256": {
+    "automation/__init__.py": "e43d4a4ab8a60fc8c7dd997fb5f3c19a21a513e05f4da83901283f7864a10fd3",
+    "automation/engine.py": "cae8a3d97724f1578cf299fc7da5c82a3a8d63cb1182f41f82f4b4c7b5db5475",
+    "automation/readiness.py": "09beac663250dd9a64591df05267076ef34e2d8fa8b8127b799646791276951a",
+    "automation/runner.py": "04e4e9c83b74e3596ba69fcc903766db08ea81bf67f052bf21312b6a585896d4",
+    "automation/schema.py": "429d19fa9c570f237f4b4781bd7cad860fb0400b42ab597fd524ae64c435158b",
+    "gradebook/__init__.py": "21369289d73168909cd3a535a13faeb93ad82ffceffca04e41798520bead2c10",
+    "gradebook/browser.py": "4eb38c6d365e8443dc0df857304be6c2c22cae83068138ccb21248bbbf98d469",
+    "gradebook/config.py": "d205a764a3ca3a6da8569b23f18cc6b2a515d624ba2d09ec1c102221c17e125e",
+    "gradebook/data.py": "5606de290d7468105183b4e27ee19a583e7cd277c1b5a255ef9de99ac90b2bdb",
+    "gradebook/page.py": "91966cbc6b47dde7352c65166a700c85683433490a9506de9d6fd25f15a0e4af",
+    "gradebook/runner.py": "9f9b843fbbefe1c3373819a5f28e65f48e133134eda6589cc60579aafbd6bfd5",
+    "studio/__init__.py": "76e482c5ab8c7e0a89257371da6505a2e7c469fa8ff46d23161bfa436bf067f5",
+    "studio/app.py": "8d982ecaa45f9542ce2e69f7a53b5428685dc494e3571275b5be4985d2420489",
+    "studio/dialogs.py": "2726cb68b528c1d5532b01e96b43e51609d4754b04966e872f03ab5b39a7e3a4",
+    "studio/exchange.py": "e9c5463dbc105e854294162483de1818bac586835f91f9ec267a09eb1ed7467d",
+    "studio/import_wizard.py": "b38769e549b5ad057dfee0493cc8a1b6549da8eaa78fad1264bde75f8b42efc0",
+    "studio/importing.py": "c67b4bc5216195ded6a3bd0aeb3dd5cdfdb45af39249cb803446817a5e89e2a4",
+    "studio/model.py": "f1e58eb7d78ceb2c18aa251d3564f0dbb7add20f0b0cb94a3264ffb6bdfbb04e",
+    "studio/steps_editor.py": "fa4d2cd2b2d16378a30a6c72bdb18040c41dff7214fe20b478dac76d45a9f14b",
+    "studio/table_editor.py": "2cb8cf9c61fc8dd674b095b2359d596fd548fe968a93ec81297507d3c7addae1",
+    "studio/theme.py": "5e7397e555257a86e4e031338c7636994c8ae8b4ed03b4ce4e7dcc89cab99bba",
+    "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests/test_generic_browser.py": "490097e5b36d6d5a6aad738825397ed15d981081a9ff704c80f3f973e2508788",
+    "tests/test_generic_model.py": "c7d5a2766c9f5a699d6062f2785e169d5b65773c1396a5da8cd3e4af87cfe4a1",
+    "tests/test_import_mapping.py": "6358fa226585f6241b442910e04145f3e60d66582828012d0b5a3ccb2bb328ad",
+    "tests/test_readiness.py": "5055aebb2701905f4fc7197517f9e37b4ba40565fc6ce39b788481ed34471156",
+    "tests/test_studio_editor.py": "90b0fa1b2ad2c73b4b5033b7d01f05e4f414164a6436568dc086afc514bd2a35",
+    "tools/demo_site.py": "995f27b7552db98cad3411c37fdc564c701909c8406a6bab4c0ca9e352a8e795",
+    "tools/extract_gradebook.py": "bef1c041f15c49c972fe60aefb95c99be320ae67399a98e1b2b440500569f66f",
+    "tools/summarize_verification.py": "66f793009af8a99dd1cc85f484f2d1eade908f4222f6b50adebcf937b53b5659",
+    "tools/wait_for_moodle.py": "30219351ba6002f158e18381bfd8428bbc17f0a809ce416385963a8f3fa20fcf"
+  },
+  "results": [
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_browser_normalization_and_multiple_matches_do_not_produce_false_passes",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_dataset_execution_assertion_failure_evidence_and_cleanup",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_imported_example_steps_and_three_dataset_rows_run_as_real_browser_cases",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_alias_variables_empty_values_and_missing_names",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_data_variable_failure_identifies_case_row_and_step",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_disabled_draft_step_and_invalid_timeout",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_duplicate_ids_are_renamed_without_replacing_steps",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_empty_case_can_be_saved_but_cannot_run",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_mixed_workspace_and_file_exchange_preserve_executable_and_manual_steps",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_old_workspace_migrates_without_rewriting_cases_or_sources",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_dataset_columns_are_unique_and_exact_values_are_preserved",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_dataset_values_override_default_credentials",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_invalid_row_mapping_reports_location_without_partial_import",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_manual_prose_is_not_silently_executable_or_reported_as_pass",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_multiline_cases_header_and_custom_mapping",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_sheet_choice_and_formula_rejection_are_explicit",
+      "status": "PASS"
+    },
+    {
+      "test": "test_readiness.ReadinessTests.test_connection_probe_uses_origin_not_the_test_action_path",
+      "status": "PASS"
+    },
+    {
+      "test": "test_readiness.ReadinessTests.test_connection_refusal_has_actionable_message",
+      "status": "PASS"
+    },
+    {
+      "test": "test_readiness.ReadinessTests.test_invalid_runtime_settings_fail_before_browser_start",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_dataset_and_variables_grid_apply_and_undo_exact_values",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_dataset_import_targets_selected_case_and_preserves_its_steps",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_edit_duplicate_reorder_toggle_and_save_actual_steps",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_import_wizard_builds_a_foreign_steps_file_without_gradebook_columns",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_run_uses_current_immutable_steps_and_keeps_credentials_in_environment",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_selected_environment_applies_and_persists_without_credentials",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_unreachable_website_blocks_browser_start_with_readable_error",
+      "status": "PASS"
+    }
+  ]
+}

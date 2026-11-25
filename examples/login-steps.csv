@@ -1,0 +1,6 @@
+case_id,title,command,target,value,expected,phase
+DEMO-LOGIN,Data-driven login,open,${base_url},,,setup
+,,type,id=username,${username},,test
+,,type,id=password,${password},,test
+,,click,id=login,,,test
+,,assert_text,id=message,,${expected_message},test

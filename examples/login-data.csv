@@ -1,0 +1,4 @@
+username,password,expected_message
+demo,demo123,Welcome demo
+wrong-user,wrong-password,Invalid credentials
+,demo123,Invalid credentials

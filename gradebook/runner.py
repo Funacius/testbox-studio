@@ -93,7 +93,7 @@ class GradebookCase(unittest.TestCase):
         if self.browser == "opera" and "OPR/" not in self.capabilities["userAgent"]:
             raise RuntimeError("Requested Opera GX, but this session does not identify as Opera")
         self.page = GradebookPage(self.driver, self.site, self,
-                                  on_step=lambda message: self.notify("step", message=message))
+                                  on_step=self.trace_step)
         self.addCleanup(self.cleanup_owned_items)
         try:
             self.page.login(os.environ.get("MOODLE_USERNAME", "teacher01"),
@@ -102,6 +102,12 @@ class GradebookCase(unittest.TestCase):
         except Exception:
             self.capture_failure("setup")
             raise
+
+    def trace_step(self, message):
+        self.notify("step", message=message)
+        delay = float(self.site.get("slow_ms", 0)) / 1000
+        if delay:
+            time.sleep(min(delay, 10))
 
     def capture_failure(self, suffix: str):
         if self.page:
@@ -140,7 +146,8 @@ class CsvResult(unittest.TextTestResult):
         super().startTest(test)
         self.pending[id(test)] = dict(status="PASS", details=[], start=time.perf_counter())
         if self.on_event:
-            self.on_event("case_start", case_id=test.case.case_id, browser=test.browser, title=test.case.title)
+            self.on_event("case_start", case_id=test.case.case_id, browser=test.browser, title=test.case.title,
+                          row_index=getattr(test, "row_index", 0))
 
     def addFailure(self, test, err):
         super().addFailure(test, err)
@@ -170,7 +177,11 @@ class CsvResult(unittest.TextTestResult):
                                  actual="\n".join(record["details"]) or "All assertions and cleanup completed",
                                  known_defect=test.case.known_defect, runtime_id=test.runtime_id,
                                  cleanup_error=test.cleanup_error,
-                                 evidence=test.evidence, capabilities=test.capabilities))
+                                 evidence=test.evidence, capabilities=test.capabilities,
+                                 row_index=getattr(test, "row_index", 0),
+                                 step_results=getattr(test, "step_results", []),
+                                 metrics=getattr(test, "metrics", []),
+                                 assertion_count=getattr(test, "assertion_count", None)))
         if self.on_event:
             self.on_event("case_end", **self.records[-1])
         if self.stop_file and self.stop_file.exists():
@@ -199,6 +210,7 @@ def build_parser(default_level: int) -> argparse.ArgumentParser:
     parser.add_argument("--level", type=int, choices=[1, 2], default=default_level)
     parser.add_argument("--data", type=Path, help="Defaults to the selected level's CSV")
     parser.add_argument("--config", type=Path, help="Level 2 site JSON")
+    parser.add_argument("--runtime-settings", type=Path, help="Optional browser/timeout environment; does not replace Level-specific URLs or locators")
     parser.add_argument("--browser", choices=["chrome", "edge", "opera", "both"], default="chrome")
     parser.add_argument("--cases", nargs="+", help="Exact case IDs; omit for the whole CSV")
     parser.add_argument("--base-url")
@@ -239,6 +251,15 @@ def main(default_level: int = 1, argv=None, compatibility: bool = False) -> int:
     if not importlib.util.find_spec("selenium"):
         parser.error("Selenium is not installed. Run: python -m pip install -r requirements.txt")
     site = load_site(args.level, args.config)
+    if args.runtime_settings:
+        from automation.readiness import checked_settings
+        try:
+            runtime = checked_settings(json.loads(args.runtime_settings.read_text(encoding="utf-8-sig")))
+        except (ValueError, OSError, TypeError) as exc:
+            parser.error(str(exc))
+        for key in ("window", "timeout", "page_load_timeout", "command_timeout", "page_load_strategy", "opera_binary", "opera_chromium_version", "slow_ms"):
+            if key in runtime:
+                site[key] = runtime[key]
     if args.base_url:
         site["base_url"] = args.base_url
     if args.course_id:

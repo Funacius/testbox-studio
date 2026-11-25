@@ -54,17 +54,18 @@ class FormDialog(tk.Toplevel):
 
 
 class JsonDialog(tk.Toplevel):
-    def __init__(self, parent, title, value):
+    def __init__(self, parent, title, value, required=None, description=None):
         super().__init__(parent)
         self.title(title)
         self.configure(bg=BG)
         self.geometry(f"900x680+{parent.winfo_rootx()+100}+{parent.winfo_rooty()+70}")
         self.transient(parent)
         self.result = None
+        self.required = required if required is not None else ("base_url", "course_id", "urls", "locators", "grade_types", "timeout")
         body = ttk.Frame(self, padding=18)
         body.pack(fill="both", expand=True)
         ttk.Label(body, text=title, font=("Segoe UI Semibold", 15)).pack(anchor="w", pady=(0, 8))
-        ttk.Label(body, text="Edit the Level 2 site URLs and element locators.", style="Muted.TLabel").pack(anchor="w", pady=(0, 12))
+        ttk.Label(body, text=description or "Edit the Level 2 site URLs and element locators.", style="Muted.TLabel", wraplength=840).pack(anchor="w", pady=(0, 12))
         self.text = dark_text(body)
         self.text.pack(fill="both", expand=True)
         self.text.insert("1.0", json.dumps(value, ensure_ascii=False, indent=2))
@@ -79,7 +80,7 @@ class JsonDialog(tk.Toplevel):
     def submit(self):
         try:
             value = json.loads(self.text.get("1.0", "end-1c"))
-            if not isinstance(value, dict) or not all(k in value for k in ("base_url", "course_id", "urls", "locators", "grade_types", "timeout")):
+            if not isinstance(value, dict) or not all(k in value for k in self.required):
                 raise ValueError("Missing required site configuration fields")
             self.result = value
         except (ValueError, TypeError) as exc:

@@ -12,9 +12,9 @@ from pathlib import Path
 from uuid import uuid4
 
 from gradebook.config import ROOT
-from gradebook.data import parse_rows
+from automation.schema import is_script, script_data, script_record, validate_records as parse_rows
 
-WORKFLOWS = ("create", "validation", "cancel", "recover", "duplicate")
+WORKFLOWS = ("steps", "create", "validation", "cancel", "recover", "duplicate")
 GROUPS = {"create": "01 · Create & persistence", "validation": "02 · Validation",
           "cancel": "03 · Cancel", "recover": "04 · Error recovery", "duplicate": "05 · Duplicate ID"}
 
@@ -29,6 +29,8 @@ def testcase(record: dict, steps: list | None = None) -> dict:
 
 
 def template_record(case_id: str, workflow: str = "create") -> dict:
+    if workflow == "steps":
+        return script_record(case_id)
     fields = {"itemname": "New grade item", "idnumber": "F003-" + case_id,
               "grademin": "0", "grademax": "100"}
     inputs = {"fields": fields, "grade_type": "Value", "selects": {}, "checks": {}, "dates": {}}
@@ -59,7 +61,11 @@ def template_record(case_id: str, workflow: str = "create") -> dict:
 
 def planned_steps(record: dict) -> list[dict]:
     """Derive the preview from effective CSV data, not a separately editable script."""
-    case = parse_rows([record])[0]
+    if is_script(record):
+        return [dict(action=f"[{s['phase']}] {s['command']} {s['target']} {s['value']}", expected=s["expected"])
+                for s in script_data(record)["steps"]]
+    from gradebook.data import parse_rows as parse_gradebook
+    case = parse_gradebook([record])[0]
     inputs, expected = case.inputs, case.expected
     steps = [dict(action="Log in as teacher and open Gradebook", expected="Gradebook is available"),
              dict(action="Record existing manual-item IDs", expected="Baseline recorded for isolated cleanup"),
@@ -99,6 +105,7 @@ def planned_steps(record: dict) -> list[dict]:
 class Workspace:
     name: str = "Gradebook workspace"
     nodes: list[dict] = field(default_factory=list)
+    settings: dict = field(default_factory=dict)
 
     def walk(self, nodes=None, path=()):
         for node in self.nodes if nodes is None else nodes:
@@ -139,9 +146,9 @@ class Workspace:
     def next_case_id(self, reserved=()) -> str:
         used = {n["record"]["case_id"] for n, _ in self.walk() if n["kind"] == "case"} | set(reserved)
         n = 1
-        while f"TC-003-{n:03}" in used:
+        while f"TC-{n:03}" in used:
             n += 1
-        return f"TC-003-{n:03}"
+        return f"TC-{n:03}"
 
     def add(self, node: dict, parent: str | None = None) -> str:
         self.children(parent).append(node)
@@ -207,13 +214,16 @@ class Workspace:
         return len(rows), renamed
 
     def to_dict(self):
-        return {"version": 1, "name": self.name, "nodes": deepcopy(self.nodes)}
+        return {"version": 2, "name": self.name, "nodes": deepcopy(self.nodes), "settings": deepcopy(self.settings)}
 
     @classmethod
     def from_dict(cls, document: dict):
-        if document.get("version") != 1 or not isinstance(document.get("nodes"), list):
+        if document.get("version") not in {1, 2} or not isinstance(document.get("nodes"), list):
             raise ValueError("Unsupported workspace file")
         workspace = cls(str(document.get("name", "Gradebook workspace")), deepcopy(document["nodes"]))
+        if not isinstance(document.get("settings", {}), dict):
+            raise ValueError("Project settings must be an object")
+        workspace.settings = deepcopy(document.get("settings", {}))
         seen = set()
         records = []
         def validate(nodes, depth=0):
@@ -245,6 +255,15 @@ class Workspace:
     def save(self, path: Path) -> None:
         self.from_dict(self.to_dict())
         path.parent.mkdir(parents=True, exist_ok=True)
+        if path.is_file():
+            previous = path.read_bytes()
+            if json.loads(previous.decode("utf-8-sig")).get("version") == 1:
+                backup = path.with_name(path.stem + ".v1.backup.json")
+                try:
+                    with backup.open("xb") as stream:
+                        stream.write(previous)
+                except FileExistsError:
+                    pass
         descriptor, temporary = tempfile.mkstemp(dir=path.parent, suffix=".json")
         try:
             with os.fdopen(descriptor, "w", encoding="utf-8") as stream:

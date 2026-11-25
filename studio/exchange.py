@@ -8,7 +8,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from gradebook.data import parse_rows
+from automation.schema import validate_records as parse_rows
 
 CORE_COLUMNS = ["case_id", "title", "workflow", "item_name", "minimum", "maximum",
                 "grade_type", "inputs_json", "expected_json", "expected_result",
@@ -27,6 +27,8 @@ def _module(name: str):
 def _string(value) -> str:
     if value is None:
         return ""
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False)
     if isinstance(value, float) and value.is_integer():
         return str(int(value))
     return str(value)

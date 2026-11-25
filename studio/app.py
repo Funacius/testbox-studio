@@ -17,11 +17,14 @@ from tkinter import filedialog, messagebox, ttk
 from uuid import uuid4
 
 from gradebook.config import ROOT
-from gradebook.data import parse_rows
+from automation.schema import is_script, script_data, validate_records as parse_rows
 from studio import APP_NAME
 from studio.dialogs import FormDialog, JsonDialog
 from studio.exchange import read_table, write_table
 from studio.model import WORKFLOWS, Workspace, folder, planned_steps, template_record, testcase
+from studio.steps_editor import ScriptDataEditor, StepsEditor
+from studio.import_wizard import ImportWizard
+from automation.readiness import checked_settings, website_status
 from studio.theme import (ACCENT, BG, BORDER, FIELD, GREEN, MUTED, PANEL, RED,
                           SURFACE, TEXT, YELLOW, apply_theme, dark_menu, dark_text)
 
@@ -59,8 +62,10 @@ class Studio(tk.Tk):
         self.drag_start = None
         self.vars = {}
         self.run_rows = {}
+        self.execution_states = {}
         self._build_menu()
         self._build_ui()
+        self._select_environment()
         self._bind_keys()
         self._rebuild_tree()
         first = next((n["uid"] for n, _ in self.workspace.walk() if n["kind"] == "case"), None)
@@ -107,7 +112,7 @@ class Studio(tk.Tk):
         help_menu = dark_menu(menu)
         help_menu.add_command(label="Open user guide", command=lambda: self._open_path(ROOT / "README.md"))
         help_menu.add_command(label="About", command=lambda: messagebox.showinfo(
-            APP_NAME, f"{APP_NAME}\nProject 3 · Bùi Quốc Thái\n\nCSV / XLS / XLSX workspace manager.\nPython + Selenium + unittest.\n\nSteps are generated from Gradebook workflows.\nOnly the Run button launches browser tests.", parent=self))
+            APP_NAME, f"{APP_NAME}\nEditable browser steps and data-driven automation.\n\nCSV / XLS / XLSX workspace manager.\nPython + Selenium + unittest.\n\nGradebook templates remain available.\nOnly Run starts browser tests.", parent=self))
         menu.add_cascade(label="Help", menu=help_menu)
 
     def _build_ui(self):
@@ -118,7 +123,7 @@ class Studio(tk.Tk):
         branding = tk.Frame(header, bg=BG)
         branding.pack(side="left")
         tk.Label(branding, text=APP_NAME, font=("Segoe UI Semibold", 19), bg=BG, fg=TEXT).pack(anchor="w")
-        tk.Label(branding, text="PROJECT 3  /  DATA-DRIVEN AUTOMATION  /  BÙI QUỐC THÁI",
+        tk.Label(branding, text="BROWSER AUTOMATION  /  EDITABLE STEPS  /  DATA-DRIVEN TESTING",
                  font=("Segoe UI", 8), bg=BG, fg=MUTED).pack(anchor="w", pady=(2, 0))
         self.count_label = tk.Label(header, text="", bg=BG, fg=MUTED, font=("Segoe UI Semibold", 10))
         self.count_label.pack(side="right")
@@ -238,7 +243,7 @@ class Studio(tk.Tk):
         self.notebook.bind("<<NotebookTabChanged>>", lambda _: self._refresh_steps())
         self.overview.columnconfigure(0, weight=1)
         self.overview.columnconfigure(1, weight=1)
-        fields = [("case_id", "Case ID", 0, 0, None), ("workflow", "Workflow", 0, 1, WORKFLOWS),
+        fields = [("case_id", "Case ID", 0, 0, None), ("workflow", "Workflow", 0, 1, WORKFLOWS[1:]),
                   ("title", "Test case name", 2, 0, None), ("item_name", "Item name (spaces are preserved)", 4, 0, None),
                   ("minimum", "Minimum grade", 6, 0, None), ("maximum", "Maximum grade", 6, 1, None),
                   ("grade_type", "Grade type", 8, 0, ("Value", "Scale", "Text")), ("scale", "Scale name (Scale type only)", 8, 1, None)]
@@ -292,16 +297,39 @@ class Studio(tk.Tk):
         self.source_text = dark_text(self.source_tab)
         self.source_text.pack(fill="both", expand=True)
         self.source_text.configure(state="disabled")
+        self.script_data_tab = ttk.Frame(self.notebook, padding=(0, 10))
+        self.script_steps_tab = ttk.Frame(self.notebook, padding=(0, 10))
+        self.script_editor = ScriptDataEditor(self.script_data_tab, self._editor_changed)
+        self.script_editor.pack(fill="both", expand=True)
+        self.steps_editor = StepsEditor(self.script_steps_tab, self._editor_changed)
+        self.steps_editor.pack(fill="both", expand=True)
+        self.notebook.add(self.script_data_tab, text="Test data")
+        self.notebook.add(self.script_steps_tab, text="Steps")
+        self.notebook.hide(self.script_data_tab)
+        self.notebook.hide(self.script_steps_tab)
+
+    def _case_tabs(self, script):
+        legacy = [(self.overview_tab, "Test data"), (self.steps_tab, "Steps"), (self.json_tab, "JSON / Expected")]
+        generic = [(self.script_data_tab, "Test data"), (self.script_steps_tab, "Steps")]
+        for frame, _ in legacy if script else generic:
+            self.notebook.hide(frame)
+        for index, (frame, title) in enumerate(generic if script else legacy):
+            self.notebook.insert(index, frame, text=title)
 
     def _build_inspector(self):
         ttk.Label(self.inspector, text="RUN CONFIGURATION", style="Section.TLabel").pack(anchor="w", pady=(0, 14))
+        self.environment = tk.StringVar(self, self.workspace.settings.get("active_environment", "(current)"))
+        self.environment_box = ttk.Combobox(self.inspector, textvariable=self.environment,
+            values=["(current)", *self.workspace.settings.get("environments", {})], state="readonly", width=23)
+        self.environment_box.pack(fill="x", pady=(0, 6))
+        self.environment_box.bind("<<ComboboxSelected>>", self._select_environment)
         self.run_vars = {}
         settings = [("mode", "Mode", "Functional", ("Functional", "Compatibility NFR")),
                     ("level", "Automation level", "Level 2", ("Level 1", "Level 2")),
                     ("browser", "Browser", "Chrome", ("Chrome", "Edge", "Opera GX", "Both")),
-                    ("base_url", "Moodle URL", "http://127.0.0.1:9501", None),
-                    ("course_id", "Course ID", "2", None),
-                    ("username", "Teacher username", os.environ.get("MOODLE_USERNAME", "teacher01"), None),
+                    ("base_url", "Base URL", self.workspace.settings.get("base_url", "http://127.0.0.1:9501"), None),
+                    ("course_id", "Course ID (Gradebook)", "2", None),
+                    ("username", "Username", os.environ.get("MOODLE_USERNAME", "teacher01"), None),
                     ("password", "Password", os.environ.get("MOODLE_PASSWORD", "1234"), None)]
         for key, label, value, choices in settings:
             ttk.Label(self.inspector, text=label, style="Muted.TLabel", font=("Segoe UI", 9)).pack(anchor="w", pady=(6, 4))
@@ -311,8 +339,11 @@ class Studio(tk.Tk):
             widget.pack(fill="x", pady=(0, 5))
         self.headless = tk.BooleanVar(self, True)
         ttk.Checkbutton(self.inspector, text="Headless (background)", variable=self.headless).pack(anchor="w", pady=(5, 0))
+        ttk.Button(self.inspector, text="Check connection", command=self._check_connection, style="Small.TButton").pack(fill="x", pady=(8, 0))
+        ttk.Button(self.inspector, text="Save environment…", command=self._save_environment, style="Small.TButton").pack(fill="x", pady=(6, 0))
         self.config_path = ROOT / "level2/config/site.json"
-        ttk.Button(self.inspector, text="URLs & locators…", command=self._edit_config).pack(fill="x", pady=(13, 0))
+        ttk.Button(self.inspector, text="Project settings…", command=self._edit_project_settings).pack(fill="x", pady=(13, 0))
+        ttk.Button(self.inspector, text="Gradebook site config…", command=self._edit_config).pack(fill="x", pady=(6, 0))
         ttk.Button(self.inspector, text="Choose config file…", style="Small.TButton", command=self._choose_config).pack(fill="x", pady=(6, 0))
         ttk.Separator(self.inspector).pack(fill="x", pady=17)
         ttk.Label(self.inspector, text="HOW IT RUNS", style="Section.TLabel").pack(anchor="w")
@@ -397,6 +428,12 @@ class Studio(tk.Tk):
 
     def _draft(self):
         node = self.workspace.find(self.editor_uid)
+        if is_script(node["record"]):
+            record = self.script_editor.draft(node["record"], self.steps_editor.steps)
+            for other, _ in self.workspace.walk():
+                if other["kind"] == "case" and other["uid"] != self.editor_uid and other["record"]["case_id"] == record["case_id"]:
+                    raise ValueError(f"Case ID already exists: {record['case_id']}")
+            return record
         record = deepcopy(node["record"])
         for key, variable in self.vars.items():
             if key != "scale":
@@ -468,6 +505,7 @@ class Studio(tk.Tk):
             self.editor_uid = uid if node["kind"] == "case" else None
             self.editor_dirty = False
             if node["kind"] == "folder":
+                self._case_tabs(False)
                 for key in self.vars:
                     self.vars[key].set("")
                 for text in (self.expected_text, self.inputs_text, self.assertions_text):
@@ -479,6 +517,22 @@ class Studio(tk.Tk):
                 self.editor_hint.configure(text=f"Folder selected · {count} cases")
                 return
             record = node["record"]
+            if is_script(record):
+                self._case_tabs(True)
+                self.script_editor.load(record)
+                self.steps_editor.load(script_data(record)["steps"])
+                for key in ("case_id", "title", "workflow"):
+                    self.vars[key].set(record[key])
+                source = ["EDITABLE BROWSER TEST", "", "The Steps tab contains the executable actions.",
+                          "Use ${column} for data values and @name for locator aliases.", "", record.get("notes", ""),
+                          "", "IMPORTED MANUAL STEPS (REFERENCE)"]
+                for index, step in enumerate(node.get("steps", []), 1):
+                    source.extend([f"{index}. {step.get('action', '')}", f"Expected: {step.get('expected', '')}"])
+                self._set_text(self.source_text, "\n".join(source), True)
+                self.editor_hint.configure(text="Executable steps · data and expected values are independent.")
+                self.notebook.select(self.script_steps_tab)
+                return
+            self._case_tabs(False)
             inputs = json.loads(record["inputs_json"])
             for key, variable in self.vars.items():
                 variable.set(inputs.get("scale", "") if key == "scale" else record.get(key, ""))
@@ -562,6 +616,8 @@ class Studio(tk.Tk):
     def _refresh_steps(self):
         if not hasattr(self, "steps_tree") or not self.editor_uid:
             return
+        if is_script(self.workspace.find(self.editor_uid)["record"]):
+            return
         try:
             record = self._draft() if self.editor_dirty else self.workspace.find(self.editor_uid)["record"]
             steps = planned_steps(record)
@@ -630,7 +686,7 @@ class Studio(tk.Tk):
         if not self._commit():
             return
         dialog = FormDialog(self, "New test case", [("name", "Test case name", "New test case", None),
-                                                     ("workflow", "Workflow template", "create", WORKFLOWS)])
+                                                     ("workflow", "Workflow template", "steps", WORKFLOWS)])
         if dialog.result:
             self._checkpoint()
             record = template_record(self.workspace.next_case_id(), dialog.result["workflow"])
@@ -866,6 +922,10 @@ class Studio(tk.Tk):
         if not self._confirm_discard():
             return
         self.workspace = Workspace("Untitled workspace")
+        for key in ("base_url", "course_id", "username", "password"):
+            self.run_vars[key].set("")
+        self.environment.set("(current)")
+        self.environment_box.configure(values=["(current)"])
         self.workspace_path = DEFAULT_WORKSPACE.with_name("untitled.project.json")
         self.history.clear()
         self.future.clear()
@@ -879,6 +939,11 @@ class Studio(tk.Tk):
         for text in (self.expected_text, self.inputs_text, self.assertions_text):
             self._set_text(text, "")
         self.steps_tree.delete(*self.steps_tree.get_children())
+
+        self.steps_editor.load([])
+        self._case_tabs(False)
+        self._set_text(self.source_text, "Create an editable test case with + Test case, or import steps and data from CSV/XLS/XLSX.", True)
+        self.notebook.select(self.source_tab)
 
     def _open_workspace(self):
         if not self._confirm_discard():
@@ -897,6 +962,11 @@ class Studio(tk.Tk):
             self._show_first()
             self.saved_label.configure(text="WORKSPACE SAVED", fg=GREEN)
             self.status.set(f"Opened: {name}")
+            if "base_url" in workspace.settings:
+                self.run_vars["base_url"].set(workspace.settings["base_url"])
+            self.environment_box.configure(values=["(current)", *workspace.settings.get("environments", {})])
+            self.environment.set(workspace.settings.get("active_environment", "(current)"))
+            self._select_environment()
         except (OSError, ValueError, KeyError, TypeError) as exc:
             messagebox.showerror("Open failed", str(exc), parent=self)
 
@@ -907,20 +977,44 @@ class Studio(tk.Tk):
         if not name:
             return
         try:
-            rows = read_table(Path(name))
-            self._checkpoint()
+            selected = self.workspace.find(self.editor_uid) if self.editor_uid else None
+            selected = selected if selected and is_script(selected["record"]) else None
+            dialog = ImportWizard(self, Path(name), self.workspace.settings.get("import_profiles", {}),
+                                  selected_case=selected["record"]["case_id"] if selected else None)
+            if not dialog.result:
+                return
+            result = dialog.result
             staging = Workspace.from_dict(self.workspace.to_dict())
-            parent = self._parent_for_new()
-            container = folder(Path(name).stem)
-            staging.add(container, parent)
-            count, renamed = staging.import_rows(rows, container["uid"])
+            renamed = 0
+            if result["kind"] == "dataset":
+                if selected and result.get("use_selected"):
+                    if not messagebox.askyesno("Replace dataset", f"Replace data rows for {selected['record']['case_id']} with this imported dataset?", parent=self):
+                        return
+                    node = staging.find(selected["uid"])
+                    node["record"]["dataset_json"] = json.dumps(result["dataset"], ensure_ascii=False)
+                    target = node["uid"]
+                else:
+                    record = template_record(staging.next_case_id(), "steps")
+                    record.update(title=Path(name).stem, dataset_json=json.dumps(result["dataset"], ensure_ascii=False))
+                    target = staging.add(testcase(record), self._parent_for_new())
+                count = len(result["dataset"])
+                description = f"Imported {count} data rows"
+            else:
+                container = folder(Path(name).stem)
+                target = staging.add(container, self._parent_for_new())
+                count, renamed = staging.import_rows(result["records"], target)
+                description = f"Imported {count} cases · {result['drafts']} disabled manual steps need review"
+            if "profile" in result:
+                profile_name, profile = result["profile"]
+                staging.settings.setdefault("import_profiles", {})[profile_name] = profile
+            self._checkpoint()
             self.workspace = staging
             self.editor_uid = None
             self._mark_dirty()
-            self._rebuild_tree(container["uid"])
-            self._show_node(container["uid"])
-            self.status.set(f"Imported {count} cases · {renamed} duplicate IDs assigned new IDs · {Path(name).name}")
-            self._log(f"Imported {count} cases from {name}. {renamed} existing IDs received new IDs; originals are retained in original_case_id.", "info")
+            self._rebuild_tree(target)
+            self._show_node(target)
+            self.status.set(description + f" · {Path(name).name}")
+            self._log(description + f". {renamed} duplicate IDs renamed; originals retained.", "info")
         except (OSError, ValueError, KeyError, TypeError) as exc:
             messagebox.showerror("Import failed", str(exc), parent=self)
 
@@ -952,6 +1046,79 @@ class Studio(tk.Tk):
             self.config_path = Path(name)
             self.status.set(f"Level 2 configuration: {name}")
 
+    def _edit_project_settings(self):
+        current = {"base_url": self.run_vars["base_url"].get(), "locators": {}, "variables": {},
+                   "window": [1440, 900], "slow_ms": 0, "highlight": False, **deepcopy(self.workspace.settings)}
+        dialog = JsonDialog(self, "Project settings", current, required=("base_url", "locators", "variables"),
+                            description="General browser tests: base URL, locator aliases (for example login_button: css=#login), and shared variables. Use Run configuration for credentials.")
+        if dialog.result is not None:
+            try:
+                checked_settings(dialog.result)
+            except ValueError as exc:
+                messagebox.showerror("Invalid project settings", str(exc), parent=self)
+                return
+            self._checkpoint()
+            self.workspace.settings = dialog.result
+            self.run_vars["base_url"].set(dialog.result["base_url"])
+            self._mark_dirty()
+
+    def _effective_settings(self):
+        settings = deepcopy(self.workspace.settings)
+        environment = settings.get("environments", {}).get(self.environment.get(), {})
+        for key in ("variables", "locators"):
+            settings[key] = {**settings.get(key, {}), **environment.get(key, {})}
+        settings.update({key: value for key, value in environment.items() if key not in {"variables", "locators"}})
+        settings["base_url"] = self.run_vars["base_url"].get().strip()
+        checked_settings(settings)
+        return settings
+
+    def _select_environment(self, _=None):
+        selected = self.workspace.settings.get("environments", {}).get(self.environment.get())
+        if selected:
+            self.run_vars["base_url"].set(selected.get("base_url", ""))
+            if "browser" in selected:
+                self.run_vars["browser"].set(selected["browser"])
+            self.headless.set(selected.get("headless", True))
+        if self.workspace.settings.get("active_environment", "(current)") != self.environment.get():
+            self.workspace.settings["active_environment"] = self.environment.get()
+            self._mark_dirty()
+
+    def _save_environment(self):
+        values = self._effective_settings()
+        dialog = FormDialog(self, "Save environment", [
+            ("name", "Environment name", "Local" if self.environment.get() == "(current)" else self.environment.get(), None),
+            ("base_url", "Base URL", self.run_vars["base_url"].get(), None),
+            ("browser", "Browser", self.run_vars["browser"].get(), ("Chrome", "Edge", "Opera GX", "Both")),
+            ("display", "Display", "Headless" if self.headless.get() else "Visible", ("Headless", "Visible")),
+            ("width", "Viewport width", str(values.get("window", [1440, 900])[0]), None),
+            ("height", "Viewport height", str(values.get("window", [1440, 900])[1]), None),
+            ("timeout", "Element timeout (seconds)", str(values.get("timeout", 15)), None),
+            ("slow_ms", "Delay between steps (milliseconds)", str(values.get("slow_ms", 0)), None)])
+        if not dialog.result:
+            return
+        try:
+            row = dialog.result
+            profile = dict(base_url=row["base_url"], browser=row["browser"], headless=row["display"] == "Headless",
+                           window=[int(row["width"]), int(row["height"])], timeout=float(row["timeout"]), slow_ms=float(row["slow_ms"]))
+            checked_settings(profile)
+        except (ValueError, TypeError) as exc:
+            messagebox.showerror("Invalid environment", str(exc), parent=self)
+            return
+        self._checkpoint()
+        self.workspace.settings.setdefault("environments", {})[row["name"]] = profile
+        self.environment_box.configure(values=["(current)", *self.workspace.settings["environments"]])
+        self.environment.set(row["name"])
+        self._select_environment()
+        self._mark_dirty()
+
+    def _check_connection(self):
+        try:
+            message = website_status(self.run_vars["base_url"].get().strip())
+            self.status.set(message)
+            messagebox.showinfo("Connection check", message, parent=self)
+        except ValueError as exc:
+            messagebox.showerror("Website is not ready", str(exc), parent=self)
+
     def _edit_config(self):
         try:
             current = json.loads(self.config_path.read_text(encoding="utf-8"))
@@ -978,6 +1145,14 @@ class Studio(tk.Tk):
         try:
             rows = self.workspace.rows(selected)
             parse_rows(rows)
+            generic = any(is_script(row) for row in rows)
+            if generic and compatibility:
+                raise ValueError("This compatibility preset is for the original Gradebook cases. Run editable steps in Functional mode for now.")
+            effective = self._effective_settings()
+            if effective.get("check_connection", True):
+                self.status.set("Checking website connection…")
+                self.update_idletasks()
+                website_status(effective.get("base_url", ""))
             if compatibility:
                 from gradebook.runner import COMPATIBILITY_IDS
                 missing = set(COMPATIBILITY_IDS) - {r["case_id"] for r in rows}
@@ -1003,12 +1178,37 @@ class Studio(tk.Tk):
             if level == 2:
                 command += ["--config", str(self.config_path)]
             command += ["--base-url", self.run_vars["base_url"].get().strip(), "--course-id", self.run_vars["course_id"].get().strip()]
+            if generic:
+                from automation.runner import preflight
+                settings = {**effective, "base_url": self.run_vars["base_url"].get().strip(),
+                            "course_id": self.run_vars["course_id"].get().strip(), "project_dir": str(self.workspace_path.resolve().parent)}
+                # Credentials stay in the child environment, outside the saved snapshot.
+                for key in ("username", "password"):
+                    settings.setdefault("variables", {}).pop(key, None)
+                probe = {**settings, "variables": {**settings.get("variables", {}),
+                                                  "username": self.run_vars["username"].get(), "password": self.run_vars["password"].get()}}
+                preflight(rows, probe)
+                project_path = run_home / "project-snapshot.json"
+                project_path.write_text(json.dumps(dict(records=rows, settings=settings), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                browser_name = "opera" if self.run_vars["browser"].get() == "Opera GX" else self.run_vars["browser"].get().lower()
+                command = [str(executable), "-u", "-m", "automation.runner", "--project", str(project_path),
+                           "--level", str(level), "--browser", browser_name, "--output", str(run_home), "--events", "--stop-file", str(self.stop_file)]
+                if level == 2:
+                    command += ["--legacy-config", str(self.config_path)]
+                if self.headless.get():
+                    command.append("--headless")
+            else:
+                runtime_path = run_home / "runtime-settings.json"
+                runtime_path.write_text(json.dumps(effective, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                command += ["--runtime-settings", str(runtime_path)]
             environment = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUNBUFFERED": "1",
-                           "MOODLE_USERNAME": self.run_vars["username"].get(), "MOODLE_PASSWORD": self.run_vars["password"].get()}
+                           "MOODLE_USERNAME": self.run_vars["username"].get(), "MOODLE_PASSWORD": self.run_vars["password"].get(),
+                           "TESTBOX_VAR_username": self.run_vars["username"].get(), "TESTBOX_VAR_password": self.run_vars["password"].get()}
             self._clear_console()
             self.last_output = run_home
             self.run_count = 0
-            self.run_total = 10 if compatibility else len(rows) * (2 if self.run_vars["browser"].get() == "Both" else 1)
+            self.run_total = 10 if compatibility else sum(len(script_data(r)["dataset"]) if is_script(r) else 1 for r in rows) * (2 if self.run_vars["browser"].get() == "Both" else 1)
+            self.execution_states.clear()
             self.progress.configure(maximum=self.run_total, value=0)
             self.run_button.configure(state="disabled")
             self.stop_button.configure(state="normal")
@@ -1055,19 +1255,30 @@ class Studio(tk.Tk):
                 elif kind == "case_start":
                     self.statuses[case_id] = "RUNNING"
                     self._rebuild_tree()
-                    key = (case_id, browser)
+                    key = (case_id, browser, event.get("row_index", 0))
                     item = self.result_tree.insert("", "end", values=(case_id, browser, "RUNNING", "—", event["title"]), tags=("RUNNING",))
                     self.run_rows[key] = {"item": item, "event": event}
                     self.run_label.configure(text=f"{self.run_count}/{self.run_total} · {case_id} · {browser}")
                     self._log(f"START  {case_id} · {browser}", "info")
                 elif kind == "step":
                     self._log(f"{case_id} / {browser}  ›  {event['message']}", "step")
+                elif kind == "step_start":
+                    self._log(f"{case_id} / {browser} / row {event.get('row_index', 0) + 1}  ›  {event['message']}", "step")
+                    if self.editor_uid and self.workspace.find(self.editor_uid)["record"]["case_id"] == case_id:
+                        step_id = event.get("step_id")
+                        if step_id and self.steps_editor.tree.exists(step_id):
+                            self.steps_editor.tree.selection_set(step_id)
+                            self.steps_editor.tree.see(step_id)
+                elif kind == "step_end":
+                    self._log(f"{event['status']}  step {event['index']} · {event['command']} · {event['duration_seconds']}s", event["status"])
                 elif kind == "case_end":
                     self.run_count += 1
                     self.progress.configure(value=self.run_count)
-                    self.statuses[case_id] = event["status"]
+                    self.execution_states[(case_id, browser, event.get("row_index", 0))] = event["status"]
+                    ranking = {"PASS": 0, "SKIP": 1, "RUNNING": 2, "FAIL": 3, "ERROR": 4}
+                    self.statuses[case_id] = max((state for (cid, _, _), state in self.execution_states.items() if cid == case_id), key=ranking.get)
                     self._rebuild_tree()
-                    row = self.run_rows.get((case_id, browser))
+                    row = self.run_rows.get((case_id, browser, event.get("row_index", 0)))
                     if row:
                         row["event"] = event
                         self.result_tree.item(row["item"], values=(case_id, browser, event["status"], event["duration_seconds"], event["title"]), tags=(event["status"],))
@@ -1150,6 +1361,15 @@ class Studio(tk.Tk):
             return
         if self._confirm_discard():
             self.destroy()
+
+    def destroy(self):
+        try:
+            for callback in self.tk.call("after", "info"):
+                self.after_cancel(callback)
+            self.update_idletasks()
+        except tk.TclError:
+            pass
+        super().destroy()
 
 
 def main():

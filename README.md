@@ -1,7 +1,88 @@
 # Testbox Studio
 
-Ứng dụng desktop quản lý test case, dữ liệu kiểm thử và chạy automation cho
-Project 3. Phiên bản hiện tại hỗ trợ Feature 003: Gradebook của Bùi Quốc Thái.
+Ứng dụng desktop để soạn bước automation, quản lý dataset và chạy kiểm thử
+browser theo dữ liệu. Testcase mới dùng workflow **steps**, có thể chỉnh sửa
+trực tiếp hành động và assertion. Bộ Gradebook Feature003 vẫn được giữ như
+một bộ workflow riêng để sử dụng các case Project 3 hiện có.
+
+## Testcase dùng chung — Steps có thể sửa
+
+1. Dùng **File → New workspace** nếu muốn project mới; hoặc thêm vào workspace
+   hiện tại. Bấm **＋ Test case**, chọn workflow **steps**.
+2. Trong **Steps**, dùng **＋ Step / Edit / Copy / Delete**, kéo đổi thứ tự,
+   bật/tắt bước và Undo/Redo. Mỗi bước có action, target, value, expected,
+   timeout và phase. `setup` chạy trước; `cleanup` vẫn chạy sau khi testcase lỗi.
+3. Trong **Test data**, sửa bảng **Data rows**, bảng **Variables** và mô tả.
+   Nhấp đúp cell để sửa; giá trị trống, dấu cách và số có zero ở đầu được giữ
+   khi nguồn lưu dưới dạng text. Dùng `${column}` trong bước để đọc dataset.
+4. Target có thể là `id=username`, `css=#submit`, `xpath=//button` hoặc alias
+   `@login_button`. Alias và biến dùng chung hiện được sửa trong
+   **Project settings…** bằng JSON; giao diện locator library là phần tiếp theo.
+5. Chọn Base URL, browser và Headless, bấm **Check connection**, rồi **Run**.
+   **Save environment…** lưu URL/browser/viewport/timeout để chọn lại. Mật khẩu
+   nhập trong Run configuration được truyền bằng environment của tiến trình con.
+   Giá trị từng dòng dataset được ưu tiên hơn credential mặc định, nên có thể
+   kiểm tra cả đăng nhập hợp lệ và không hợp lệ.
+6. Với `type`, browser có thể giới hạn hoặc chuẩn hóa input; dùng `assert_value`
+   để kiểm tra kết quả mong đợi. `type_exact` yêu cầu giữ nguyên input tuyệt đối.
+   Locator dùng cho một hành động phải xác định duy nhất phần tử phù hợp.
+
+Workspace format 2 mở được file format 1 và giữ nguyên case/expected/source cũ.
+Khi Save lần đầu lên file format 1, app giữ bản sao `.v1.backup.json` bên cạnh.
+Nếu app cũ đang mở, lưu workspace rồi đóng app cũ trước khi mở phiên bản mới.
+
+### Import file của người khác
+
+**Import…** mở wizard để chọn sheet, dòng header, mode, mapping và Preview:
+
+- **Steps table:** map Case ID, Action, Target, Value, Expected… vào cột tương
+  ứng. Case nhiều dòng có thể để trống ID ở các dòng tiếp theo. Mô tả hành động
+  bằng lời được giữ thành `note` tắt sẵn; cần chuyển thành action rõ ràng trước
+  khi Run. File chỉ có ghi chú không được báo là một testcase chạy PASS.
+- **Dataset:** nhập các cột thành biến. Preview hiển thị tên biến sau chuẩn hóa.
+  Có thể thay dataset của case **steps** đang chọn hoặc tạo case nháp mới.
+- **Testbox export:** nhập lại bảng đã xuất từ app, giữ cấu trúc case/folder/steps.
+- **Project 2 Gradebook:** chọn rõ sheet `003 - Moodle Grading` để dùng adapter
+  cũ. App không tự chọn phần Gradebook thay cho sheet của thành viên khác.
+
+Mapping có thể lưu theo tên profile trong project. Import được kiểm tra trước
+khi áp dụng; lỗi dòng/cột không làm thay một phần workspace. Công thức XLSX
+trong vùng dữ liệu cần đổi thành giá trị literal trước khi nhập.
+
+### Thử luồng chung bằng website mẫu
+
+Mở terminal riêng tại thư mục Pro3 và chạy:
+
+```powershell
+.\.venv\Scripts\python.exe tools/demo_site.py
+```
+
+Trong app, nhập `examples/login-steps.csv` bằng **Steps table**. Chọn case
+`DEMO-LOGIN`, nhập `examples/login-data.csv` bằng **Dataset** vào case đó.
+Đặt Base URL là `http://127.0.0.1:9542`, Apply changes rồi Run. Ba dòng dữ liệu
+gồm một đăng nhập hợp lệ và hai đăng nhập không hợp lệ; cả ba có expected riêng.
+Website mẫu không cần Moodle/Docker và chỉ phục vụ ví dụ automation cục bộ.
+
+### Tiến độ mở rộng app
+
+Đã triển khai phần lõi: testcase Steps dùng chung, bộ chạy, editor Steps,
+import mapping, bảng dataset/biến, cấu hình môi trường và kiểm tra kết nối.
+Các phần đang tiếp tục: locator library, pause/step/breakpoints, báo cáo tổng
+hợp và Python export, cấu hình NFR chung, templates/recorder/điều kiện/vòng lặp.
+`data/studio-development.json` theo dõi phạm vi và các kiểm chứng tương ứng.
+Breakpoint hiện được lưu trong step; điều khiển dừng ở breakpoint chưa được nối
+với bộ chạy. Chế độ Compatibility hiện vẫn là preset Gradebook Level 2.
+
+Kiểm chứng bước đầu cho phần lõi được ghi riêng tại
+[studio-core-verification.json](artifacts/studio-core-verification.json):
+26 development tests PASS, gồm cả chạy Chrome trên website mẫu cục bộ. Đây là
+kiểm tra app, tách biệt với kết quả 36 testcase Gradebook của Project 3.
+Chạy lại các kiểm tra phát triển bằng:
+
+```powershell
+$env:TESTBOX_BROWSER_TESTS = '1'
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
 
 ## Mở app và sử dụng nhanh
 
@@ -33,14 +114,15 @@ Mở app không khởi động kiểm thử hay thay đổi Moodle. Cách sử d
 1. **Explorer:** chọn folder hoặc test case. Dùng **＋ Folder / ＋ Test case**
    để tạo mới; chuột phải hoặc **F2** để đổi tên; kéo thả, nút **↑ / ↓** hoặc
    **Move…** để di chuyển và sắp xếp. Có thể nhân bản, xóa và undo/redo.
-2. **Import…:** chọn CSV, XLS hoặc XLSX. Có thể nạp trực tiếp workbook
-   Project 2; file khác cần theo mẫu dữ liệu xuất từ app. Case trùng mã sẽ
+2. **Import…:** chọn CSV, XLS hoặc XLSX, rồi chọn sheet/mapping trong wizard.
+   Workbook Project 2 có adapter Gradebook riêng. Case trùng mã sẽ
    được cấp mã mới và giữ mã cũ trong `original_case_id`.
 3. **Test data:** sửa dữ liệu nhập. **JSON / Expected** chứa tùy chọn nâng cao
    và kết quả mong đợi để kiểm tra. Thay dữ liệu nhập không tự đổi Expected
    Result; cần cập nhật kết quả mong đợi đúng với yêu cầu của case.
-4. **Steps:** xem các bước tạo từ workflow và dữ liệu hiện tại; nhấp đúp một
-   bước để đọc đầy đủ. **Source** hiển thị các bước gốc từ Excel để đối chiếu.
+4. **Steps:** case workflow **steps** sửa trực tiếp các bước thực thi. Với
+   workflow Gradebook cũ, tab này vẫn là bản xem trước sinh từ dữ liệu.
+   **Source** hiển thị các bước gốc từ Excel để đối chiếu.
 5. **Apply changes** áp dụng chỉnh sửa; **Save workspace** hoặc **Ctrl+S** lưu
    cây folder và test case vào `workspace/gradebook.project.json`. Dùng
    **File → Save workspace as…** để lưu một workspace khác.
@@ -61,12 +143,46 @@ Nếu app đang mở khi mã nguồn được cập nhật, lưu các chỉnh s�
 lại để thấy phiên bản mới. Tên app là **Testbox Studio**; tên feature, file dữ
 liệu và workflow vẫn thể hiện đúng chức năng Gradebook hiện đang hỗ trợ.
 
+## Chuẩn bị trước khi bấm Run
+
+1. Mở **Docker Desktop**, chờ Docker Engine chạy. Sau đó mở PowerShell tại
+   thư mục Pro3 và bật container Moodle đã có:
+
+   ```powershell
+   docker start pro2-moodle
+   .\.venv\Scripts\python.exe tools/wait_for_moodle.py
+   ```
+
+   Chờ dòng `Moodle ready: HTTP 200`. Testbox Studio không tự bật Docker Desktop
+   hoặc container khi bấm Run. Nếu báo `ERR_CONNECTION_REFUSED`, kiểm tra lại
+   Docker, container và URL Moodle trước khi chạy tiếp.
+2. Mở `http://127.0.0.1:9501/login/index.php`, kiểm tra tài khoản teacher có
+   quyền sửa Gradebook của Course 1, ID `2`. Fixture hiện tại dùng
+   `teacher01` / `1234`; cập nhật Run configuration nếu bạn đã đổi tài khoản.
+3. Kiểm tra Moodle dùng English UI, Minimum grade được bật, Natural aggregation
+   và scale cần thiết đã tồn tại; xem **Moodle preconditions** bên dưới.
+4. Trong app, chọn Functional, Level 1 hoặc Level 2, Chrome và bật
+   **Headless (background)** cho lần kiểm tra đầu. URL là
+   `http://127.0.0.1:9501`, Course ID là `2`. Chạy một case trước khi chạy cả bộ.
+5. Đối chiếu **Test data** với **JSON / Expected**, rồi Apply changes. Ví dụ,
+   TC-003-001 gốc nhập Grade type `Value` và kỳ vọng lưu `Value`. Nếu đổi input
+   sang `Text` trong khi Expected vẫn là `Value`, case sẽ FAIL đúng theo phép
+   so sánh. Khi thiết kế case Text mới, cần xác định lại expected fields và
+   trạng thái điều khiển phù hợp; không tự đổi Expected chỉ để làm mất FAIL.
+6. Chạy tuần tự, tránh sửa cùng course khi automation đang chạy. Theo dõi
+   Execution và Open results để phân biệt ERROR kết nối với FAIL assertion.
+
+Python/Selenium trên máy hiện tại đã được cài sẵn. Internet có thể cần khi
+Selenium Manager tải driver phù hợp sau khi browser cập nhật. Opera GX còn cần
+Chromium version phù hợp trong site settings; nên xác nhận Chrome hoạt động
+trước, rồi mới chọn Opera GX.
+
 ## Project 3 — Feature 003: Gradebook — Bùi Quốc Thái
 
 Python 3.12 + Selenium WebDriver + unittest. This submission implements the
 36 manual grade-item cases from Project 2 as data-driven automation.
 
-**Current state: browser verification completed on 23 November 2026.**
+**Gradebook dataset verification: completed on 23 November 2026.**
 Level 1 and Level 2 each have 35 PASS and 1 FAIL: TC-003-036 reproduces the
 known Moodle defect F003-D01. Chrome/Edge compatibility passed 10/10, and
 supplementary Opera GX coverage passed 5/5. See **Verification results** below
@@ -103,8 +219,8 @@ when an actual Run is started.
 - **Test data:** edit case IDs, names, workflow, grade type, scale and bounds.
   Input whitespace is preserved. Changes are applied before selection,
   save, export or run; invalid JSON/data is rejected without discarding edits.
-- **Steps:** a read-only preview generated from the effective workflow/data.
-  Double-click a row to read its full action and expected result.
+- **Steps:** editable actions for workflow `steps`; a generated read-only preview
+  remains available for legacy Gradebook workflows.
 - **JSON / Expected:** edit extra input options and expected assertions
   independently. Changing an input never silently changes its expected value.
 - **Source:** original Excel preconditions, notes, defect reference and manual
@@ -120,7 +236,7 @@ when an actual Run is started.
   output folder. Browser tests only start when **Run** is pressed. **Stop after
   case** finishes the active case and its cleanup rather than killing a browser.
 
-The workspace is initially seeded with the 36 source cases grouped into five
+The existing Gradebook workspace is seeded with the 36 source cases grouped into five
 workflow folders. Save writes to `workspace/gradebook.project.json`, separate
 from the source CSV/Excel. File → Save as supports additional workspaces.
 Tree changes have undo/redo; editing text also retains normal text undo.
@@ -133,22 +249,22 @@ Duplicate IDs during import receive new IDs, with originals retained in the
 `original_case_id` column. Imports are staged so a failed import does not
 partially replace the workspace.
 
-The original Project 2 workbook can be imported directly: its
-`003 - Moodle Grading` sheet is recognized and converted using the same strict
-extractor as the CLI. Other spreadsheets must use the exported data-driven
-column schema. Excel formulas are not supported as XLSX test inputs; exported
-values are literal text, including strings that start with `=`.
+The original Project 2 workbook has an explicit Gradebook adapter in the import
+wizard. Its `003 - Moodle Grading` sheet is converted with the CLI extractor.
+Other spreadsheet layouts can be mapped to executable steps or datasets.
+Excel formulas are not supported as XLSX test inputs; exported values are
+literal text, including strings that start with `=`.
 
-New cases start from one of the five supported Gradebook workflow templates.
-This is a Gradebook automation app, not a universal Katalon recorder or an
-arbitrary Selenium-step scripting tool. The steps preview is generated from
-the workflow; it is not a second independently editable automation script.
+New cases default to the general `steps` workflow. Five Gradebook templates
+remain available. Recording, conditional steps, loops and advanced playback
+are still on the development roadmap; they are not claimed as complete.
 
-Run uses an immutable CSV snapshot of the selected folders/cases in workspace
-order, so edits made while running do not alter that invocation. Compatibility
+Run uses an immutable snapshot (CSV data and, for editable tests, JSON steps)
+of the selected folders/cases, so edits do not alter that invocation. Compatibility
 mode always uses Level 2, both browsers, and the original fixed five case IDs.
-Passwords are supplied to the child process environment and are not saved in
-workspace JSON. A stopped/incomplete run is not reported as successful.
+Run-configuration passwords are supplied to the child process environment and
+are not saved in workspace JSON. Test data entered explicitly in datasets is
+part of that saved dataset. A stopped/incomplete run is not reported as successful.
 
 For another machine, install the app-only dependencies first if browser
 execution is not needed yet:
@@ -410,8 +526,10 @@ provide a different JSON file:
 
 Each case gets a teacher login and independent setup/cleanup. Without
 `--reuse-browser`, each case also gets a fresh browser profile. The desktop
-app and VS Code tasks reuse a suite profile with per-case cookies/storage
-reset. Verification can run headless at 1440 × 900; mode, actual viewport,
+Gradebook app runs and VS Code tasks reuse a suite profile with per-case
+cookies/storage reset. Editable-step app runs currently use a fresh profile per
+data row; the general CLI also offers explicit `--reuse-browser`. Verification
+can run headless at 1440 × 900; mode, actual viewport,
 device scale and session-isolation policy are recorded in results.
 
 ## Non-functional requirement NF-003-COMPAT
