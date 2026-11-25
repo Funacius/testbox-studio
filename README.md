@@ -69,7 +69,7 @@ Website mẫu không cần Moodle/Docker và chỉ phục vụ ví dụ automati
 
 Đã triển khai phần lõi, import mapping, bảng dataset/biến, môi trường, locator
 library, điều khiển từng step và báo cáo tổng hợp. Các phần đang tiếp tục:
-Python export, cấu hình NFR chung, templates/recorder/điều kiện/vòng lặp.
+Cấu hình NFR chung, templates/recorder/điều kiện/vòng lặp.
 `data/studio-development.json` theo dõi phạm vi và các kiểm chứng tương ứng.
 Chế độ Compatibility hiện vẫn là preset Gradebook Level 2.
 
@@ -92,6 +92,35 @@ có thể xuất hiện trên ảnh chụp trang web.
 Thời gian toàn case gồm setup/cleanup. Khi đánh giá hiệu năng, dùng timer có
 ranh giới rõ ràng và kiểm tra metadata pause/slow; thời gian tương tác có ảnh
 hưởng tới phép đo.
+
+### Xuất Python chạy độc lập
+
+Chọn **File → Export Python / unittest…**, chọn selection hoặc toàn workspace
+và Level 1/2 hoặc cả hai. Giải nén ZIP, cài `requirements.txt` trong gói xuất,
+rồi chạy `python level1/test_cases.py --headless` hoặc
+`python level2/test_cases.py --headless`. Gói có runtime Python/Selenium/unittest,
+README và CSV; không cần app hay thư mục project gốc.
+
+Level 1 giữ URL, locator và định nghĩa step trong `level1/program.py`; Level 2
+đọc `level2/cases.json` và `level2/config/site.json`. Cả hai đọc dữ liệu từ
+`data/case-CASE-ID.csv` mỗi lần chạy, kể cả input/expected literal được tách
+thành cột `step_N_value` / `step_N_expected`. Sửa hoặc thêm dòng CSV sẽ thay
+đổi kiểm tra thực tế. Có thể dùng `--browser`, `--base-url`, `--case`, `--list`
+và `--output`. Hỗ trợ cả `python -m unittest level1.test_cases -v`; đặt
+`TESTBOX_HEADLESS=1` khi muốn chạy discovery ở chế độ nền.
+
+File upload có sẵn được kèm vào `assets/` (tối đa 20 MiB/file); file được cung
+cấp bằng biến lúc chạy cần chuẩn bị trên máy đích. Credential chỉ nhập ở Run
+configuration không được xuất. Dữ liệu credential đã lưu trong dataset hoặc
+project variables vẫn được kèm vì đó là dữ liệu test đã lưu; xem README của
+gói xuất trước khi chia sẻ. Native Gradebook giữ nguyên CSV/expected và vẫn
+cần Moodle cùng fixture đã mô tả bên dưới.
+
+Bộ mẫu đã xuất: [testbox-login-python.zip](artifacts/testbox-login-python.zip),
+dùng cùng website `tools/demo_site.py` ở trên. Kiểm tra phát triển sau khi thêm
+Python export: **48 PASS, 0 FAIL/ERROR/SKIP**, có chạy browser ngoài repository
+ở cả hai Level, thay CSV/locator và kiểm tra upload độc lập; xem
+[studio-python-export-verification.json](artifacts/studio-python-export-verification.json).
 
 Kiểm chứng bước đầu cho phần lõi được ghi riêng tại
 [studio-core-verification.json](artifacts/studio-core-verification.json):

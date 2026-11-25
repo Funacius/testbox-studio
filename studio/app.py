@@ -104,6 +104,7 @@ class Studio(tk.Tk):
             ("Import data…", self._import, "Ctrl+I"), ("Export data…", self._export, "Ctrl+E")]:
             file_menu.add_command(label=text, command=command, accelerator=accelerator)
         file_menu.add_separator()
+        file_menu.add_command(label="Export Python / unittest…", command=self._export_python)
         file_menu.add_command(label="Open execution report…", command=self._open_report)
         file_menu.add_command(label="Exit", command=self._close)
         menu.add_cascade(label="File", menu=file_menu)
@@ -1084,6 +1085,40 @@ class Studio(tk.Tk):
             self.status.set(f"Exported {len(rows)} cases: {name}")
         except (OSError, ValueError, KeyError) as exc:
             messagebox.showerror("Export failed", str(exc), parent=self)
+
+    def _export_python(self):
+        if not self._commit():
+            return
+        dialog = FormDialog(self, "Export runnable Python", [
+            ("scope", "Cases", "Selection" if self._selected() else "All cases", ("Selection", "All cases")),
+            ("levels", "Export levels", "Both levels", ("Both levels", "Level 1", "Level 2"))])
+        if not dialog.result:
+            return
+        try:
+            selected = self._selected() if dialog.result["scope"] == "Selection" else None
+            if dialog.result["scope"] == "Selection" and not selected:
+                raise ValueError("Select at least one case or folder before exporting a selection")
+            rows = self.workspace.rows(selected)
+            if not rows:
+                raise ValueError("There are no test cases to export")
+            name = filedialog.asksaveasfilename(parent=self, title="Export standalone Selenium/unittest suite",
+                defaultextension=".zip", initialfile="testbox-python.zip", filetypes=[("Python suite ZIP", "*.zip")])
+            if not name:
+                return
+            from automation.exporting import export_python
+            settings = self._effective_settings()
+            settings["course_id"] = self.run_vars["course_id"].get().strip()
+            legacy = json.loads(self.config_path.read_text(encoding="utf-8")) if any(not is_script(r) for r in rows) else None
+            levels = (1, 2) if dialog.result["levels"] == "Both levels" else (int(dialog.result["levels"][-1]),)
+            result = export_python(name, rows, settings, levels=levels,
+                project_dir=self.workspace_path.resolve().parent, legacy_site=legacy)
+            self.status.set(f"Exported {result['cases']} cases to Python: {name}")
+            messagebox.showinfo("Python suite exported", f"Saved: {name}\n\nExtract the ZIP and follow README.md. "
+                "Inputs and expected values are read from CSV at runtime.\n\nReview saved data before sharing; "
+                "credentials already in datasets/variables are included."
+                + ("\n\n" + "\n".join(result["warnings"]) if result["warnings"] else ""), parent=self)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            messagebox.showerror("Python export failed", str(exc), parent=self)
 
     def _choose_config(self):
         name = filedialog.askopenfilename(parent=self, title="Choose Level 2 configuration", filetypes=[("JSON", "*.json")])

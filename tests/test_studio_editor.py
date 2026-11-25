@@ -96,6 +96,32 @@ class StudioEditorTests(unittest.TestCase):
         self.assertEqual(process.call_args.kwargs["env"]["TESTBOX_VAR_password"], "temporary-secret")
         self.assertEqual(app.run_total, 1)
 
+    def test_python_export_commits_selected_edits_and_excludes_run_credentials(self):
+        import zipfile
+        app = self.app
+        app._show_node(self.uid)
+        app.tree.selection_set(self.uid)
+        app.script_editor.variables["title"].set("Export current edited title")
+        app.run_vars["username"].set("run-only-user")
+        app.run_vars["password"].set("run-only-secret")
+        fake = type("Dialog", (), {"result": {"scope": "Selection", "levels": "Both levels"}})()
+        destination = Path(self.directory.name) / "export.zip"
+        with patch("studio.app.FormDialog", return_value=fake), \
+             patch("studio.app.filedialog.asksaveasfilename", return_value=str(destination)), \
+             patch("studio.app.messagebox.showinfo"), \
+             patch("studio.app.subprocess.Popen") as browser:
+            app._export_python()
+        browser.assert_not_called()
+        self.assertTrue(destination.is_file())
+        with zipfile.ZipFile(destination) as archive:
+            text = "\n".join(archive.read(name).decode("utf-8") for name in archive.namelist())
+            self.assertIn("Export current edited title", text)
+            self.assertNotIn("run-only-secret", text)
+            self.assertNotIn("run-only-user", text)
+            manifest = json.loads(archive.read("manifest.json"))
+            self.assertEqual(manifest["cases"], [self.record["case_id"]])
+            self.assertEqual(manifest["levels"], [1, 2])
+
     def test_dataset_and_variables_grid_apply_and_undo_exact_values(self):
         app = self.app
         app._show_node(self.uid)

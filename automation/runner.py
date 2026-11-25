@@ -169,6 +169,30 @@ class ControlledGradebookCase(GradebookCase):
         super().setUp()
 
 
+def build_tests(records, settings, browsers, output, run_id, level, headless, drivers, emit,
+                controller=None, legacy_config=None):
+    """Create real unittest cases without starting browsers (also used by exports)."""
+    from gradebook.config import load_site
+    from gradebook.data import parse_rows
+    tests = []
+    for browser in browsers:
+        for record in records:
+            if is_script(record):
+                for index, row in enumerate(script_data(record)["dataset"]):
+                    tests.append(ScriptCase(record, row, index, browser, settings, output, run_id,
+                                            level, headless, drivers, emit, controller))
+            else:
+                site = load_site(level, legacy_config if level == 2 else None)
+                for key in ("base_url", "course_id", "window", "page_load_timeout", "command_timeout"):
+                    if key in settings:
+                        site[key] = settings[key]
+                test = ControlledGradebookCase(parse_rows([record])[0], level, browser, site, output,
+                                              run_id, headless, emit, drivers)
+                test.controller = controller
+                tests.append(test)
+    return tests
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", type=Path, required=True, help="Immutable JSON snapshot with records and settings")
@@ -209,24 +233,8 @@ def main(argv=None):
             print("@@GRADEBOOK_EVENT " + json.dumps(dict(event=event, time=datetime.now(BANGKOK).isoformat(), **values), ensure_ascii=False), flush=True)
     drivers = {} if args.reuse_browser else None
     controller = PlaybackController(args.control_file, emit, args.stop_file) if args.control_file else None
-    tests = []
-    from gradebook.config import load_site
-    from gradebook.data import parse_rows
-    for browser in browsers:
-        for record in records:
-            if is_script(record):
-                for index, row in enumerate(script_data(record)["dataset"]):
-                    tests.append(ScriptCase(record, row, index, browser, settings, output, run_id,
-                                            args.level, args.headless, drivers, emit, controller))
-            else:
-                site = load_site(args.level, args.legacy_config if args.level == 2 else None)
-                for key in ("base_url", "course_id", "window", "page_load_timeout", "command_timeout"):
-                    if key in settings:
-                        site[key] = settings[key]
-                test = ControlledGradebookCase(parse_rows([record])[0], args.level, browser, site, output,
-                                              run_id, args.headless, emit, drivers)
-                test.controller = controller
-                tests.append(test)
+    tests = build_tests(records, settings, browsers, output, run_id, args.level, args.headless, drivers, emit,
+                        controller, args.legacy_config)
     emit("run_start", total=len(tests), output=str(output), run_id=run_id)
     class RunResult(CsvResult):
         def stopTest(self, test):

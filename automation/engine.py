@@ -236,6 +236,7 @@ class StepEngine:
             self.variables[target] = value
             return f"Set variable {target}"
         if cmd == "upload":
+            value = self.settings.get("upload_assets", {}).get(value, value)
             path = Path(value).expanduser()
             if not path.is_absolute():
                 path = Path(self.settings.get("project_dir", ".")) / path
