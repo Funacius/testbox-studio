@@ -50,6 +50,7 @@ class StudioEditorTests(unittest.TestCase):
         app = self.app
         app._show_node(self.uid)
         self.assertEqual(app.notebook.tab(app.script_steps_tab, "state"), "normal")
+        self.assertEqual(app.notebook.tab(app.script_data_tab, "state"), "normal")
         editor = app.steps_editor
         editor.tree.selection_set(editor.steps[0]["id"])
         editor.duplicate()
@@ -71,6 +72,8 @@ class StudioEditorTests(unittest.TestCase):
         legacy = next(n for n, _ in app.workspace.walk() if n["kind"] == "case" and n["uid"] != self.uid)
         app._show_node(legacy["uid"])
         self.assertEqual(app.notebook.tab(app.overview_tab, "state"), "normal")
+        self.assertEqual(app.notebook.tab(app.steps_tab, "state"), "normal")
+        self.assertEqual(app.notebook.tab(app.json_tab, "state"), "normal")
         self.assertEqual(app.notebook.tab(app.script_steps_tab, "state"), "hidden")
 
     def test_run_uses_current_immutable_steps_and_keeps_credentials_in_environment(self):
@@ -167,6 +170,58 @@ class StudioEditorTests(unittest.TestCase):
         self.assertEqual(app._effective_settings()["variables"]["course"], "7")
         self.assertTrue(app._save())
         self.assertEqual(Workspace.load(self.path).settings["active_environment"], "Staging")
+
+    def test_playback_controls_write_versioned_commands_and_stop_request(self):
+        app = self.app
+        app._show_node(self.uid)
+        app.tree.selection_set(self.uid)
+        app.start_paused.set(True)
+        process = FinishedProcess()
+        process.poll = lambda: None
+        with patch("studio.app.subprocess.Popen", return_value=process) as launch, \
+             patch("studio.app.website_status", return_value="ready"):
+            app._run()
+        self.assertIn("--control-file", launch.call_args.args[0])
+        self.assertEqual(json.loads(app.playback_path.read_text())["command"], "pause")
+        app._playback("next")
+        self.assertEqual(json.loads(app.playback_path.read_text()), {"command": "next", "sequence": 1})
+        app._stop()
+        self.assertTrue(app.stop_file.exists())
+        self.assertEqual(json.loads(app.playback_path.read_text()), {"command": "stop", "sequence": 2})
+        app.process = None
+
+    def test_locator_library_is_saved_to_the_selected_environment(self):
+        app = self.app
+        app.workspace.settings["environments"] = {"Staging": {"base_url": "http://127.0.0.1:8765"}}
+        app.environment.set("Staging")
+        app._select_environment()
+        library = {"username": {"by": "id", "value": "username"}}
+        dialog = type("Dialog", (), {"result": library})()
+        with patch("studio.app.LocatorLibraryDialog", return_value=dialog):
+            app._locator_library()
+        self.assertEqual(app._effective_settings()["locators"], library)
+        self.assertEqual(app.workspace.settings["environments"]["Staging"]["locators"], library)
+
+    def test_general_case_hides_gradebook_controls_and_report_viewer_shows_unexecuted_steps(self):
+        from automation.reporting import write_report
+        from studio.report_viewer import ReportViewer
+        app = self.app
+        app._show_node(self.uid)
+        self.assertEqual(app.run_widgets["course_id"].winfo_manager(), "")
+        record = dict(case_id="R-1", title="Stopped", browser="chrome", level=2, row_index=1, status="SKIP", actual="Stopped by user",
+                      duration_seconds=.1, cleanup_error="", evidence=[], expected_json={"steps": [{"id": "unreached", "command": "click", "target": "id=save"}]}, step_results=[])
+        output = Path(self.directory.name) / "report"
+        write_report(dict(metadata={"stopped": True}, successful=False, counts={"SKIP": 1}, results=[record]), output)
+        viewer = ReportViewer(app, output, lambda path: None)
+        try:
+            first = viewer.cases.get_children()[0]
+            self.assertEqual(viewer.cases.item(first, "values")[2], "2")
+            self.assertEqual(viewer.current_steps[0]["status"], "NOT_RUN")
+            viewer.filter.set("PASS")
+            viewer.refresh()
+            self.assertFalse(viewer.cases.get_children())
+        finally:
+            viewer.destroy()
 
 
 if __name__ == "__main__":

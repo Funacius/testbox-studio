@@ -25,6 +25,9 @@ from studio.model import WORKFLOWS, Workspace, folder, planned_steps, template_r
 from studio.steps_editor import ScriptDataEditor, StepsEditor
 from studio.import_wizard import ImportWizard
 from automation.readiness import checked_settings, website_status
+from automation.playback import write_control
+from studio.locator_library import LocatorLibraryDialog
+from studio.report_viewer import ReportViewer
 from studio.theme import (ACCENT, BG, BORDER, FIELD, GREEN, MUTED, PANEL, RED,
                           SURFACE, TEXT, YELLOW, apply_theme, dark_menu, dark_text)
 
@@ -39,7 +42,7 @@ class Studio(tk.Tk):
         super().__init__()
         self.withdraw()
         apply_theme(self)
-        self.title(f"{APP_NAME} · Project 3")
+        self.title(APP_NAME)
         width, height = min(1600, self.winfo_screenwidth() - 80), min(960, self.winfo_screenheight() - 150)
         self.geometry(f"{width}x{height}+35+30")
         self.minsize(1180, 730)
@@ -55,6 +58,9 @@ class Studio(tk.Tk):
         self.events = queue.Queue()
         self.process = None
         self.stop_file = None
+        self.playback_path = None
+        self.playback_sequence = 0
+        self.run_generic = False
         self.last_output = None
         self.close_when_stopped = False
         self.run_count = 0
@@ -98,6 +104,7 @@ class Studio(tk.Tk):
             ("Import data…", self._import, "Ctrl+I"), ("Export data…", self._export, "Ctrl+E")]:
             file_menu.add_command(label=text, command=command, accelerator=accelerator)
         file_menu.add_separator()
+        file_menu.add_command(label="Open execution report…", command=self._open_report)
         file_menu.add_command(label="Exit", command=self._close)
         menu.add_cascade(label="File", menu=file_menu)
         edit = dark_menu(menu)
@@ -167,10 +174,11 @@ class Studio(tk.Tk):
 
     def _set_sashes(self, horizontal):
         try:
-            total = horizontal.winfo_width()
-            horizontal.sashpos(0, 325)
-            horizontal.sashpos(1, total - 260)
             self.vertical.sashpos(0, max(400, self.vertical.winfo_height() - 215))
+            self.update_idletasks()
+            total = horizontal.winfo_width()
+            horizontal.sashpos(1, total - 260)
+            horizontal.sashpos(0, 325)
         except tk.TclError:
             pass
 
@@ -314,7 +322,7 @@ class Studio(tk.Tk):
         for frame, _ in legacy if script else generic:
             self.notebook.hide(frame)
         for index, (frame, title) in enumerate(generic if script else legacy):
-            self.notebook.insert(index, frame, text=title)
+            self.notebook.insert(index, frame, text=title, state="normal")
 
     def _build_inspector(self):
         ttk.Label(self.inspector, text="RUN CONFIGURATION", style="Section.TLabel").pack(anchor="w", pady=(0, 14))
@@ -324,31 +332,58 @@ class Studio(tk.Tk):
         self.environment_box.pack(fill="x", pady=(0, 6))
         self.environment_box.bind("<<ComboboxSelected>>", self._select_environment)
         self.run_vars = {}
+        self.run_labels, self.run_widgets = {}, {}
+        has_gradebook = any(n["kind"] == "case" and not is_script(n["record"]) for n, _ in self.workspace.walk())
         settings = [("mode", "Mode", "Functional", ("Functional", "Compatibility NFR")),
                     ("level", "Automation level", "Level 2", ("Level 1", "Level 2")),
                     ("browser", "Browser", "Chrome", ("Chrome", "Edge", "Opera GX", "Both")),
                     ("base_url", "Base URL", self.workspace.settings.get("base_url", "http://127.0.0.1:9501"), None),
-                    ("course_id", "Course ID (Gradebook)", "2", None),
-                    ("username", "Username", os.environ.get("MOODLE_USERNAME", "teacher01"), None),
-                    ("password", "Password", os.environ.get("MOODLE_PASSWORD", "1234"), None)]
+                    ("course_id", "Course ID (Gradebook)", "2" if has_gradebook else "", None),
+                    ("username", "Username", os.environ.get("TESTBOX_VAR_username", os.environ.get("MOODLE_USERNAME", "teacher01") if has_gradebook else ""), None),
+                    ("password", "Password", os.environ.get("TESTBOX_VAR_password", os.environ.get("MOODLE_PASSWORD", "1234") if has_gradebook else ""), None)]
         for key, label, value, choices in settings:
-            ttk.Label(self.inspector, text=label, style="Muted.TLabel", font=("Segoe UI", 9)).pack(anchor="w", pady=(6, 4))
+            self.run_labels[key] = ttk.Label(self.inspector, text=label, style="Muted.TLabel", font=("Segoe UI", 9))
+            self.run_labels[key].pack(anchor="w", pady=(6, 4))
             variable = tk.StringVar(self, value)
             self.run_vars[key] = variable
             widget = ttk.Combobox(self.inspector, textvariable=variable, values=choices, state="readonly", width=23) if choices else ttk.Entry(self.inspector, textvariable=variable, show="●" if key == "password" else "", width=25)
             widget.pack(fill="x", pady=(0, 5))
+            self.run_widgets[key] = widget
         self.headless = tk.BooleanVar(self, True)
         ttk.Checkbutton(self.inspector, text="Headless (background)", variable=self.headless).pack(anchor="w", pady=(5, 0))
+        self.start_paused = tk.BooleanVar(self, False)
+        ttk.Checkbutton(self.inspector, text="Start paused (editable steps)", variable=self.start_paused).pack(anchor="w", pady=(5, 0))
+        self.highlight_steps = tk.BooleanVar(self, self.workspace.settings.get("highlight", False))
+        ttk.Checkbutton(self.inspector, text="Highlight active element", variable=self.highlight_steps).pack(anchor="w", pady=(5, 0))
+        self.slow_ms = tk.StringVar(self, str(self.workspace.settings.get("slow_ms", 0)))
+        ttk.Label(self.inspector, text="Step delay (milliseconds)", style="Muted.TLabel").pack(anchor="w", pady=(5, 3))
+        ttk.Spinbox(self.inspector, from_=0, to=10000, increment=100, textvariable=self.slow_ms, width=15).pack(fill="x")
         ttk.Button(self.inspector, text="Check connection", command=self._check_connection, style="Small.TButton").pack(fill="x", pady=(8, 0))
         ttk.Button(self.inspector, text="Save environment…", command=self._save_environment, style="Small.TButton").pack(fill="x", pady=(6, 0))
         self.config_path = ROOT / "level2/config/site.json"
         ttk.Button(self.inspector, text="Project settings…", command=self._edit_project_settings).pack(fill="x", pady=(13, 0))
-        ttk.Button(self.inspector, text="Gradebook site config…", command=self._edit_config).pack(fill="x", pady=(6, 0))
-        ttk.Button(self.inspector, text="Choose config file…", style="Small.TButton", command=self._choose_config).pack(fill="x", pady=(6, 0))
-        ttk.Separator(self.inspector).pack(fill="x", pady=17)
+        ttk.Button(self.inspector, text="Locator library…", command=self._locator_library).pack(fill="x", pady=(6, 0))
+        self.gradebook_buttons = [ttk.Button(self.inspector, text="Gradebook site config…", command=self._edit_config),
+                                  ttk.Button(self.inspector, text="Choose Gradebook config…", style="Small.TButton", command=self._choose_config)]
+        for button in self.gradebook_buttons:
+            button.pack(fill="x", pady=(6, 0))
+        self.inspector_divider = ttk.Separator(self.inspector)
+        self.inspector_divider.pack(fill="x", pady=17)
         ttk.Label(self.inspector, text="HOW IT RUNS", style="Section.TLabel").pack(anchor="w")
         ttk.Label(self.inspector, text="Run uses a snapshot of the selected cases in folder order.\n\nBrowser tests start only when you press Run. Stop finishes the current case and cleanup.",
                   style="Muted.TLabel", wraplength=210, font=("Segoe UI", 9)).pack(anchor="w", pady=(9, 0))
+        self._gradebook_inspector(has_gradebook)
+
+    def _gradebook_inspector(self, visible):
+        widgets = [self.run_labels["course_id"], self.run_widgets["course_id"]]
+        if visible:
+            widgets[0].pack(anchor="w", pady=(6, 4), before=self.run_labels["username"])
+            widgets[1].pack(fill="x", pady=(0, 5), before=self.run_labels["username"])
+            for button in self.gradebook_buttons:
+                button.pack(fill="x", pady=(6, 0), before=self.inspector_divider)
+        else:
+            for widget in [*widgets, *self.gradebook_buttons]:
+                widget.pack_forget()
 
     def _build_console(self):
         frame = ttk.Frame(self.vertical, padding=(16, 10))
@@ -358,7 +393,13 @@ class Studio(tk.Tk):
         ttk.Label(top, text="EXECUTION", style="Section.TLabel").pack(side="left")
         self.run_label = ttk.Label(top, text="Idle · press Run to start", style="Muted.TLabel")
         self.run_label.pack(side="left", padx=20)
+        self.playback_buttons = {}
+        for label, action in (("Pause", "pause"), ("Resume", "run"), ("Next step", "next")):
+            button = ttk.Button(top, text=label, style="Small.TButton", command=lambda command=action: self._playback(command), state="disabled")
+            button.pack(side="left", padx=(0, 4))
+            self.playback_buttons[action] = button
         ttk.Button(top, text="Open results", style="Small.TButton", command=self._open_results).pack(side="right")
+        ttk.Button(top, text="View report", style="Small.TButton", command=self._view_report).pack(side="right", padx=5)
         ttk.Button(top, text="Clear", style="Small.TButton", command=self._clear_console).pack(side="right", padx=6)
         self.progress = ttk.Progressbar(top, mode="determinate", length=170)
         self.progress.pack(side="right", padx=12)
@@ -506,6 +547,7 @@ class Studio(tk.Tk):
             self.editor_dirty = False
             if node["kind"] == "folder":
                 self._case_tabs(False)
+                self._gradebook_inspector(any(not is_script(row) for row in self.workspace.rows([uid])))
                 for key in self.vars:
                     self.vars[key].set("")
                 for text in (self.expected_text, self.inputs_text, self.assertions_text):
@@ -518,6 +560,7 @@ class Studio(tk.Tk):
                 return
             record = node["record"]
             if is_script(record):
+                self._gradebook_inspector(False)
                 self._case_tabs(True)
                 self.script_editor.load(record)
                 self.steps_editor.load(script_data(record)["steps"])
@@ -533,6 +576,7 @@ class Studio(tk.Tk):
                 self.notebook.select(self.script_steps_tab)
                 return
             self._case_tabs(False)
+            self._gradebook_inspector(True)
             inputs = json.loads(record["inputs_json"])
             for key, variable in self.vars.items():
                 variable.set(inputs.get("scale", "") if key == "scale" else record.get(key, ""))
@@ -944,6 +988,7 @@ class Studio(tk.Tk):
         self._case_tabs(False)
         self._set_text(self.source_text, "Create an editable test case with + Test case, or import steps and data from CSV/XLS/XLSX.", True)
         self.notebook.select(self.source_tab)
+        self._gradebook_inspector(False)
 
     def _open_workspace(self):
         if not self._confirm_discard():
@@ -1069,6 +1114,11 @@ class Studio(tk.Tk):
             settings[key] = {**settings.get(key, {}), **environment.get(key, {})}
         settings.update({key: value for key, value in environment.items() if key not in {"variables", "locators"}})
         settings["base_url"] = self.run_vars["base_url"].get().strip()
+        try:
+            settings["slow_ms"] = float(self.slow_ms.get())
+        except ValueError as exc:
+            raise ValueError("Step delay must be a number between 0 and 10000 milliseconds") from exc
+        settings["highlight"] = self.highlight_steps.get()
         checked_settings(settings)
         return settings
 
@@ -1079,6 +1129,8 @@ class Studio(tk.Tk):
             if "browser" in selected:
                 self.run_vars["browser"].set(selected["browser"])
             self.headless.set(selected.get("headless", True))
+            self.slow_ms.set(str(selected.get("slow_ms", 0)))
+            self.highlight_steps.set(selected.get("highlight", self.workspace.settings.get("highlight", False)))
         if self.workspace.settings.get("active_environment", "(current)") != self.environment.get():
             self.workspace.settings["active_environment"] = self.environment.get()
             self._mark_dirty()
@@ -1118,6 +1170,33 @@ class Studio(tk.Tk):
             messagebox.showinfo("Connection check", message, parent=self)
         except ValueError as exc:
             messagebox.showerror("Website is not ready", str(exc), parent=self)
+
+    def _locator_library(self):
+        if not self._commit():
+            return
+        try:
+            settings = self._effective_settings()
+            variables = dict(settings.get("variables", {}))
+            variables.update(username=self.run_vars["username"].get(), password=self.run_vars["password"].get())
+            if self.editor_uid:
+                record = self.workspace.find(self.editor_uid)["record"]
+                if is_script(record):
+                    from automation.runner import variables_for
+                    data = script_data(record)
+                    index = self.script_editor.dataset.selected_row() or 0
+                    row = data["dataset"][index] if data["dataset"] else {}
+                    variables = variables_for(record, row, {**settings, "variables": variables}, "locator-preview")
+            browser = self.run_vars["browser"].get()
+            browser = "opera" if browser == "Opera GX" else "chrome" if browser == "Both" else browser.lower()
+            dialog = LocatorLibraryDialog(self, settings, browser, variables)
+            if dialog.result is not None:
+                self._checkpoint()
+                environment = self.workspace.settings.get("environments", {}).get(self.environment.get())
+                target = environment if environment is not None else self.workspace.settings
+                target["locators"] = dialog.result
+                self._mark_dirty()
+        except (ValueError, TypeError) as exc:
+            messagebox.showerror("Locator library", str(exc), parent=self)
 
     def _edit_config(self):
         try:
@@ -1197,6 +1276,10 @@ class Studio(tk.Tk):
                     command += ["--legacy-config", str(self.config_path)]
                 if self.headless.get():
                     command.append("--headless")
+                self.playback_path = run_home / "playback.json"
+                self.playback_sequence = 0
+                write_control(self.playback_path, "pause" if self.start_paused.get() else "run", 0)
+                command += ["--control-file", str(self.playback_path)]
             else:
                 runtime_path = run_home / "runtime-settings.json"
                 runtime_path.write_text(json.dumps(effective, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -1209,6 +1292,10 @@ class Studio(tk.Tk):
             self.run_count = 0
             self.run_total = 10 if compatibility else sum(len(script_data(r)["dataset"]) if is_script(r) else 1 for r in rows) * (2 if self.run_vars["browser"].get() == "Both" else 1)
             self.execution_states.clear()
+            self.run_generic = generic
+            self.stop_button.configure(text="■ Stop + cleanup" if generic else "■ Stop after case")
+            for button in self.playback_buttons.values():
+                button.configure(state="normal" if generic else "disabled")
             self.progress.configure(maximum=self.run_total, value=0)
             self.run_button.configure(state="disabled")
             self.stop_button.configure(state="normal")
@@ -1222,6 +1309,8 @@ class Studio(tk.Tk):
         except (OSError, ValueError, KeyError) as exc:
             self.run_button.configure(state="normal")
             self.stop_button.configure(state="disabled")
+            for button in self.playback_buttons.values():
+                button.configure(state="disabled")
             messagebox.showerror("Cannot start run", str(exc), parent=self)
 
     def _read_process(self, process):
@@ -1256,7 +1345,8 @@ class Studio(tk.Tk):
                     self.statuses[case_id] = "RUNNING"
                     self._rebuild_tree()
                     key = (case_id, browser, event.get("row_index", 0))
-                    item = self.result_tree.insert("", "end", values=(case_id, browser, "RUNNING", "—", event["title"]), tags=("RUNNING",))
+                    label = f"{case_id} · data {event.get('row_index', 0) + 1}"
+                    item = self.result_tree.insert("", "end", values=(label, browser, "RUNNING", "—", event["title"]), tags=("RUNNING",))
                     self.run_rows[key] = {"item": item, "event": event}
                     self.run_label.configure(text=f"{self.run_count}/{self.run_total} · {case_id} · {browser}")
                     self._log(f"START  {case_id} · {browser}", "info")
@@ -1271,6 +1361,14 @@ class Studio(tk.Tk):
                             self.steps_editor.tree.see(step_id)
                 elif kind == "step_end":
                     self._log(f"{event['status']}  step {event['index']} · {event['command']} · {event['duration_seconds']}s", event["status"])
+                elif kind == "playback":
+                    self.run_label.configure(text=f"{event['state'].title()} · {case_id} · {event['command']}")
+                    self._log(event["message"], "info")
+                    if self.editor_uid and self.workspace.find(self.editor_uid)["record"]["case_id"] == case_id:
+                        step_id = event.get("step_id")
+                        if step_id and self.steps_editor.tree.exists(step_id):
+                            self.steps_editor.tree.selection_set(step_id)
+                            self.steps_editor.tree.see(step_id)
                 elif kind == "case_end":
                     self.run_count += 1
                     self.progress.configure(value=self.run_count)
@@ -1281,7 +1379,8 @@ class Studio(tk.Tk):
                     row = self.run_rows.get((case_id, browser, event.get("row_index", 0)))
                     if row:
                         row["event"] = event
-                        self.result_tree.item(row["item"], values=(case_id, browser, event["status"], event["duration_seconds"], event["title"]), tags=(event["status"],))
+                        label = f"{case_id} · data {event.get('row_index', 0) + 1}"
+                        self.result_tree.item(row["item"], values=(label, browser, event["status"], event["duration_seconds"], event["title"]), tags=(event["status"],))
                     self._log(f"{event['status']}  {case_id} · {browser} · {event['duration_seconds']}s", event["status"])
                     if event["status"] in {"FAIL", "ERROR"}:
                         self._log(event.get("actual", ""), event["status"])
@@ -1299,6 +1398,8 @@ class Studio(tk.Tk):
                     self.process = None
                     self.run_button.configure(state="normal")
                     self.stop_button.configure(state="disabled")
+                    for button in self.playback_buttons.values():
+                        button.configure(state="disabled")
                     self.run_label.configure(text=f"Finished · {self.run_count}/{self.run_total} · exit {event['code']}")
                     self.status.set(f"Run finished · results: {self.last_output}")
                     if self.close_when_stopped:
@@ -1312,9 +1413,20 @@ class Studio(tk.Tk):
     def _stop(self):
         if self.process and self.process.poll() is None and self.stop_file:
             self.stop_file.write_text("Stop after current case and cleanup.\n", encoding="utf-8")
+            if self.run_generic:
+                self._playback("stop")
             self.stop_button.configure(state="disabled")
-            self.run_label.configure(text="Stopping after current case + cleanup…")
-            self._log("Stop requested. The current case will finish and clean up before stopping.", "info")
+            self.run_label.configure(text="Stopping + cleanup…" if self.run_generic else "Stopping after current case + cleanup…")
+            self._log("Stop requested. The current action finishes, then cleanup runs." if self.run_generic else "Stop requested. The current case will finish and clean up before stopping.", "info")
+
+    def _playback(self, command):
+        if self.playback_path and self.run_generic:
+            try:
+                self.playback_sequence += 1
+                write_control(self.playback_path, command, self.playback_sequence)
+                self.status.set(f"Playback command sent: {command}")
+            except OSError as exc:
+                messagebox.showerror("Playback command", str(exc), parent=self)
 
     def _log(self, message, tag="info"):
         self.console.configure(state="normal")
@@ -1353,9 +1465,24 @@ class Studio(tk.Tk):
         else:
             messagebox.showinfo("No run results", "Results will be available after an actual run.", parent=self)
 
+    def _view_report(self, output=None):
+        output = Path(output) if output else self.last_output
+        if not output or not (output / "results.json").exists():
+            messagebox.showinfo("No execution report", "A report is available after a run finishes.", parent=self)
+            return
+        try:
+            ReportViewer(self, output, self._open_path)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            messagebox.showerror("Cannot open report", str(exc), parent=self)
+
+    def _open_report(self):
+        name = filedialog.askopenfilename(parent=self, title="Open results.json", filetypes=[("Execution results JSON", "*.json")])
+        if name:
+            self._view_report(Path(name).parent)
+
     def _close(self):
         if self.process and self.process.poll() is None:
-            if messagebox.askyesno("Run in progress", "Stop after the current case and cleanup, then close the app?", parent=self):
+            if messagebox.askyesno("Run in progress", "Stop and run cleanup, then close the app?" if self.run_generic else "Stop after the current case and cleanup, then close the app?", parent=self):
                 self.close_when_stopped = True
                 self._stop()
             return

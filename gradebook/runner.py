@@ -142,6 +142,10 @@ class CsvResult(unittest.TextTestResult):
         self.records = []
         self.pending = {}
 
+    def _exc_info_to_string(self, err, test):
+        from automation.privacy import redact
+        return redact(super()._exc_info_to_string(err, test), getattr(test, "secret_values", set()))
+
     def startTest(self, test):
         super().startTest(test)
         self.pending[id(test)] = dict(status="PASS", details=[], start=time.perf_counter())
@@ -182,6 +186,8 @@ class CsvResult(unittest.TextTestResult):
                                  step_results=getattr(test, "step_results", []),
                                  metrics=getattr(test, "metrics", []),
                                  assertion_count=getattr(test, "assertion_count", None)))
+        from automation.privacy import redact
+        self.records[-1] = redact(self.records[-1], getattr(test, "secret_values", set()))
         if self.on_event:
             self.on_event("case_end", **self.records[-1])
         if self.stop_file and self.stop_file.exists():
@@ -190,19 +196,13 @@ class CsvResult(unittest.TextTestResult):
 
 
 def write_results(result: CsvResult, output: Path, metadata: dict) -> None:
-    import csv
+    from automation.reporting import write_report
     output.mkdir(parents=True, exist_ok=True)
     document = {"metadata": metadata, "successful": result.wasSuccessful() and not result.skipped and not metadata.get("stopped", False),
                 "counts": {status: sum(r["status"] == status for r in result.records)
                            for status in ("PASS", "FAIL", "ERROR", "SKIP")},
                 "results": result.records}
-    (output / "results.json").write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    columns = ["case_id", "title", "level", "browser", "status", "duration_seconds",
-               "expected", "actual", "known_defect", "runtime_id", "cleanup_error", "evidence"]
-    with (output / "results.csv").open("w", encoding="utf-8-sig", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=columns, extrasaction="ignore")
-        writer.writeheader()
-        writer.writerows({**r, "evidence": json.dumps(r["evidence"], ensure_ascii=False)} for r in result.records)
+    write_report(document, output)
 
 
 def build_parser(default_level: int) -> argparse.ArgumentParser:

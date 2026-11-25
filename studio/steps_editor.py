@@ -62,7 +62,7 @@ class StepDialog(tk.Toplevel):
         self.wait_window()
 
     def _help(self, *_):
-        self.help_text.configure(text=COMMANDS[self.fields["command"].get()][3])
+        self.help_text.configure(text=COMMANDS[self.fields["command"].get()][3] + " Cleanup runs without pause or breakpoints.")
 
     def submit(self):
         try:

@@ -12,10 +12,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 from automation.schema import checked_step, locator, resolve
-
-
-class ExecutionStopped(Exception):
-    """A user stop is an incomplete run, never a successful assertion result."""
+from automation.playback import ExecutionStopped
+from automation.privacy import credential_values, redact
 
 
 class StepEngine:
@@ -32,9 +30,10 @@ class StepEngine:
         self.timers = {}
         self.metrics = []
         self.assertions = 0
+        self.secret_values = credential_values(self.variables)
 
     def emit(self, event, **values):
-        self.on_event(event=event, **values)
+        self.on_event(event=event, **redact(values, self.secret_values))
 
     def wait(self, timeout):
         return WebDriverWait(self.driver, timeout, poll_frequency=.1)
@@ -55,6 +54,7 @@ class StepEngine:
                 raise ValueError(f"Locator matches {len(elements)} elements; use a unique selector: {text}")
             if not elements or clickable and not elements[0].is_enabled():
                 return False
+            self.highlight(elements[0])
             return elements[0]
         except StaleElementReferenceException:
             return False
@@ -82,13 +82,19 @@ class StepEngine:
                           target=step["target"], expected=step["expected"], description=step["description"], status="RUNNING")
             self.emit("step_start", **record, message=step["description"] or f"{step['command']} {step['target']}")
             try:
+                record["input_value"] = resolve(step["value"], self.variables)
+                record["expected"] = resolve(step["expected"], self.variables)
                 actual = self.execute(step)
+                self.secret_values.update(credential_values(self.variables))
                 record.update(status="PASS", actual=actual)
+                if step["command"] == "screenshot":
+                    record["evidence"] = [actual]
             except Exception as exc:
                 record.update(status="FAIL" if isinstance(exc, AssertionError) else "ERROR", actual=f"{type(exc).__name__}: {exc}")
                 self.capture(record, index)
                 errors.append(exc)
             record["duration_seconds"] = round(time.perf_counter() - began, 6)
+            record = redact(record, self.secret_values)
             self.records.append(record)
             self.emit("step_end", **record)
             if errors and phase != "cleanup":
@@ -146,6 +152,8 @@ class StepEngine:
             return "Clicked element"
         if cmd in {"type", "type_exact"}:
             field = self.element(target, timeout)
+            if field.get_attribute("type") == "password" and value:
+                self.secret_values.add(value)
             self.highlight(field)
             field.clear()
             if value:
@@ -166,7 +174,7 @@ class StepEngine:
                 select.select_by_value(value)
                 if select.first_selected_option.get_attribute("value") != value:
                     raise RuntimeError("Dropdown did not retain the selected value")
-            return "Selected dropdown option"
+            return select.first_selected_option.text if cmd == "select" else field.get_property("value")
         if cmd == "check":
             field = self.wait(timeout).until(lambda _: self.unique(target, clickable=True))
             desired = self.boolean(value)
@@ -210,10 +218,10 @@ class StepEngine:
             except AssertionError as exc:
                 # The output belongs to the asserted page state, not typed secrets.
                 raise AssertionError(f"{cmd}: expected {expected!r}, actual {actual[0]!r}") from exc
-            return "Expected state matched"
+            return actual[0]
         if cmd == "assert_url":
             self.assertion(lambda _: self.driver.current_url == expected, timeout, f"URL did not match {expected!r}")
-            return "Expected URL matched"
+            return self.driver.current_url
         if cmd in {"store_text", "store_value"}:
             from automation.schema import VARIABLE_NAME
             if not VARIABLE_NAME.fullmatch(value):
@@ -246,9 +254,15 @@ class StepEngine:
             if target != "last" and (not target.isdecimal()):
                 raise ValueError("Window target must be an index or last")
             index = -1 if target == "last" else int(target)
-            self.wait(timeout).until(lambda _: len(self.driver.window_handles) > index if index >= 0 else bool(self.driver.window_handles))
+            minimum = int(value) if value else index + 1 if index >= 0 else 2
+            if minimum <= 0:
+                raise ValueError("Minimum window count must be positive")
+            self.wait(timeout).until(lambda _: len(self.driver.window_handles) >= max(minimum, index + 1))
             self.driver.switch_to.window(self.driver.window_handles[index])
             return "Switched window"
+        if cmd == "close_window":
+            self.driver.close()
+            return "Closed window"
         if cmd in {"accept_alert", "dismiss_alert"}:
             alert = self.wait(timeout).until(EC.alert_is_present())
             if value:
@@ -285,4 +299,6 @@ class StepEngine:
 
     def highlight(self, element):
         if self.settings.get("highlight"):
-            self.driver.execute_script("arguments[0].style.outline='3px solid #ea8a23';", element)
+            self.driver.execute_script("const p=window.__testboxActiveOutline,e=arguments[0];if(p&&p[0]===e)return;"
+                "if(p){try{p[0].style.outline=p[1]}catch(x){}}window.__testboxActiveOutline=[e,e.style.outline];"
+                "e.style.outline='3px solid #ea8a23';", element)

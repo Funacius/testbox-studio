@@ -35,7 +35,8 @@ COMMANDS = {
     "upload": (True, True, False, "Send a local file path to an input[type=file]."),
     "frame": (True, False, False, "Enter an iframe located by Target."),
     "default_content": (False, False, False, "Return to the top-level document."),
-    "switch_window": (True, False, False, "Switch to a window by zero-based index or 'last'."),
+    "switch_window": (True, False, False, "Switch by zero-based index or 'last'; Value optionally sets the minimum window count."),
+    "close_window": (False, False, False, "Close the current window; switch to a remaining window before further actions."),
     "accept_alert": (False, False, False, "Accept a JavaScript alert; Value optionally supplies prompt text."),
     "dismiss_alert": (False, False, False, "Dismiss a JavaScript alert."),
     "screenshot": (False, False, False, "Save a browser screenshot to this run's evidence folder."),
@@ -61,8 +62,8 @@ def checked_step(value: dict) -> dict:
     if not isinstance(value, dict):
         raise ValueError("Every executable step must be an object")
     step = {**new_step(), **deepcopy(value)}
-    if not isinstance(step["id"], str) or not step["id"]:
-        raise ValueError("Every step needs an ID")
+    if not isinstance(step["id"], str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,79}", step["id"]):
+        raise ValueError("Step ID must use letters, digits, _, . or - (up to 80 characters)")
     for key in ("enabled", "breakpoint"):
         if not isinstance(step[key], bool):
             raise ValueError(f"Step {key} must be true or false")
@@ -168,9 +169,12 @@ def locator(target: str, locators: dict) -> tuple[str, str]:
             target = entry
         elif isinstance(entry, dict):
             target = f"{entry.get('by', '')}={entry.get('value', '')}"
+        elif isinstance(entry, (list, tuple)) and len(entry) == 2:
+            target = f"{entry[0]}={entry[1]}"
         else:
             raise ValueError(f"Invalid locator alias: {name}")
     by, separator, selector = target.partition("=")
+    by = {"css selector": "css", "link text": "link", "partial link text": "partial_link", "tag name": "tag", "class name": "class"}.get(by.strip().lower(), by.strip().lower())
     if not separator or by not in BY or not selector:
         raise ValueError("Target needs id=..., css=..., xpath=... or @locator_alias")
     actual = {"css": "css selector", "link": "link text", "partial_link": "partial link text", "tag": "tag name", "class": "class name"}.get(by, by)

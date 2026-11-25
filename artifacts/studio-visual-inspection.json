@@ -1,0 +1,30 @@
+{
+  "scope": "Owned Tk windows and real generated HTML report inspected visually",
+  "images": [
+    {
+      "path": "artifacts/studio-html-report-preview.png",
+      "width": 1440,
+      "height": 1200,
+      "sha256": "4245cbe722b386fa099960382cb12805c5980a9e485ecd9ec4484a3ab5e832c9"
+    },
+    {
+      "path": "artifacts/studio-locators-preview.png",
+      "width": 1016,
+      "height": 769,
+      "sha256": "43382de31a5d0a081f3bcabe3756e96b29712eb378595653ac3d72be39a9d7dd"
+    },
+    {
+      "path": "artifacts/studio-report-preview.png",
+      "width": 1216,
+      "height": 839,
+      "sha256": "e731e65f80446fb37c8e184de25ae2522e1706d6860901b6b2fe6f54f908b900"
+    },
+    {
+      "path": "artifacts/studio-steps-preview.png",
+      "width": 1616,
+      "height": 1009,
+      "sha256": "05989935733bdaa84171815ccf2ddd443b5af1064c8a1546c7f3bef280282562"
+    }
+  ],
+  "note": "Dialog capture was corrected after the 41-test verification. Runtime app source did not change; capture helper hash in that earlier test artifact predates the correction."
+}

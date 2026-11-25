@@ -15,6 +15,7 @@ from urllib.parse import urlsplit
 
 from automation.schema import COMMANDS, PHASES, VARIABLE, is_script, locator, resolve, script_data, validate_records
 from automation.readiness import checked_settings, website_status
+from automation.playback import ExecutionStopped, PlaybackController
 from gradebook.runner import BANGKOK, CsvResult, GradebookCase, new_run_id, write_results
 from datetime import datetime
 
@@ -68,7 +69,7 @@ def preflight(records, settings):
 
 class ScriptCase(unittest.TestCase):
     def __init__(self, record, row, row_index, browser, settings, output, run_id, level,
-                 headless, shared_drivers, on_event):
+                 headless, shared_drivers, on_event, controller=None):
         super().__init__("runTest")
         self.record, self.row, self.row_index = record, row, row_index
         self.data = script_data(record, runnable=True)
@@ -81,9 +82,14 @@ class ScriptCase(unittest.TestCase):
         self.evidence, self.capabilities, self.cleanup_error = [], {}, ""
         self.step_results, self.metrics, self.assertion_count = [], [], 0
         self.engine, self.driver, self.completed_main = None, None, False
+        self.controller = controller
 
     def id(self):
         return f"L{self.level}.{self.browser}.{self.case.case_id}.row{self.row_index + 1}"
+
+    @property
+    def secret_values(self):
+        return self.engine.secret_values if self.engine else set()
 
     def __str__(self):
         return f"{self.id()}: {self.case.title}"
@@ -91,6 +97,11 @@ class ScriptCase(unittest.TestCase):
     def setUp(self):
         from gradebook.browser import close_browser, create_browser
         from automation.engine import StepEngine
+        if self.controller:
+            try:
+                self.controller.command()
+            except ExecutionStopped as exc:
+                raise unittest.SkipTest(str(exc)) from exc
         settings = {"window": [1440, 900], **self.settings}
         if self.shared_drivers is not None and self.browser in self.shared_drivers:
             self.driver = self.shared_drivers[self.browser]
@@ -120,12 +131,17 @@ class ScriptCase(unittest.TestCase):
         self.engine = StepEngine(self.driver, settings, values,
                                  self.output / f"{self.browser}-{self.case.case_id}-row{self.row_index + 1}",
                                  on_event=lambda **event: self.on_event(case_id=self.case.case_id, browser=self.browser,
-                                                                       row_index=self.row_index, **event))
+                                                                       row_index=self.row_index, **event),
+                                 control=(lambda step: self.controller.before_step(step, case_id=self.case.case_id,
+                                          browser=self.browser, row_index=self.row_index)) if self.controller else None)
         self.addCleanup(self.cleanup_steps)
 
     def runTest(self):
-        self.engine.run_phase(self.data["steps"], "setup")
-        self.engine.run_phase(self.data["steps"], "test")
+        try:
+            self.engine.run_phase(self.data["steps"], "setup")
+            self.engine.run_phase(self.data["steps"], "test")
+        except ExecutionStopped as exc:
+            raise unittest.SkipTest(str(exc)) from exc
         self.completed_main = True
 
     def cleanup_steps(self):
@@ -142,6 +158,17 @@ class ScriptCase(unittest.TestCase):
             self.evidence = [path for step in self.step_results for path in step.get("evidence", [])]
 
 
+class ControlledGradebookCase(GradebookCase):
+    def setUp(self):
+        if self.controller:
+            try:
+                self.controller.before_step(dict(id="legacy-case-start", command="Gradebook testcase", phase="setup"),
+                                            case_id=self.case.case_id, browser=self.browser, row_index=0)
+            except ExecutionStopped as exc:
+                raise unittest.SkipTest(str(exc)) from exc
+        super().setUp()
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", type=Path, required=True, help="Immutable JSON snapshot with records and settings")
@@ -152,6 +179,7 @@ def main(argv=None):
     parser.add_argument("--reuse-browser", action="store_true")
     parser.add_argument("--events", action="store_true")
     parser.add_argument("--stop-file", type=Path)
+    parser.add_argument("--control-file", type=Path, help="Optional GUI playback commands; CLI runs without it ignore breakpoints")
     parser.add_argument("--output", type=Path, default=Path("results"))
     parser.add_argument("--list", action="store_true")
     args = parser.parse_args(argv)
@@ -180,6 +208,7 @@ def main(argv=None):
         if args.events:
             print("@@GRADEBOOK_EVENT " + json.dumps(dict(event=event, time=datetime.now(BANGKOK).isoformat(), **values), ensure_ascii=False), flush=True)
     drivers = {} if args.reuse_browser else None
+    controller = PlaybackController(args.control_file, emit, args.stop_file) if args.control_file else None
     tests = []
     from gradebook.config import load_site
     from gradebook.data import parse_rows
@@ -188,30 +217,39 @@ def main(argv=None):
             if is_script(record):
                 for index, row in enumerate(script_data(record)["dataset"]):
                     tests.append(ScriptCase(record, row, index, browser, settings, output, run_id,
-                                            args.level, args.headless, drivers, emit))
+                                            args.level, args.headless, drivers, emit, controller))
             else:
                 site = load_site(args.level, args.legacy_config if args.level == 2 else None)
                 for key in ("base_url", "course_id", "window", "page_load_timeout", "command_timeout"):
                     if key in settings:
                         site[key] = settings[key]
-                tests.append(GradebookCase(parse_rows([record])[0], args.level, browser, site, output,
-                                          run_id, args.headless, emit, drivers))
+                test = ControlledGradebookCase(parse_rows([record])[0], args.level, browser, site, output,
+                                              run_id, args.headless, emit, drivers)
+                test.controller = controller
+                tests.append(test)
     emit("run_start", total=len(tests), output=str(output), run_id=run_id)
+    class RunResult(CsvResult):
+        def stopTest(self, test):
+            super().stopTest(test)
+            if controller and controller.stopped:
+                self.stop()
     try:
         with (output / "unittest.log").open("w", encoding="utf-8") as log:
             result = unittest.TextTestRunner(stream=log, verbosity=2,
-                         resultclass=lambda *a, **k: CsvResult(*a, on_event=emit, stop_file=args.stop_file, **k)).run(unittest.TestSuite(tests))
+                         resultclass=lambda *a, **k: RunResult(*a, on_event=emit, stop_file=args.stop_file, **k)).run(unittest.TestSuite(tests))
     finally:
         if drivers:
             from gradebook.browser import close_browser
             for driver in drivers.values():
                 close_browser(driver)
-    stopped = result.testsRun < len(tests)
+    stopped = result.testsRun < len(tests) or bool(args.stop_file and args.stop_file.exists()) or bool(controller and controller.stopped)
     metadata = dict(run_id=run_id, executed_at=datetime.now(BANGKOK).isoformat(), type="editable_steps",
                     level=args.level, headless=args.headless, reuse_browser=args.reuse_browser,
                     planned_executions=len(tests), completed_executions=result.testsRun, stopped=stopped,
                     python=platform.python_version(), source_project=str(args.project.resolve()),
-                    site_base_url=settings.get("base_url", ""))
+                    site_base_url=settings.get("base_url", ""), interactive_playback=bool(controller),
+                    pause_seconds=round(controller.pause_seconds, 6) if controller else 0,
+                    slow_ms=settings.get("slow_ms", 0))
     write_results(result, output, metadata)
     successful = result.wasSuccessful() and not result.skipped and not stopped
     emit("run_end", successful=successful, stopped=stopped, output=str(output), total=result.testsRun)

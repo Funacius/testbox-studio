@@ -39,14 +39,16 @@
     {
       "id": "F06",
       "name": "Locator library, checking and element highlighting",
-      "status": "pending"
+      "status": "implemented_initial_verification",
+      "evidence_summary": "Editable locator library; read-only ambiguity/visibility checks and reversible highlighting in a separate owned browser; real Chrome and Tk checks pass.",
+      "initial_verification": "artifacts/studio-development-verification.json"
     },
     {
       "id": "F07",
       "name": "Visible/headless, slow playback, pause/resume, step and breakpoints",
-      "status": "partial",
-      "evidence_summary": "Visible/headless and slow/highlight settings exist. Pause/resume, single-step and breakpoint enforcement are still missing.",
-      "initial_verification": "artifacts/studio-core-verification.json"
+      "status": "implemented_initial_verification",
+      "evidence_summary": "Visible/headless, slow/highlight, pause/resume/next, enforced breakpoints and stop with cleanup; real child-runner test proves unexecuted rows remain NOT_RUN.",
+      "initial_verification": "artifacts/studio-development-verification.json"
     },
     {
       "id": "F08",
@@ -58,9 +60,9 @@
     {
       "id": "F09",
       "name": "Per-step and per-dataset reports, screenshots and exports",
-      "status": "partial",
-      "evidence_summary": "Per-step JSON, per-case CSV, screenshots/HTML evidence and metrics exist. Consolidated HTML report, row-aware exports and report UI remain.",
-      "initial_verification": "artifacts/studio-core-verification.json"
+      "status": "implemented_initial_verification",
+      "evidence_summary": "Row-aware JSON/CSV, planned and completed steps, standalone HTML, Tk report viewer, evidence ZIP and credential masking; real deliberate-failure demo retained.",
+      "initial_verification": "artifacts/studio-development-verification.json"
     },
     {
       "id": "F10",
@@ -87,11 +89,8 @@
     "Existing user workspace files and running app instances are not overwritten or closed automatically",
     "General-purpose projects do not require Moodle-specific columns or credentials"
   ],
-  "current_stage": "General-purpose core and import/dataset path implemented; goal remains active.",
+  "current_stage": "Core, locator library, playback controls and reporting implemented; Python export, generic NFR and advanced authoring remain.",
   "next_features": [
-    "F06",
-    "F07",
-    "F09",
     "F10",
     "F11",
     "F12"

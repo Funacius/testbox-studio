@@ -16,8 +16,10 @@ một bộ workflow riêng để sử dụng các case Project 3 hiện có.
    Nhấp đúp cell để sửa; giá trị trống, dấu cách và số có zero ở đầu được giữ
    khi nguồn lưu dưới dạng text. Dùng `${column}` trong bước để đọc dataset.
 4. Target có thể là `id=username`, `css=#submit`, `xpath=//button` hoặc alias
-   `@login_button`. Alias và biến dùng chung hiện được sửa trong
-   **Project settings…** bằng JSON; giao diện locator library là phần tiếp theo.
+   `@login_button`. **Locator library…** cho phép sửa alias, kiểm tra số phần tử
+   khớp và highlight trong browser tạm riêng. Với trang cần đăng nhập, dùng
+   **Open visible browser**, đăng nhập rồi kiểm tra locator. Biến dùng chung
+   vẫn có thể sửa trong **Project settings…**.
 5. Chọn Base URL, browser và Headless, bấm **Check connection**, rồi **Run**.
    **Save environment…** lưu URL/browser/viewport/timeout để chọn lại. Mật khẩu
    nhập trong Run configuration được truyền bằng environment của tiến trình con.
@@ -65,23 +67,45 @@ Website mẫu không cần Moodle/Docker và chỉ phục vụ ví dụ automati
 
 ### Tiến độ mở rộng app
 
-Đã triển khai phần lõi: testcase Steps dùng chung, bộ chạy, editor Steps,
-import mapping, bảng dataset/biến, cấu hình môi trường và kiểm tra kết nối.
-Các phần đang tiếp tục: locator library, pause/step/breakpoints, báo cáo tổng
-hợp và Python export, cấu hình NFR chung, templates/recorder/điều kiện/vòng lặp.
+Đã triển khai phần lõi, import mapping, bảng dataset/biến, môi trường, locator
+library, điều khiển từng step và báo cáo tổng hợp. Các phần đang tiếp tục:
+Python export, cấu hình NFR chung, templates/recorder/điều kiện/vòng lặp.
 `data/studio-development.json` theo dõi phạm vi và các kiểm chứng tương ứng.
-Breakpoint hiện được lưu trong step; điều khiển dừng ở breakpoint chưa được nối
-với bộ chạy. Chế độ Compatibility hiện vẫn là preset Gradebook Level 2.
+Chế độ Compatibility hiện vẫn là preset Gradebook Level 2.
+
+### Điều khiển chạy và xem báo cáo
+
+Với case **steps**, có thể bật **Start paused**, đặt breakpoint trong editor,
+dùng **Pause / Resume / Next step** và đặt độ trễ giữa các bước. Pause có hiệu
+lực sau khi hành động hiện tại kết thúc. **Stop + cleanup** dừng phần test,
+vẫn chạy cleanup; các dòng chưa chạy được ghi NOT_RUN. Cleanup không dừng ở
+breakpoint. CLI không dùng control file sẽ bỏ qua breakpoint.
+
+**View report** mở kết quả theo testcase, browser và dòng dataset, kèm từng
+step, expected/actual và evidence. Mỗi run sinh `results.json`, `results.csv`,
+`steps.csv`, `metrics.csv` và `report.html` có lọc/tìm kiếm. **Export report ZIP…**
+đóng gói báo cáo và evidence với liên kết tương đối; input snapshot không nằm
+trong ZIP. Giá trị credential được che trong các đầu ra văn bản khi được nhận
+diện qua tên biến hoặc password field; đây không phải công cụ che mọi thông tin
+có thể xuất hiện trên ảnh chụp trang web.
+
+Thời gian toàn case gồm setup/cleanup. Khi đánh giá hiệu năng, dùng timer có
+ranh giới rõ ràng và kiểm tra metadata pause/slow; thời gian tương tác có ảnh
+hưởng tới phép đo.
 
 Kiểm chứng bước đầu cho phần lõi được ghi riêng tại
 [studio-core-verification.json](artifacts/studio-core-verification.json):
 26 development tests PASS, gồm cả chạy Chrome trên website mẫu cục bộ. Đây là
 kiểm tra app, tách biệt với kết quả 36 testcase Gradebook của Project 3.
+Lần kiểm tra tiếp theo có **41 development tests PASS**, gồm locator, browser
+contexts, upload, pause/next/stop/cleanup và bảo vệ credential trong đầu ra văn
+bản: [studio-development-verification.json](artifacts/studio-development-verification.json).
+Bộ demo giữ lại cố ý gồm 3 PASS và 1 FAIL để kiểm tra báo cáo. Các ảnh preview
+trong `artifacts/studio-*-preview.png` được chụp từ giao diện thực tế và đã xem.
 Chạy lại các kiểm tra phát triển bằng:
 
 ```powershell
-$env:TESTBOX_BROWSER_TESTS = '1'
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe tools/verify_studio.py --browser --demo --capture
 ```
 
 ## Mở app và sử dụng nhanh
