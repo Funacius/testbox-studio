@@ -59,7 +59,7 @@ def retained_demo():
 
 def screenshots(output):
     captures = []
-    for view, name in (("steps", "studio-steps-preview.png"), ("locators", "studio-locators-preview.png"), ("report", "studio-report-preview.png")):
+    for view, name in (("steps", "studio-steps-preview.png"), ("locators", "studio-locators-preview.png"), ("report", "studio-report-preview.png"), ("nfr", "studio-nfr-preview.png")):
         path = ROOT / "artifacts" / name
         args = [sys.executable, str(ROOT / "tools/capture_studio_preview.py"), "--view", view, "--output", str(path)]
         if view == "report":

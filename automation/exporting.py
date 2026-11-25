@@ -211,7 +211,7 @@ def export_python(path, records, settings, *, levels=(1, 2), project_dir=None, l
     files = {"README.md": GUIDE, "requirements.txt": "selenium==4.53.0\n", **datasets, **assets}
     for package in ("automation", "gradebook"):
         for source in sorted((ROOT / package).glob("*.py")):
-            if source.name == "exporting.py":
+            if source.name in {"exporting.py", "nfr.py"}:
                 continue
             files[f"runtime/{package}/{source.name}"] = source.read_bytes()
     for level in levels:

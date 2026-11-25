@@ -122,6 +122,54 @@ class StudioEditorTests(unittest.TestCase):
             self.assertEqual(manifest["cases"], [self.record["case_id"]])
             self.assertEqual(manifest["levels"], [1, 2])
 
+    def test_nfr_matrix_honors_selected_cases_and_keeps_levels_and_repeats_separate(self):
+        app = self.app
+        app._show_node(self.uid)
+        app.tree.selection_set(self.uid)
+        app.workspace.settings["nfr"] = dict(levels=[1, 2], browsers=["chrome", "edge"], repetitions=2)
+        app.run_vars["mode"].set("Compatibility NFR")
+        app.run_vars["password"].set("run-only-password")
+        with patch("studio.app.subprocess.Popen", return_value=FinishedProcess()) as process, \
+             patch("studio.app.website_status", return_value="Fixture ready"):
+            app._run()
+        command = process.call_args.args[0]
+        self.assertIn("automation.nfr", command)
+        snapshot = Path(command[command.index("--project") + 1])
+        project = json.loads(snapshot.read_text(encoding="utf-8"))
+        self.assertEqual(len(project["records"]), 1)
+        self.assertEqual(project["records"][0]["case_id"], self.record["case_id"])
+        self.assertEqual(app.run_total, 8)
+        self.assertTrue(app.run_nfr)
+        self.assertFalse(app.run_generic)
+        self.assertNotIn("run-only-password", snapshot.read_text(encoding="utf-8"))
+        events = []
+        for level in (1, 2):
+            for repetition in (1, 2):
+                event = dict(case_id="DEMO-01", browser="chrome", row_index=0, level=level, repetition=repetition, title="NFR test")
+                events.extend([dict(event="case_start", **event), dict(event="case_end", status="PASS", duration_seconds=.1, **event)])
+        for event in events:
+            app.events.put(event)
+        app._poll_events()
+        self.assertEqual(len(app.run_rows), 4)
+        self.assertEqual(len(app.result_tree.get_children()), 4)
+
+    def test_nfr_dialog_saves_boundaries_for_the_actual_case(self):
+        from studio.nfr_dialog import NfrDialog
+        app = self.app
+        with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"):
+            dialog = NfrDialog(app, [self.record], {}, self.record["case_id"])
+        try:
+            options = list(dialog.step_ids)
+            dialog.start.set(options[0])
+            dialog.end.set(options[-1])
+            dialog.maximum.set("2.5")
+            dialog.submit()
+            self.assertEqual(dialog.result["measurements"][self.record["case_id"]]["maximum_seconds"], "2.5")
+            self.assertEqual(dialog.result["levels"], [1, 2])
+        finally:
+            if dialog.winfo_exists():
+                dialog.destroy()
+
     def test_dataset_and_variables_grid_apply_and_undo_exact_values(self):
         app = self.app
         app._show_node(self.uid)
@@ -241,7 +289,7 @@ class StudioEditorTests(unittest.TestCase):
         viewer = ReportViewer(app, output, lambda path: None)
         try:
             first = viewer.cases.get_children()[0]
-            self.assertEqual(viewer.cases.item(first, "values")[2], "2")
+            self.assertEqual(viewer.cases.set(first, "row"), "2")
             self.assertEqual(viewer.current_steps[0]["status"], "NOT_RUN")
             viewer.filter.set("PASS")
             viewer.refresh()

@@ -100,7 +100,7 @@ def main():
     if os.name != "nt":
         raise SystemExit("This development preview helper is for Windows")
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--view", choices=("steps", "locators", "report"), default="steps")
+    parser.add_argument("--view", choices=("steps", "locators", "report", "nfr"), default="steps")
     parser.add_argument("--report", type=Path)
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts/studio-steps-preview.png")
     args = parser.parse_args()
@@ -130,6 +130,17 @@ def main():
                 from studio.locator_library import LocatorLibraryDialog
                 with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"):
                     dialog = LocatorLibraryDialog(app, project.settings, "chrome")
+                dialog.withdraw()
+                capture(dialog, args.output)
+            elif args.view == "nfr":
+                from studio.nfr_dialog import NfrDialog
+                steps = json.loads(records[0]["actions_json"])
+                first = next(s["id"] for s in steps if s["command"] == "click")
+                last = next(s["id"] for s in steps if s["command"] == "assert_text")
+                config = dict(levels=[1, 2], browsers=["chrome", "edge"], repetitions=3,
+                    measurements={records[0]["case_id"]: dict(start=first, end=last, maximum_seconds=2)})
+                with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"):
+                    dialog = NfrDialog(app, records, config, records[0]["case_id"])
                 dialog.withdraw()
                 capture(dialog, args.output)
             elif args.view == "report":

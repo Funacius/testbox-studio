@@ -28,6 +28,7 @@ from automation.readiness import checked_settings, website_status
 from automation.playback import write_control
 from studio.locator_library import LocatorLibraryDialog
 from studio.report_viewer import ReportViewer
+from studio.nfr_dialog import NfrDialog
 from studio.theme import (ACCENT, BG, BORDER, FIELD, GREEN, MUTED, PANEL, RED,
                           SURFACE, TEXT, YELLOW, apply_theme, dark_menu, dark_text)
 
@@ -61,6 +62,7 @@ class Studio(tk.Tk):
         self.playback_path = None
         self.playback_sequence = 0
         self.run_generic = False
+        self.run_nfr = False
         self.last_output = None
         self.close_when_stopped = False
         self.run_count = 0
@@ -335,7 +337,7 @@ class Studio(tk.Tk):
         self.run_vars = {}
         self.run_labels, self.run_widgets = {}, {}
         has_gradebook = any(n["kind"] == "case" and not is_script(n["record"]) for n, _ in self.workspace.walk())
-        settings = [("mode", "Mode", "Functional", ("Functional", "Compatibility NFR")),
+        settings = [("mode", "Mode", "Functional", ("Functional", "Compatibility NFR", "Elapsed-time NFR")),
                     ("level", "Automation level", "Level 2", ("Level 1", "Level 2")),
                     ("browser", "Browser", "Chrome", ("Chrome", "Edge", "Opera GX", "Both")),
                     ("base_url", "Base URL", self.workspace.settings.get("base_url", "http://127.0.0.1:9501"), None),
@@ -364,6 +366,7 @@ class Studio(tk.Tk):
         self.config_path = ROOT / "level2/config/site.json"
         ttk.Button(self.inspector, text="Project settings…", command=self._edit_project_settings).pack(fill="x", pady=(13, 0))
         ttk.Button(self.inspector, text="Locator library…", command=self._locator_library).pack(fill="x", pady=(6, 0))
+        ttk.Button(self.inspector, text="NFR settings…", command=self._nfr_settings).pack(fill="x", pady=(6, 0))
         self.gradebook_buttons = [ttk.Button(self.inspector, text="Gradebook site config…", command=self._edit_config),
                                   ttk.Button(self.inspector, text="Choose Gradebook config…", style="Small.TButton", command=self._choose_config)]
         for button in self.gradebook_buttons:
@@ -1245,33 +1248,86 @@ class Studio(tk.Tk):
         except (OSError, ValueError) as exc:
             messagebox.showerror("Configuration error", str(exc), parent=self)
 
+    def _nfr_settings(self):
+        if not self._commit():
+            return
+        current = self.workspace.find(self.editor_uid)["record"]["case_id"] if self.editor_uid else None
+        dialog = NfrDialog(self, self.workspace.rows(), self.workspace.settings.get("nfr", {}), current)
+        if dialog.result is not None:
+            self._checkpoint()
+            self.workspace.settings["nfr"] = dialog.result
+            self._mark_dirty()
+
+    def _start_nfr(self, rows, effective):
+        from automation.nfr import checked_nfr
+        from automation.runner import preflight
+        kind = "compatibility" if self.run_vars["mode"].get() == "Compatibility NFR" else "elapsed"
+        settings = {**effective, "course_id": self.run_vars["course_id"].get().strip(),
+                    "project_dir": str(self.workspace_path.resolve().parent)}
+        settings["nfr"] = checked_nfr(settings.get("nfr", {}), rows, kind)
+        if kind == "elapsed" and (self.start_paused.get() or settings.get("slow_ms", 0)):
+            raise ValueError("Turn off Start paused and set step delay to 0 for elapsed NFR")
+        probe = {**settings, "variables": {**settings.get("variables", {}),
+            "username": self.run_vars["username"].get(), "password": self.run_vars["password"].get()}}
+        preflight(rows, probe)
+        run_home = ROOT / "results" / ("studio-nfr-" + datetime.now(BANGKOK).strftime("%Y%m%d-%H%M%S") + "-" + uuid4().hex[:8])
+        run_home.mkdir(parents=True, exist_ok=False)
+        snapshot = run_home / "project-snapshot.json"
+        snapshot.write_text(json.dumps(dict(records=rows, settings=settings), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        self.stop_file = run_home / "stop.request"
+        executable = Path(sys.executable)
+        if executable.name.lower() == "pythonw.exe":
+            executable = executable.with_name("python.exe")
+        command = [str(executable), "-u", "-m", "automation.nfr", "--project", str(snapshot), "--kind", kind,
+            "--output", str(run_home), "--events", "--stop-file", str(self.stop_file), "--legacy-config", str(self.config_path)]
+        if self.headless.get():
+            command.append("--headless")
+        environment = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUNBUFFERED": "1",
+            "MOODLE_USERNAME": self.run_vars["username"].get(), "MOODLE_PASSWORD": self.run_vars["password"].get(),
+            "TESTBOX_VAR_username": self.run_vars["username"].get(), "TESTBOX_VAR_password": self.run_vars["password"].get()}
+        self._clear_console()
+        self.last_output = run_home
+        self.run_count = 0
+        matrix = settings["nfr"]
+        self.run_total = sum(len(script_data(r)["dataset"]) if is_script(r) else 1 for r in rows) * len(matrix["levels"]) * len(matrix["browsers"]) * matrix["repetitions"]
+        self.run_generic, self.run_nfr, self.playback_path = False, True, None
+        self.execution_states.clear()
+        self.stop_button.configure(text="■ Stop after case", state="normal")
+        for button in self.playback_buttons.values():
+            button.configure(state="disabled")
+        self.progress.configure(maximum=self.run_total, value=0)
+        self.run_button.configure(state="disabled")
+        self.run_label.configure(text=f"Starting NFR · {self.run_total} executions")
+        self._log(f"Starting {kind} NFR · levels {matrix['levels']} · browsers {matrix['browsers']} · {matrix['repetitions']} repetitions", "info")
+        self.status.set("Running NFR from an immutable snapshot; both levels use their exported definitions")
+        self.process = subprocess.Popen(command, cwd=ROOT, env=environment, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
+            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0)
+        threading.Thread(target=self._read_process, args=(self.process,), daemon=True).start()
+
     def _run(self):
         if self.process and self.process.poll() is None or not self._commit():
             return
         if not importlib.util.find_spec("selenium"):
             messagebox.showerror("Selenium is not installed", "Install dependencies before running:\n\npython -m pip install -r requirements.txt\n\nYou can manage and export test data without running Selenium.", parent=self)
             return
-        compatibility = self.run_vars["mode"].get() == "Compatibility NFR"
-        selected = self._selected() if self.scope.get() == "Selected items" and not compatibility else None
-        if self.scope.get() == "Selected items" and not selected and not compatibility:
+        nfr = self.run_vars["mode"].get() != "Functional"
+        selected = self._selected() if self.scope.get() == "Selected items" else None
+        if self.scope.get() == "Selected items" and not selected:
             messagebox.showinfo("Select test cases", "Select a case or folder, or choose All cases.", parent=self)
             return
         try:
             rows = self.workspace.rows(selected)
             parse_rows(rows)
             generic = any(is_script(row) for row in rows)
-            if generic and compatibility:
-                raise ValueError("This compatibility preset is for the original Gradebook cases. Run editable steps in Functional mode for now.")
             effective = self._effective_settings()
             if effective.get("check_connection", True):
                 self.status.set("Checking website connection…")
                 self.update_idletasks()
                 website_status(effective.get("base_url", ""))
-            if compatibility:
-                from gradebook.runner import COMPATIBILITY_IDS
-                missing = set(COMPATIBILITY_IDS) - {r["case_id"] for r in rows}
-                if missing:
-                    raise ValueError(f"Compatibility requires the original five case IDs. Missing: {', '.join(sorted(missing))}")
+            if nfr:
+                self._start_nfr(rows, effective)
+                return
             token = datetime.now(BANGKOK).strftime("%Y%m%d-%H%M%S") + "-" + uuid4().hex[:8]
             run_home = ROOT / "results" / ("studio-" + token)
             run_home.mkdir(parents=True, exist_ok=False)
@@ -1281,12 +1337,11 @@ class Studio(tk.Tk):
             executable = Path(sys.executable)
             if sys.platform == "win32" and executable.name.lower() == "pythonw.exe":
                 executable = executable.with_name("python.exe")
-            command = [str(executable), "-u", "-m", "nonfunctional.compatibility" if compatibility else "gradebook.runner",
+            command = [str(executable), "-u", "-m", "gradebook.runner",
                        "--data", str(data_path), "--output", str(run_home), "--events", "--reuse-browser", "--stop-file", str(self.stop_file)]
-            level = 2 if compatibility else int(self.run_vars["level"].get()[-1])
-            if not compatibility:
-                browser_name = "opera" if self.run_vars["browser"].get() == "Opera GX" else self.run_vars["browser"].get().lower()
-                command += ["--level", str(level), "--browser", browser_name]
+            level = int(self.run_vars["level"].get()[-1])
+            browser_name = "opera" if self.run_vars["browser"].get() == "Opera GX" else self.run_vars["browser"].get().lower()
+            command += ["--level", str(level), "--browser", browser_name]
             if self.headless.get():
                 command.append("--headless")
             if level == 2:
@@ -1325,9 +1380,10 @@ class Studio(tk.Tk):
             self._clear_console()
             self.last_output = run_home
             self.run_count = 0
-            self.run_total = 10 if compatibility else sum(len(script_data(r)["dataset"]) if is_script(r) else 1 for r in rows) * (2 if self.run_vars["browser"].get() == "Both" else 1)
+            self.run_total = sum(len(script_data(r)["dataset"]) if is_script(r) else 1 for r in rows) * (2 if self.run_vars["browser"].get() == "Both" else 1)
             self.execution_states.clear()
             self.run_generic = generic
+            self.run_nfr = False
             self.stop_button.configure(text="■ Stop + cleanup" if generic else "■ Stop after case")
             for button in self.playback_buttons.values():
                 button.configure(state="normal" if generic else "disabled")
@@ -1336,12 +1392,12 @@ class Studio(tk.Tk):
             self.stop_button.configure(state="normal")
             self.run_label.configure(text=f"Starting · {self.run_total} executions")
             self.status.set("Running a snapshot · edits to the workspace do not affect this run")
-            self._log(f"Starting {'compatibility NFR' if compatibility else f'Level {level}'} · {self.run_total} executions", "info")
+            self._log(f"Starting Level {level} · {self.run_total} executions", "info")
             self.process = subprocess.Popen(command, cwd=ROOT, env=environment, stdout=subprocess.PIPE,
                                              stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
                                              creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0)
             threading.Thread(target=self._read_process, args=(self.process,), daemon=True).start()
-        except (OSError, ValueError, KeyError) as exc:
+        except (OSError, ValueError, KeyError, TypeError) as exc:
             self.run_button.configure(state="normal")
             self.stop_button.configure(state="disabled")
             for button in self.playback_buttons.values():
@@ -1379,8 +1435,8 @@ class Studio(tk.Tk):
                 elif kind == "case_start":
                     self.statuses[case_id] = "RUNNING"
                     self._rebuild_tree()
-                    key = (case_id, browser, event.get("row_index", 0))
-                    label = f"{case_id} · data {event.get('row_index', 0) + 1}"
+                    key = self._execution_key(event)
+                    label = self._execution_label(event)
                     item = self.result_tree.insert("", "end", values=(label, browser, "RUNNING", "—", event["title"]), tags=("RUNNING",))
                     self.run_rows[key] = {"item": item, "event": event}
                     self.run_label.configure(text=f"{self.run_count}/{self.run_total} · {case_id} · {browser}")
@@ -1407,14 +1463,14 @@ class Studio(tk.Tk):
                 elif kind == "case_end":
                     self.run_count += 1
                     self.progress.configure(value=self.run_count)
-                    self.execution_states[(case_id, browser, event.get("row_index", 0))] = event["status"]
+                    self.execution_states[self._execution_key(event)] = event["status"]
                     ranking = {"PASS": 0, "SKIP": 1, "RUNNING": 2, "FAIL": 3, "ERROR": 4}
-                    self.statuses[case_id] = max((state for (cid, _, _), state in self.execution_states.items() if cid == case_id), key=ranking.get)
+                    self.statuses[case_id] = max((state for key, state in self.execution_states.items() if key[0] == case_id), key=ranking.get)
                     self._rebuild_tree()
-                    row = self.run_rows.get((case_id, browser, event.get("row_index", 0)))
+                    row = self.run_rows.get(self._execution_key(event))
                     if row:
                         row["event"] = event
-                        label = f"{case_id} · data {event.get('row_index', 0) + 1}"
+                        label = self._execution_label(event)
                         self.result_tree.item(row["item"], values=(label, browser, event["status"], event["duration_seconds"], event["title"]), tags=(event["status"],))
                     self._log(f"{event['status']}  {case_id} · {browser} · {event['duration_seconds']}s", event["status"])
                     if event["status"] in {"FAIL", "ERROR"}:
@@ -1444,6 +1500,16 @@ class Studio(tk.Tk):
         except queue.Empty:
             pass
         self.after(100, self._poll_events)
+
+    def _execution_key(self, event):
+        return (event.get("case_id", ""), event.get("browser", ""), event.get("row_index", 0),
+                event.get("level", 0) if self.run_nfr else 0, event.get("repetition", 1) if self.run_nfr else 1)
+
+    def _execution_label(self, event):
+        label = f"{event.get('case_id', '')} · data {event.get('row_index', 0) + 1}"
+        if self.run_nfr:
+            label += f" · L{event.get('level', '')} · repeat {event.get('repetition', 1)}"
+        return label
 
     def _stop(self):
         if self.process and self.process.poll() is None and self.stop_file:

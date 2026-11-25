@@ -44,6 +44,9 @@ def apply_theme(root):
     style.configure("TEntry", fieldbackground=FIELD, foreground=TEXT, padding=7,
                     insertcolor=TEXT, bordercolor=BORDER)
     style.map("TEntry", fieldbackground=[("disabled", PANEL)], foreground=[("disabled", MUTED)])
+    style.configure("TSpinbox", fieldbackground=FIELD, background=SURFACE, foreground=TEXT,
+                    insertcolor=TEXT, padding=6, arrowcolor=MUTED, bordercolor=BORDER)
+    style.map("TSpinbox", fieldbackground=[("disabled", PANEL)], foreground=[("disabled", MUTED)])
     style.configure("TCombobox", fieldbackground=FIELD, background=SURFACE, foreground=TEXT,
                     padding=6, arrowcolor=MUTED)
     style.map("TCombobox", fieldbackground=[("readonly", FIELD)], selectbackground=[("readonly", FIELD)],

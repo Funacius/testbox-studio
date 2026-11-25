@@ -1,11 +1,11 @@
 {
-  "scope": "Owned Tk windows and real generated HTML report inspected visually",
+  "scope": "Owned Tk views and generated HTML reports inspected visually",
   "images": [
     {
       "path": "artifacts/studio-html-report-preview.png",
       "width": 1440,
       "height": 1200,
-      "sha256": "4245cbe722b386fa099960382cb12805c5980a9e485ecd9ec4484a3ab5e832c9"
+      "sha256": "3f4fa806261008cf2543234cb2096def73af82e8650f31b0ff2a221720d3f9ef"
     },
     {
       "path": "artifacts/studio-locators-preview.png",
@@ -14,17 +14,31 @@
       "sha256": "43382de31a5d0a081f3bcabe3756e96b29712eb378595653ac3d72be39a9d7dd"
     },
     {
+      "path": "artifacts/studio-nfr-preview.png",
+      "width": 916,
+      "height": 739,
+      "sha256": "b924d584f993589fca2c0e60a53c02f59bd126bad5b5fe66404c90232fc44ebd"
+    },
+    {
+      "path": "artifacts/studio-nfr-report-preview.png",
+      "width": 1440,
+      "height": 1100,
+      "sha256": "a7b56552b6721000f358e4971af682b085a185c6e40629ff52ad4cb52973735e"
+    },
+    {
       "path": "artifacts/studio-report-preview.png",
       "width": 1216,
       "height": 839,
-      "sha256": "e731e65f80446fb37c8e184de25ae2522e1706d6860901b6b2fe6f54f908b900"
+      "sha256": "79ff1005ab74aee4da5d37b4cd4e1a5cb387802de7eb7d961d90a3209570fcaf"
     },
     {
       "path": "artifacts/studio-steps-preview.png",
       "width": 1616,
       "height": 1009,
-      "sha256": "05989935733bdaa84171815ccf2ddd443b5af1064c8a1546c7f3bef280282562"
+      "sha256": "d802201b16643f96c283114838eee1db81ce6f229a2a0367a01967c86345bbcc"
     }
   ],
-  "note": "Dialog capture was corrected after the 41-test verification. Runtime app source did not change; capture helper hash in that earlier test artifact predates the correction."
+  "verification": "artifacts/studio-nfr-verification.json",
+  "followup": "artifacts/studio-nfr-visual-verification.json",
+  "note": "HTML case labels gained Level identity and metric display rounds to six decimals after the 55-test run. Six targeted checks plus actual Chrome rendering verify this presentation-only follow-up."
 }

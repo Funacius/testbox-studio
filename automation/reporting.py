@@ -91,6 +91,8 @@ def report_html(document, output):
         metrics = ''.join('<li><pre>' + escaped(metric) + '</pre></li>' for metric in record.get("metrics", []))
         row_number = int(record.get("row_index", 0)) + 1
         label = f"{record['case_id']} · data {row_number} · {record['browser']} · {record['title']}"
+        if "repetition" in record:
+            label += f" · L{record.get('level', '')} · repeat {record['repetition']}"
         sections.append(f'<details class="case" data-status="{escaped(record["status"])}"><summary>'
                         f'<span class="badge {escaped(record["status"])}">{escaped(record["status"])}</span> {escaped(label)}</summary>'
                         f'<p>Level {escaped(record.get("level", ""))} · {escaped(record.get("duration_seconds", ""))} seconds · '
@@ -100,6 +102,23 @@ def report_html(document, output):
                         + (f'<h3>Measurements</h3><ul>{metrics}</ul>' if metrics else '')
                         + f'<h3>Cleanup</h3><pre>{escaped(record.get("cleanup_error") or "Completed / no cleanup error recorded")}</pre>'
                         + f'<p>{evidence_links(record.get("evidence", []), output)}</p></details>')
+    nfr = document.get("nfr")
+    nfr_section = ''
+    if nfr:
+        nfr_rows = []
+        for group in nfr.get("groups", []):
+            values = [group.get(key, "—") for key in ("level", "browser", "case_id", "data_row")]
+            values.append(f"{group.get('pass_count', 0)}/{group.get('executions', 0)}")
+            values += [f"{group[key]:.6f}" if isinstance(group.get(key), (float, int)) else "—"
+                       for key in ("minimum_seconds", "median_seconds", "p95_seconds", "maximum_seconds", "limit_seconds")]
+            values.append("PASS" if group.get("successful") else "FAIL / INCOMPLETE")
+            nfr_rows.append('<tr>' + ''.join('<td>' + escaped(value) + '</td>' for value in values) + '</tr>')
+        headers = ("Level", "Browser", "Case", "Data row", "PASS / Total", "Min s", "Median s", "P95 s", "Max s", "Limit s", "Outcome")
+        nfr_section = ('<section><h2>Non-functional requirement · ' + escaped(nfr.get("kind", "")) + '</h2><p>'
+            + escaped(nfr.get("acceptance", "")) + '</p><p class="meta">' + escaped(nfr.get("percentile_method", ""))
+            + '</p><div class="scroll"><table><thead><tr>' + ''.join('<th>' + escaped(title) + '</th>' for title in headers)
+            + '</tr></thead><tbody>' + ''.join(nfr_rows) + '</tbody></table></div><p><a href="nfr-summary.json">NFR summary JSON</a></p>'
+            + ('<pre>' + escaped(nfr["infrastructure_errors"]) + '</pre>' if nfr.get("infrastructure_errors") else '') + '</section>')
     body = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Testbox Studio execution report</title><style>
 body{{background:#202020;color:#e3e3e3;font:15px system-ui;margin:0;padding:25px}}h1{{color:#ea8a23}}h3{{font-size:15px}}
@@ -116,7 +135,7 @@ th{{background:#3d3d3d}}td pre{{max-width:350px;min-width:65px}}.meta{{color:#aa
 <p><a href="results.json">JSON</a> · <a href="results.csv">Case CSV</a> · <a href="steps.csv">Step CSV</a> · <a href="metrics.csv">Measurements CSV</a> · <a href="unittest.log">Unittest log</a></p>
 <p class="meta">Case duration includes setup/cleanup. Named measurements follow the configured timer boundaries.
 Interactive pauses and step delays affect elapsed measurements; review playback metadata before drawing performance conclusions.</p></header>
-<div id="filters"><input id="search" placeholder="Search case, browser, text…" aria-label="Search report">
+{nfr_section}<div id="filters"><input id="search" placeholder="Search case, browser, text…" aria-label="Search report">
 <select id="status" aria-label="Filter status"><option value="">All statuses</option><option>PASS</option><option>FAIL</option><option>ERROR</option><option>SKIP</option></select>
 <button id="expand">Expand visible</button><button id="collapse">Collapse all</button></div>
 {''.join(sections)}
@@ -135,16 +154,16 @@ def write_report(document, output):
     output.mkdir(parents=True, exist_ok=True)
     (output / "results.json").write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     rows = [{**record, "data_row": int(record.get("row_index", 0)) + 1} for record in document["results"]]
-    write_csv(output / "results.csv", ["case_id", "title", "level", "browser", "row_index", "data_row", "status", "duration_seconds",
+    write_csv(output / "results.csv", ["case_id", "title", "level", "browser", "repetition", "row_index", "data_row", "status", "duration_seconds",
               "assertion_count", "expected", "actual", "known_defect", "runtime_id", "cleanup_error", "evidence"], rows)
     steps, metrics = [], []
     for record in rows:
-        context = {key: record.get(key, "") for key in ("case_id", "level", "browser", "row_index", "data_row")}
+        context = {key: record.get(key, "") for key in ("case_id", "level", "browser", "repetition", "row_index", "data_row")}
         steps.extend({**context, **step} for step in planned_results(record))
         metrics.extend({**context, **metric} for metric in record.get("metrics", []))
-    write_csv(output / "steps.csv", ["case_id", "level", "browser", "row_index", "data_row", "index", "step_id", "phase", "command", "target",
+    write_csv(output / "steps.csv", ["case_id", "level", "browser", "repetition", "row_index", "data_row", "index", "step_id", "phase", "command", "target",
               "input_value", "expected", "actual", "status", "duration_seconds", "evidence"], steps)
-    write_csv(output / "metrics.csv", ["case_id", "level", "browser", "row_index", "data_row", "name", "elapsed_seconds", "maximum_seconds"], metrics)
+    write_csv(output / "metrics.csv", ["case_id", "level", "browser", "repetition", "row_index", "data_row", "name", "elapsed_seconds", "maximum_seconds"], metrics)
     (output / "report.html").write_text(report_html(document, output), encoding="utf-8")
 
 
@@ -172,7 +191,7 @@ def zip_report(output, target):
             destination = root / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, destination)
-        for name in ("unittest.log", "compatibility-summary.json"):
+        for name in ("unittest.log", "compatibility-summary.json", "nfr-summary.json"):
             if (output / name).is_file():
                 shutil.copyfile(output / name, root / name)
         for source in (output / "logs").glob("*.txt"):

@@ -43,7 +43,7 @@ class ReportViewer(tk.Toplevel):
         panes.add(case_frame, weight=2)
         panes.add(step_frame, weight=3)
         panes.add(details, weight=2)
-        self.cases = self.table(case_frame, [("case", "CASE", 150), ("browser", "BROWSER", 100), ("row", "DATA ROW", 80),
+        self.cases = self.table(case_frame, [("case", "CASE", 150), ("level", "LEVEL", 60), ("browser", "BROWSER", 100), ("repeat", "REPEAT", 65), ("row", "DATA ROW", 80),
                                            ("status", "STATUS", 90), ("seconds", "SECONDS", 100), ("title", "NAME", 550)])
         self.steps = self.table(step_frame, [("index", "#", 40), ("phase", "PHASE", 80), ("command", "ACTION", 150),
                                            ("target", "TARGET", 200), ("expected", "EXPECTED", 220), ("actual", "ACTUAL", 250), ("status", "STATUS", 100)])
@@ -80,7 +80,7 @@ class ReportViewer(tk.Toplevel):
         for index, record in enumerate(self.document["results"]):
             if self.filter.get() not in {"All", record["status"]}:
                 continue
-            self.cases.insert("", "end", iid=str(index), values=(record["case_id"], record["browser"], record.get("row_index", 0) + 1,
+            self.cases.insert("", "end", iid=str(index), values=(record["case_id"], record.get("level", ""), record["browser"], record.get("repetition", 1), record.get("row_index", 0) + 1,
                               record["status"], record.get("duration_seconds", ""), record["title"]), tags=(record["status"],))
         first = self.cases.get_children()
         if first:

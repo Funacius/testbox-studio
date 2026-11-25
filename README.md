@@ -69,16 +69,16 @@ Website mẫu không cần Moodle/Docker và chỉ phục vụ ví dụ automati
 
 Đã triển khai phần lõi, import mapping, bảng dataset/biến, môi trường, locator
 library, điều khiển từng step và báo cáo tổng hợp. Các phần đang tiếp tục:
-Cấu hình NFR chung, templates/recorder/điều kiện/vòng lặp.
+templates/recorder/điều kiện/vòng lặp.
 `data/studio-development.json` theo dõi phạm vi và các kiểm chứng tương ứng.
-Chế độ Compatibility hiện vẫn là preset Gradebook Level 2.
 
 ### Điều khiển chạy và xem báo cáo
 
 Với case **steps**, có thể bật **Start paused**, đặt breakpoint trong editor,
 dùng **Pause / Resume / Next step** và đặt độ trễ giữa các bước. Pause có hiệu
 lực sau khi hành động hiện tại kết thúc. **Stop + cleanup** dừng phần test,
-vẫn chạy cleanup; các dòng chưa chạy được ghi NOT_RUN. Cleanup không dừng ở
+vẫn chạy cleanup; step chưa tới được ghi NOT_RUN, và báo cáo giữ số lượt dự
+kiến/đã thực hiện để thấy dataset còn chưa chạy. Cleanup không dừng ở
 breakpoint. CLI không dùng control file sẽ bỏ qua breakpoint.
 
 **View report** mở kết quả theo testcase, browser và dòng dataset, kèm từng
@@ -121,6 +121,41 @@ dùng cùng website `tools/demo_site.py` ở trên. Kiểm tra phát triển sau
 Python export: **48 PASS, 0 FAIL/ERROR/SKIP**, có chạy browser ngoài repository
 ở cả hai Level, thay CSV/locator và kiểm tra upload độc lập; xem
 [studio-python-export-verification.json](artifacts/studio-python-export-verification.json).
+
+### NFR cho cả hai Level
+
+**NFR settings…** lưu lựa chọn Level 1/2/cả hai, browser và số lần lặp (1–30).
+Chọn case/folder trong Explorer, chọn mode **Compatibility NFR** hoặc
+**Elapsed-time NFR**, rồi Run. NFR dùng lựa chọn trong NFR settings, tách biệt
+với Level/browser của mode Functional; Headless vẫn theo checkbox trong Run
+configuration. Case kết quả có Level và số lần lặp riêng.
+
+- Compatibility cần ít nhất hai browser khác nhau; mỗi browser/Level phải
+  vượt qua các assertion của case được chọn. Hỗ trợ cả case Steps lẫn native
+  Gradebook; không ép phải dùng năm mã case của preset cũ.
+- Elapsed-time dùng case **steps**. Trong NFR settings chọn bước bắt đầu, bước
+  xác nhận trạng thái ready/saved, và giới hạn giây cho từng case. Chọn bước
+  cuối là wait/assertion để đo tới trạng thái thực tế cần kiểm tra. Tắt
+  **Start paused**, đặt **Step delay = 0**. NFR không dừng ở breakpoint.
+- Mỗi dòng dataset được chạy đủ số lần lặp trong từng browser/Level. Cả
+  assertion chức năng và ngưỡng của **mọi** mẫu đo đều phải đạt. Thiếu mẫu,
+  thiếu measurement, ERROR, SKIP, Stop hoặc assertion FAIL đều không thành PASS.
+- Báo cáo NFR có `nfr-summary.json`, bảng HTML min/median/P95/max và limit,
+  cùng kết quả từng lần lặp trong JSON/CSV. P95 dùng nearest-rank; ít mẫu chỉ
+  mang ý nghĩa mô tả, không thay thế load test. Setup/cleanup không nằm trong
+  timer trừ khi bạn chủ động đặt ranh giới đo bao gồm chúng; UI hiện chỉ cho
+  chọn ranh giới ở phase test.
+
+Bộ chạy NFR tạo gói Python từ snapshot: Level 1 thực thi định nghĩa trong
+Python, Level 2 đọc định nghĩa JSON bên ngoài. Native Gradebook cần Moodle
+và fixture cũ; phép đo thời gian của native workflow cần được soạn thành Steps
+để đặt ranh giới rõ ràng. `python -m nonfunctional.compatibility` vẫn giữ
+preset lịch sử năm case Gradebook Level 2 cho bài nộp trước đây.
+
+Kiểm tra sau khi thêm NFR: **55 development tests PASS**, gồm Chrome/Edge ở
+cả hai Level, giới hạn thời gian, thiếu mẫu, Stop và chỉnh sửa UI; xem
+[studio-nfr-verification.json](artifacts/studio-nfr-verification.json).
+Đây là kiểm tra app trên website mẫu, không phải kết quả hiệu năng Moodle.
 
 Kiểm chứng bước đầu cho phần lõi được ghi riêng tại
 [studio-core-verification.json](artifacts/studio-core-verification.json):
@@ -186,8 +221,8 @@ Mở app không khởi động kiểm thử hay thay đổi Moodle. Cách sử d
    tài khoản có quyền sửa Gradebook. Trong **Run configuration**, chọn Level,
    trình duyệt và chế độ. **Headless (background)** mặc định bật để chạy nền.
    Chọn **Selected items** hoặc **All cases**, rồi bấm
-   **Run**. Chế độ Compatibility tự dùng Level 2 và Chrome/Edge cho 5 case
-   quy định. Yêu cầu môi trường cụ thể nằm ở phần **Moodle preconditions**
+   **Run**. Mode NFR dùng ma trận trong **NFR settings…**. Yêu cầu môi trường
+   Gradebook cụ thể nằm ở phần **Moodle preconditions**
    bên dưới.
 8. **Execution:** theo dõi Live steps và Case results; bấm **Open results** để
    mở file kết quả. **Stop after case** chờ case hiện tại và cleanup hoàn tất.
@@ -283,8 +318,8 @@ when an actual Run is started.
   site JSON and functional/compatibility mode.
   Opera GX is also available as an experimental Chromium adapter. Headless
   mode is enabled by default so runs can continue while other applications
-  occupy the display. Compatibility mode runs Chrome and Edge in the selected
-  headless/windowed mode.
+  occupy the display. NFR settings select levels, browsers and repetitions;
+  compatibility needs at least two distinct browsers.
 - **Execution:** live action events, per-case results and links to the actual
   output folder. Browser tests only start when **Run** is pressed. **Stop after
   case** finishes the active case and its cleanup rather than killing a browser.
@@ -309,12 +344,13 @@ Excel formulas are not supported as XLSX test inputs; exported values are
 literal text, including strings that start with `=`.
 
 New cases default to the general `steps` workflow. Five Gradebook templates
-remain available. Recording, conditional steps, loops and advanced playback
+remain available. Recording, conditional steps and loops
 are still on the development roadmap; they are not claimed as complete.
 
 Run uses an immutable snapshot (CSV data and, for editable tests, JSON steps)
-of the selected folders/cases, so edits do not alter that invocation. Compatibility
-mode always uses Level 2, both browsers, and the original fixed five case IDs.
+of the selected folders/cases, so edits do not alter that invocation. NFR mode
+uses the configured browser/level matrix and honors the selected cases. The
+historical CLI compatibility preset retains its original Level 2 selection.
 Run-configuration passwords are supplied to the child process environment and
 are not saved in workspace JSON. Test data entered explicitly in datasets is
 part of that saved dataset. A stopped/incomplete run is not reported as successful.

@@ -86,6 +86,7 @@ def cli(root, level, argv=None):
     parser.add_argument("--case", action="append", default=[])
     parser.add_argument("--events", action="store_true")
     parser.add_argument("--list", action="store_true")
+    parser.add_argument("--stop-file", type=Path)
     args = parser.parse_args(argv)
     try:
         project = load_project(root, level)
@@ -102,6 +103,8 @@ def cli(root, level, argv=None):
             snapshot = Path(directory) / "project.json"
             snapshot.write_text(json.dumps(project, ensure_ascii=False), encoding="utf-8")
             command = ["--project", str(snapshot), "--level", str(level), "--browser", args.browser, "--output", str(args.output)]
+            if args.stop_file:
+                command += ["--stop-file", str(args.stop_file.resolve())]
             legacy = Path(root) / "level2/config/gradebook.json"
             if level == 2 and legacy.is_file():
                 command += ["--legacy-config", str(legacy)]

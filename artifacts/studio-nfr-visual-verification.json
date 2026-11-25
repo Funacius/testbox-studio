@@ -1,0 +1,15 @@
+{
+  "scope": "Formatting follow-up after the 55-test NFR verification; execution logic unchanged",
+  "source_sha256": {
+    "automation/reporting.py": "435adcb41c8ba36cc3b292a6c7e84b770b64e34b8e34c54a7e2a680e61001af5"
+  },
+  "checks": {
+    "targeted_unit_tests": 6,
+    "unit_tests_passed": 6,
+    "real_chrome_html_render_passed": true,
+    "unique_collapsed_case_labels": 4,
+    "nfr_groups_rendered": 2,
+    "measurement_display_decimal_places": 6
+  },
+  "retained_report": "results/studio-nfr-demo-20261125-214649/nfr-20261125-214649-912a42af/results.json"
+}
