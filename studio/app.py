@@ -29,12 +29,15 @@ from automation.playback import write_control
 from studio.locator_library import LocatorLibraryDialog
 from studio.report_viewer import ReportViewer
 from studio.nfr_dialog import NfrDialog
+from studio.templates import TemplateDialog, instantiate
+from studio.recorder_dialog import RecorderDialog
 from studio.theme import (ACCENT, BG, BORDER, FIELD, GREEN, MUTED, PANEL, RED,
                           SURFACE, TEXT, YELLOW, apply_theme, dark_menu, dark_text)
 
 FILE_TYPES = [("Test data", "*.csv *.xls *.xlsx"), ("CSV", "*.csv"),
               ("Excel workbook", "*.xlsx"), ("Excel 97–2003", "*.xls")]
-DEFAULT_WORKSPACE = ROOT / "workspace/gradebook.project.json"
+DEFAULT_WORKSPACE = ROOT / "workspace/testbox.project.json"
+LEGACY_WORKSPACE = ROOT / "workspace/gradebook.project.json"
 BANGKOK = timezone(timedelta(hours=7))
 
 
@@ -47,8 +50,8 @@ class Studio(tk.Tk):
         width, height = min(1600, self.winfo_screenwidth() - 80), min(960, self.winfo_screenheight() - 150)
         self.geometry(f"{width}x{height}+35+30")
         self.minsize(1180, 730)
-        self.workspace_path = workspace_path or DEFAULT_WORKSPACE
-        self.workspace = Workspace.load(self.workspace_path) if self.workspace_path.exists() else Workspace.seed()
+        self.workspace_path = workspace_path or (LEGACY_WORKSPACE if not DEFAULT_WORKSPACE.exists() and LEGACY_WORKSPACE.exists() else DEFAULT_WORKSPACE)
+        self.workspace = Workspace.load(self.workspace_path) if self.workspace_path.exists() else Workspace("Untitled workspace")
         self.dirty = False
         self.editor_dirty = False
         self.editor_uid = None
@@ -81,6 +84,10 @@ class Studio(tk.Tk):
             self.tree.selection_set(first)
             self.tree.focus(first)
             self._show_node(first)
+        else:
+            self.selection_title.configure(text="Create a test case, use a template, or import your file")
+            self._set_text(self.source_text, "Use + Test case for editable steps, or Tools > Case templates. Import CSV/XLS/XLSX to map your steps and data.\n\nSet the website URL before running. Existing Gradebook samples are available from Tools > Load Gradebook sample.", True)
+            self.notebook.select(self.source_tab)
         self.protocol("WM_DELETE_WINDOW", self._close)
         self.after(100, self._poll_events)
         self.after(60, self.deiconify)
@@ -119,6 +126,14 @@ class Studio(tk.Tk):
             ("Move down", lambda: self._reorder(1), "Alt+Down"), ("Delete…", self._delete, "Delete")]:
             edit.add_command(label=text, command=command, accelerator=accelerator)
         menu.add_cascade(label="Edit", menu=edit)
+        tools_menu = dark_menu(menu)
+        tools_menu.add_command(label="Case templates…", command=self._templates)
+        tools_menu.add_command(label="Browser recorder / picker…", command=self._recorder)
+        tools_menu.add_command(label="Locator library…", command=self._locator_library)
+        tools_menu.add_command(label="NFR settings…", command=self._nfr_settings)
+        tools_menu.add_separator()
+        tools_menu.add_command(label="Load Gradebook sample", command=self._load_gradebook_sample)
+        menu.add_cascade(label="Tools", menu=tools_menu)
         help_menu = dark_menu(menu)
         help_menu.add_command(label="Open user guide", command=lambda: self._open_path(ROOT / "README.md"))
         help_menu.add_command(label="About", command=lambda: messagebox.showinfo(
@@ -274,7 +289,7 @@ class Studio(tk.Tk):
         bottom = ttk.Frame(self.center)
         bottom.pack(side="bottom", fill="x", pady=(12, 0), before=self.notebook)
         ttk.Button(bottom, text="Apply changes", style="Primary.TButton", command=self._apply).pack(side="right")
-        ttk.Button(bottom, text="Workflow template…", command=self._reset_template).pack(side="left")
+        ttk.Button(bottom, text="Case templates…", command=self._templates).pack(side="left")
         self.editor_hint = ttk.Label(bottom, text="Expected assertions are edited separately.", style="Muted.TLabel", font=("Segoe UI", 8))
         self.editor_hint.pack(side="left", padx=10)
 
@@ -340,7 +355,7 @@ class Studio(tk.Tk):
         settings = [("mode", "Mode", "Functional", ("Functional", "Compatibility NFR", "Elapsed-time NFR")),
                     ("level", "Automation level", "Level 2", ("Level 1", "Level 2")),
                     ("browser", "Browser", "Chrome", ("Chrome", "Edge", "Opera GX", "Both")),
-                    ("base_url", "Base URL", self.workspace.settings.get("base_url", "http://127.0.0.1:9501"), None),
+                    ("base_url", "Base URL", self.workspace.settings.get("base_url", "http://127.0.0.1:9501" if has_gradebook else ""), None),
                     ("course_id", "Course ID (Gradebook)", "2" if has_gradebook else "", None),
                     ("username", "Username", os.environ.get("TESTBOX_VAR_username", os.environ.get("MOODLE_USERNAME", "teacher01") if has_gradebook else ""), None),
                     ("password", "Password", os.environ.get("TESTBOX_VAR_password", os.environ.get("MOODLE_PASSWORD", "1234") if has_gradebook else ""), None)]
@@ -366,6 +381,7 @@ class Studio(tk.Tk):
         self.config_path = ROOT / "level2/config/site.json"
         ttk.Button(self.inspector, text="Project settings…", command=self._edit_project_settings).pack(fill="x", pady=(13, 0))
         ttk.Button(self.inspector, text="Locator library…", command=self._locator_library).pack(fill="x", pady=(6, 0))
+        ttk.Button(self.inspector, text="Recorder / picker…", command=self._recorder).pack(fill="x", pady=(6, 0))
         ttk.Button(self.inspector, text="NFR settings…", command=self._nfr_settings).pack(fill="x", pady=(6, 0))
         self.gradebook_buttons = [ttk.Button(self.inspector, text="Gradebook site config…", command=self._edit_config),
                                   ttk.Button(self.inspector, text="Choose Gradebook config…", style="Small.TButton", command=self._choose_config)]
@@ -703,6 +719,10 @@ class Studio(tk.Tk):
     def _reset_template(self):
         if not self.editor_uid:
             return
+        node = self.workspace.find(self.editor_uid)
+        if is_script(node["record"]):
+            self._templates()
+            return
         workflow = self.vars["workflow"].get()
         if workflow not in WORKFLOWS:
             return
@@ -713,11 +733,91 @@ class Studio(tk.Tk):
         record = template_record(node["record"]["case_id"], workflow)
         record["title"] = self.vars["title"].get() or node["name"]
         node["record"] = record
-        node["steps"] = []
         node["name"] = record["title"]
         self._mark_dirty()
         self._show_node(node["uid"])
         self._rebuild_tree(node["uid"])
+
+    def _templates(self):
+        if not self._commit():
+            return
+        current = self.workspace.find(self.editor_uid)["record"] if self.editor_uid else None
+        try:
+            dialog = TemplateDialog(self, self.workspace.settings.get("templates", {}), current)
+            if dialog.result is None:
+                return
+            self._checkpoint()
+            self.workspace.settings["templates"] = dialog.result["templates"]
+            record = dialog.result["record"]
+            uid = None
+            if record:
+                record = instantiate(record, self.workspace.next_case_id())
+                uid = self.workspace.add(testcase(record), self._parent_for_new())
+            self._mark_dirty()
+            self._rebuild_tree(uid)
+            if uid:
+                self._show_node(uid)
+        except (ValueError, TypeError, KeyError) as exc:
+            messagebox.showerror("Case templates", str(exc), parent=self)
+
+    def _load_gradebook_sample(self):
+        if not self._confirm_discard():
+            return
+        self.workspace = Workspace.seed()
+        self.workspace_path = LEGACY_WORKSPACE.with_name("gradebook-sample.project.json")
+        self.history.clear()
+        self.future.clear()
+        self.editor_uid = None
+        self.editor_dirty = False
+        for key, value in dict(base_url="http://127.0.0.1:9501", course_id="2", username="teacher01", password="1234").items():
+            self.run_vars[key].set(value)
+        self.environment.set("(current)")
+        self.environment_box.configure(values=["(current)"])
+        self._mark_dirty()
+        self._rebuild_tree()
+        self._show_first()
+
+    def _recorder(self):
+        if not self._commit():
+            return
+        try:
+            settings = self._effective_settings()
+            current = self.workspace.find(self.editor_uid) if self.editor_uid else None
+            record = current["record"] if current else None
+            can_append = bool(record and is_script(record))
+            occupied = set(settings.get("variables", {}))
+            if can_append:
+                data = script_data(record)
+                occupied.update(data["variables"])
+                occupied.update(key for row in data["dataset"] for key in row)
+            dialog = RecorderDialog(self, settings, occupied, can_append)
+            if not dialog.result:
+                return
+            result = dialog.result
+            if not result["steps"]:
+                messagebox.showinfo("No recorded steps", "No actions were applied. Record actions or add an assertion first.", parent=self)
+                return
+            self._checkpoint()
+            environment = self.workspace.settings.get("environments", {}).get(self.environment.get())
+            target = environment if environment is not None else self.workspace.settings
+            target.setdefault("locators", {}).update(result["locators"])
+            if result["destination"] == "Append to selected case" and can_append:
+                actions = data["steps"] + result["steps"]
+                variables = {**data["variables"], **result["variables"]}
+                record.update(actions_json=json.dumps(actions, ensure_ascii=False), variables_json=json.dumps(variables, ensure_ascii=False))
+                uid = current["uid"]
+            else:
+                record = template_record(self.workspace.next_case_id(), "steps")
+                record.update(title="Recorded browser test", actions_json=json.dumps(result["steps"], ensure_ascii=False),
+                    variables_json=json.dumps(result["variables"], ensure_ascii=False),
+                    notes="Recorded in an owned Chrome profile. Review selectors, input variables and expected assertions before Run.")
+                uid = self.workspace.add(testcase(record), self._parent_for_new())
+            self._mark_dirty()
+            self._rebuild_tree(uid)
+            self._show_node(uid)
+            self.notebook.select(self.script_steps_tab)
+        except (ValueError, TypeError, KeyError, OSError) as exc:
+            messagebox.showerror("Browser recorder", str(exc), parent=self)
 
     def _new_folder(self):
         if not self._commit():
@@ -1586,6 +1686,11 @@ class Studio(tk.Tk):
             if messagebox.askyesno("Run in progress", "Stop and run cleanup, then close the app?" if self.run_generic else "Stop after the current case and cleanup, then close the app?", parent=self):
                 self.close_when_stopped = True
                 self._stop()
+            return
+        recorder = next((child for child in self.winfo_children() if isinstance(child, RecorderDialog)), None)
+        if recorder:
+            recorder.cancel()
+            self.after(150, self._close)
             return
         if self._confirm_discard():
             self.destroy()

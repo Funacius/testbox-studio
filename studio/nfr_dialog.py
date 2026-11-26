@@ -89,8 +89,13 @@ class NfrDialog(tk.Toplevel):
         self.current_case = self.case.get()
         record = self.records[self.current_case]
         steps = script_data(record)["steps"]
+        from automation.flow import top_level_actions
+        try:
+            eligible = top_level_actions(steps, "test")
+        except ValueError:
+            eligible = set()
         self.step_ids = {f"{i}. {s['command']}  {s['target']}": s["id"] for i, s in enumerate(steps, 1)
-                         if s["enabled"] and s["phase"] == "test" and s["command"] != "note"}
+                         if s["id"] in eligible}
         self.start_box.configure(values=list(self.step_ids))
         self.end_box.configure(values=list(self.step_ids))
         rule = self.config.get("measurements", {}).get(self.current_case, {})

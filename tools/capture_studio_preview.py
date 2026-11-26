@@ -100,7 +100,7 @@ def main():
     if os.name != "nt":
         raise SystemExit("This development preview helper is for Windows")
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--view", choices=("steps", "locators", "report", "nfr"), default="steps")
+    parser.add_argument("--view", choices=("steps", "locators", "report", "nfr", "templates", "recorder", "welcome", "flow"), default="steps")
     parser.add_argument("--report", type=Path)
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts/studio-steps-preview.png")
     args = parser.parse_args()
@@ -116,15 +116,26 @@ def main():
     parent = project.add(folder("Browser tests"))
     uid = project.add(testcase(records[0]), parent)
     project.settings = dict(base_url="http://127.0.0.1:9542", locators={"username": "id=username", "password": "id=password", "submit": "id=login", "message": "id=message"})
-    with tempfile.TemporaryDirectory() as directory, patch("tkinter.Tk.deiconify"):
+    if args.view == "welcome":
+        project = Workspace("Untitled workspace")
+    if args.view == "flow":
+        from automation.schema import new_step
+        record = project.find(uid)["record"]
+        actions = json.loads(record["actions_json"])
+        actions[1:1] = [new_step("repeat", target="iteration", value="3"),
+            new_step("if_equal", target="${iteration}", expected="2"),
+            new_step("note", description="Add conditional actions", enabled=False), new_step("end_if"), new_step("end_repeat")]
+        record["actions_json"] = json.dumps(actions)
+    with tempfile.TemporaryDirectory() as directory, patch("tkinter.Tk.deiconify"), patch("tkinter.Toplevel.deiconify"):
         path = Path(directory) / "preview.json"
         project.save(path)
         app = Studio(path)
         app.geometry("1600x950+30+30")
-        app._show_node(uid)
+        if args.view != "welcome":
+            app._show_node(uid)
         dialog = None
         try:
-            if args.view != "steps":
+            if args.view not in {"steps", "welcome", "flow"}:
                 capture(app, Path(directory) / "parent.png")
             if args.view == "locators":
                 from studio.locator_library import LocatorLibraryDialog
@@ -142,6 +153,24 @@ def main():
                 with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"):
                     dialog = NfrDialog(app, records, config, records[0]["case_id"])
                 dialog.withdraw()
+                capture(dialog, args.output)
+            elif args.view == "templates":
+                from studio.templates import TemplateDialog
+                with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"):
+                    dialog = TemplateDialog(app, {}, records[0])
+                dialog.list.selection_set("2")
+                dialog.show()
+                capture(dialog, args.output)
+            elif args.view == "recorder":
+                from studio.recorder_dialog import RecorderDialog
+                with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"), patch("studio.recorder_dialog.threading.Thread.start"):
+                    dialog = RecorderDialog(app, project.settings)
+                dialog.buffer.steps = json.loads(records[0]["actions_json"])
+                dialog.target.set("id=message")
+                dialog.command.set("assert_text")
+                dialog.expected.set("${expected_message}")
+                dialog.status.set("Development preview — no browser opened. Recorded steps remain reviewable before applying.")
+                dialog.refresh()
                 capture(dialog, args.output)
             elif args.view == "report":
                 from studio.report_viewer import ReportViewer

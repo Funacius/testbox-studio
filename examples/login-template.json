@@ -1,0 +1,24 @@
+{
+  "format": "testbox-template-1",
+  "name": "Login demo",
+  "record": {
+    "case_id": "TEMPLATE",
+    "title": "Data-driven login (local demo)",
+    "workflow": "steps",
+    "item_name": "",
+    "minimum": "",
+    "maximum": "",
+    "grade_type": "",
+    "inputs_json": "{}",
+    "expected_json": "{}",
+    "expected_result": "Each data row has its own expected login message.",
+    "actions_json": "[{\"id\": \"4a04358a75be48098418ea5c77c14b6c\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"open\", \"target\": \"${base_url}\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"d58c08c6772949668a84e508fa265b3c\", \"enabled\": true, \"phase\": \"test\", \"command\": \"type\", \"target\": \"id=username\", \"value\": \"${username}\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"98341d1960a844fbbb156045d1e0ee42\", \"enabled\": true, \"phase\": \"test\", \"command\": \"type\", \"target\": \"id=password\", \"value\": \"${password}\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"04d61bb10e9a4f98ac7688343df5c37a\", \"enabled\": true, \"phase\": \"test\", \"command\": \"click\", \"target\": \"id=login\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"c7dba024fc2a499184e05012f8dc5d33\", \"enabled\": true, \"phase\": \"test\", \"command\": \"assert_text\", \"target\": \"id=message\", \"value\": \"\", \"expected\": \"${expected_message}\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}]",
+    "dataset_json": "[{\"username\": \"demo\", \"password\": \"demo123\", \"expected_message\": \"Welcome demo\"}, {\"username\": \"demo\", \"password\": \"wrong\", \"expected_message\": \"Invalid credentials\"}]",
+    "variables_json": "{}",
+    "precondition": "",
+    "notes": "Start tools/demo_site.py and set Base URL to http://127.0.0.1:9542. Adapt selectors and expected data for another site.",
+    "known_defect": "",
+    "source_sheet": "",
+    "source_row": ""
+  }
+}

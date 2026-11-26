@@ -94,6 +94,8 @@ class StepsEditor(ttk.Frame):
         more.pack(fill="x", pady=(0, 8))
         ttk.Button(more, text="Undo steps", command=self.undo, style="Small.TButton").pack(side="left")
         ttk.Button(more, text="Redo steps", command=self.redo, style="Small.TButton").pack(side="left", padx=5)
+        ttk.Button(more, text="＋ If block", command=lambda: self.add_block("if"), style="Small.TButton").pack(side="left", padx=5)
+        ttk.Button(more, text="＋ Repeat block", command=lambda: self.add_block("repeat"), style="Small.TButton").pack(side="left")
         frame = ttk.Frame(self)
         frame.pack(fill="both", expand=True)
         self.tree = ttk.Treeview(frame, columns=("n", "on", "phase", "command", "target", "value", "expected"), show="headings", selectmode="browse")
@@ -164,6 +166,24 @@ class StepsEditor(ttk.Frame):
             self.checkpoint()
             self.steps[index] = dialog.result
             self.changed(dialog.result["id"])
+
+    def add_block(self, kind):
+        phase = self.steps[self.selected()]["phase"] if self.selected() is not None else "test"
+        if kind == "if":
+            block = [new_step("if_equal", target="${condition}", expected="true", phase=phase),
+                     new_step("note", description="Add actions for the true branch", enabled=False, phase=phase),
+                     new_step("else", phase=phase),
+                     new_step("note", description="Add actions for the alternative branch", enabled=False, phase=phase),
+                     new_step("end_if", phase=phase)]
+        else:
+            block = [new_step("repeat", target="iteration", value="3", phase=phase),
+                     new_step("note", description="Add actions using ${iteration} (1-based)", enabled=False, phase=phase),
+                     new_step("end_repeat", phase=phase)]
+        self.checkpoint()
+        index = self.selected()
+        insert = len(self.steps) if index is None else index + 1
+        self.steps[insert:insert] = block
+        self.changed(block[0]["id"])
 
     def duplicate(self):
         index = self.selected()

@@ -33,6 +33,7 @@ COMMANDS = {
     "store_value": (True, True, False, "Read a field value into the variable named in Value."),
     "set_variable": (True, False, False, "Set the variable named in Target to Value."),
     "upload": (True, True, False, "Send a local file path to an input[type=file]."),
+    "press_key": (True, True, False, "Send ENTER, TAB, ESCAPE or a supported navigation key to the located element."),
     "frame": (True, False, False, "Enter an iframe located by Target."),
     "default_content": (False, False, False, "Return to the top-level document."),
     "switch_window": (True, False, False, "Switch by zero-based index or 'last'; Value optionally sets the minimum window count."),
@@ -42,6 +43,13 @@ COMMANDS = {
     "screenshot": (False, False, False, "Save a browser screenshot to this run's evidence folder."),
     "start_timer": (True, False, False, "Start a named user-observed elapsed-time measurement."),
     "stop_timer": (True, False, False, "Stop the named timer; Expected optionally gives a maximum in seconds."),
+    "if_equal": (False, False, False, "If Target text equals Expected, run the block; otherwise run else, if present. Close with end_if."),
+    "if_contains": (False, False, False, "If Target text contains Expected, run the block. Text may contain ${variables}. Close with end_if."),
+    "if_visible": (True, False, False, "Check current visibility using a unique locator; missing/hidden means false. Close with end_if."),
+    "else": (False, False, False, "Alternative branch for the matching if."),
+    "end_if": (False, False, False, "Close the matching conditional block in this phase."),
+    "repeat": (True, True, False, "Repeat Value times (0–100). Target names a scoped index variable, starting at 1. Close with end_repeat."),
+    "end_repeat": (False, False, False, "Close the matching bounded repeat block."),
 }
 BY = {"id", "name", "css", "xpath", "link", "partial_link", "tag", "class"}
 VARIABLE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_.-]*)\}")
@@ -85,6 +93,12 @@ def checked_step(value: dict) -> dict:
     for required, key in ((target, "target"), (field, "value"), (expected, "expected")):
         if step["enabled"] and required and not step[key]:
             raise ValueError(f"{step['command']} requires {key}")
+    if step["enabled"] and step["command"] == "repeat":
+        if not VARIABLE_NAME.fullmatch(step["target"]):
+            raise ValueError("Repeat Target must name an index variable (for example iteration)")
+        if not VARIABLE.search(step["value"]):
+            from automation.flow import repeat_count
+            repeat_count(step["value"])
     return step
 
 
@@ -119,7 +133,10 @@ def script_data(record: dict, runnable=False) -> dict:
         raise ValueError("Variables must map valid variable names to text values")
     if not isinstance(rows, list) or any(not isinstance(row, dict) or any(not isinstance(k, str) or not isinstance(v, str) for k, v in row.items()) for row in rows):
         raise ValueError("Dataset must be an array of objects containing text values")
-    if runnable and (not rows or not any(s["enabled"] and s["phase"] == "test" and s["command"] != "note" for s in steps)):
+    from automation.flow import CONTROL, validate_flow
+    if runnable:
+        validate_flow(steps)
+    if runnable and (not rows or not any(s["enabled"] and s["phase"] == "test" and s["command"] not in CONTROL | {"note"} for s in steps)):
         raise ValueError(f"{record['case_id']}: add a dataset row and an enabled test step before Run")
     return dict(steps=steps, variables=variables, dataset=rows)
 

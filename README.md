@@ -67,10 +67,99 @@ Website mẫu không cần Moodle/Docker và chỉ phục vụ ví dụ automati
 
 ### Tiến độ mở rộng app
 
-Đã triển khai phần lõi, import mapping, bảng dataset/biến, môi trường, locator
-library, điều khiển từng step và báo cáo tổng hợp. Các phần đang tiếp tục:
-templates/recorder/điều kiện/vòng lặp.
+Đã triển khai phần lõi, import mapping, dataset/biến, môi trường, locator,
+playback, báo cáo, Python export, NFR và các công cụ soạn test nâng cao bên dưới.
+Lượt kiểm tra tích hợp và hồi quy Gradebook cuối cùng vẫn đang được hoàn thiện;
+các kết quả phát triển ở từng mốc không thay thế cho hồi quy bộ bài nộp.
 `data/studio-development.json` theo dõi phạm vi và các kiểm chứng tương ứng.
+
+### Case templates
+
+**Tools → Case templates…** (hoặc nút **Case templates…** ở editor) mở thư viện:
+
+- **Create case from selected** tạo case mới với ID/step ID độc lập, giữ setup,
+  test, cleanup, biến và dataset của mẫu.
+- **Save current as…** lưu case đang chọn thành mẫu trong project; **Apply
+  library** lưu thay đổi thư viện mà không tạo case mới. Cancel bỏ thay đổi
+  đang soạn trong hộp thoại.
+- **Import template… / Export selected…** trao đổi mẫu bằng JSON. URL và
+  locator alias vẫn thuộc project đích, cần cấu hình tương ứng.
+- Mẫu login dùng `tools/demo_site.py`; có dữ liệu hợp lệ/không hợp lệ và
+  expected riêng. Thay selector và expected khi áp dụng cho website khác.
+
+Lần mở đầu trên máy chưa có workspace, app tạo project trống dùng chung.
+**Tools → Load Gradebook sample** nạp lại 36 case gốc vào workspace mẫu riêng.
+Workspace Gradebook đã lưu trước đây vẫn được mở khi chưa có workspace mặc
+định mới; không tự ghi đè file của người dùng.
+
+### Ghi thao tác và chọn phần tử
+
+Mở **Tools → Browser recorder / picker…**:
+
+1. Nhập URL, bấm **Open URL** để mở Chrome với profile tạm riêng. Nhập URL
+   mới qua nút này khi muốn ghi một lần điều hướng bằng tay.
+2. Bấm **Record**, thao tác trên trang; dùng **Pause recording** khi cần.
+   Text input/textarea, checkbox/radio, select, click và Enter/Tab/Escape được
+   chuyển thành step. Text trở thành biến `recorded_input_N` có thể sửa.
+3. **Pick element** cho phép click chọn phần tử mà không kích hoạt hành động
+   của nó. Chọn locator gợi ý, có thể lưu alias. Chọn action và tự nhập
+   expected từ yêu cầu rồi **Add step**; app không tự đổi expected thành actual.
+4. Với JavaScript alert/prompt, dùng **Accept alert / Dismiss alert** trong
+   hộp thoại để ghi bước xử lý; prompt có ô nhập text riêng.
+5. Chọn tạo case mới hoặc append vào case Steps đang chọn, rồi **Apply
+   recorded steps**. Browser tạm được đóng trước khi áp dụng. Sửa thêm ở Steps,
+   Data rows/Variables và Run khi đã chuẩn bị website cùng dữ liệu cần thiết.
+
+Recorder dùng Chrome; playback vẫn có Chrome/Edge/Opera GX theo cấu hình.
+Recorder hiện ghi ở document chính của tab hiện tại. Iframe, tab mới, shadow
+DOM và editor phức tạp cần thêm/chỉnh step thủ công; engine có các lệnh frame,
+default_content và switch_window. Luôn kiểm tra selector và assertion sau khi
+ghi, đặc biệt ở trang có ID thay đổi theo phiên.
+
+Password field được ghi bằng `${password}`, không lấy literal mật khẩu từ
+field. Điền Run configuration hoặc dataset khi chạy. File chooser dùng
+`${upload_file}` và cần đường dẫn file trên máy chạy. Cảnh báo từ recorder
+được giữ thành note tắt sẵn để rà lại. Cơ chế dùng API của
+[Chrome DevTools Page](https://chromedevtools.github.io/devtools-protocol/tot/Page/)
+và [Selenium Chrome logging](https://www.selenium.dev/documentation/webdriver/browsers/chrome/#logging-preferences).
+
+### Điều kiện và vòng lặp
+
+Trong Steps có **＋ If block / ＋ Repeat block** để chèn bộ khung; sửa các
+action/note bên trong như những step khác. Hoặc dùng **＋ Step** với các lệnh:
+
+| Action | Target | Value | Expected |
+| --- | --- | --- | --- |
+| `if_equal` | Text bên trái, có thể chứa `${variable}` | — | Text cần bằng |
+| `if_contains` | Text cần tìm trong đó | — | Chuỗi con |
+| `if_visible` | Locator duy nhất | — | — |
+| `else` / `end_if` | — | — | — |
+| `repeat` | Tên biến chỉ số, ví dụ `iteration` | Số lần, hoặc `${count}` | — |
+| `end_repeat` | — | — | — |
+
+`if_visible` kiểm tra trạng thái hiện tại; thêm wait trước đó nếu cần chờ
+trang cập nhật. Mỗi block phải đóng trong cùng phase. Repeat cho phép 0–100
+lần, chỉ số bắt đầu ở 1 và khôi phục biến cũ sau block (kể cả khi lỗi/Stop).
+Tối đa 8 block lồng nhau và giới hạn bảo thủ 10.000 step sau khai triển mỗi
+phase. Không thực thi biểu thức Python/eval.
+
+Nhánh không được chọn và repeat bằng 0 được ghi SKIP ở mức step. Nếu không
+có hành động test nào thực hiện, cả testcase báo ERROR thay vì PASS. Cleanup
+vẫn chạy và tiếp tục các bước còn lại khi một bước cleanup lỗi. Báo cáo có
+`execution` và `loop_path` để phân biệt các lượt chạy cùng một step.
+Ranh giới đo NFR cần chọn action ở ngoài các block điều kiện/repeat.
+
+Ví dụ sẵn có: import `examples/repeat-login-steps.csv` bằng **Steps table**,
+rồi `examples/repeat-login-data.csv` bằng **Dataset** vào case `DEMO-REPEAT`.
+Dùng cùng website demo ở cổng 9542. Có cả `examples/login-template.json` để
+thử **Import template…**.
+
+Mốc kiểm tra công cụ soạn test: **68 development tests PASS**, gồm browser
+thực, ghi/phát lại thao tác, chọn phần tử, chuyển trang, template và control
+flow trong Python export ở cả hai Level. Xem
+[studio-authoring-verification.json](artifacts/studio-authoring-verification.json).
+Đây là kiểm chứng bản triển khai các tính năng; final audit và hồi quy Moodle
+vẫn được theo dõi riêng trong `data/studio-development.json`.
 
 ### Điều khiển chạy và xem báo cáo
 
@@ -212,7 +301,8 @@ Mở app không khởi động kiểm thử hay thay đổi Moodle. Cách sử d
    workflow Gradebook cũ, tab này vẫn là bản xem trước sinh từ dữ liệu.
    **Source** hiển thị các bước gốc từ Excel để đối chiếu.
 5. **Apply changes** áp dụng chỉnh sửa; **Save workspace** hoặc **Ctrl+S** lưu
-   cây folder và test case vào `workspace/gradebook.project.json`. Dùng
+   cây folder và test case vào file workspace hiện tại (project mới mặc định
+   `workspace/testbox.project.json`; workspace Gradebook cũ giữ đường dẫn cũ). Dùng
    **File → Save workspace as…** để lưu một workspace khác.
 6. **Export…:** chọn xuất phần đang chọn hoặc toàn workspace, rồi lưu dưới
    dạng `.csv`, `.xls` hoặc `.xlsx`. Xuất dữ liệu không thay thế thao tác lưu
@@ -324,9 +414,10 @@ when an actual Run is started.
   output folder. Browser tests only start when **Run** is pressed. **Stop after
   case** finishes the active case and its cleanup rather than killing a browser.
 
-The existing Gradebook workspace is seeded with the 36 source cases grouped into five
-workflow folders. Save writes to `workspace/gradebook.project.json`, separate
-from the source CSV/Excel. File → Save as supports additional workspaces.
+First launch without a saved workspace opens an empty general-purpose project.
+Tools → Load Gradebook sample loads the 36 source cases grouped into five workflow
+folders. New workspaces default to `workspace/testbox.project.json`; existing
+Gradebook workspaces retain their original paths. File → Save as supports other files.
 Tree changes have undo/redo; editing text also retains normal text undo.
 
 Import/export supports real **CSV, XLS and XLSX** files. CSV uses UTF-8 with a
@@ -344,8 +435,9 @@ Excel formulas are not supported as XLSX test inputs; exported values are
 literal text, including strings that start with `=`.
 
 New cases default to the general `steps` workflow. Five Gradebook templates
-remain available. Recording, conditional steps and loops
-are still on the development roadmap; they are not claimed as complete.
+remain available. Tools provides reusable templates and a Chrome recorder/picker;
+structured conditions and bounded repeat blocks are editable in Steps. See the
+authoring sections above for the supported scope and limitations.
 
 Run uses an immutable snapshot (CSV data and, for editable tests, JSON steps)
 of the selected folders/cases, so edits do not alter that invocation. NFR mode

@@ -1,0 +1,22 @@
+{
+  "scope": "Actual import and execution of the delivered repeat CSV and template JSON examples; local demo only",
+  "report": "results/studio-authoring-demo-20261126-113754/automation-20261126-113754-5c542f3b/results.json",
+  "counts": {
+    "PASS": 4,
+    "FAIL": 0,
+    "ERROR": 0,
+    "SKIP": 0
+  },
+  "loop_iterations": [
+    [
+      1,
+      2,
+      3
+    ],
+    [
+      1,
+      2
+    ]
+  ],
+  "successful": true
+}

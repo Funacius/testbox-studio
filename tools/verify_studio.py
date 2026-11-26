@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def source_hashes():
-    paths = [p for folder in ("automation", "studio", "gradebook", "tests", "tools") for p in (ROOT / folder).glob("*.py")]
+    paths = [p for folder in ("automation", "studio", "gradebook", "tests", "tools") for p in (ROOT / folder).iterdir() if p.suffix in {".py", ".js"}]
     return {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(paths)}
 
 
@@ -59,7 +59,9 @@ def retained_demo():
 
 def screenshots(output):
     captures = []
-    for view, name in (("steps", "studio-steps-preview.png"), ("locators", "studio-locators-preview.png"), ("report", "studio-report-preview.png"), ("nfr", "studio-nfr-preview.png")):
+    for view, name in (("steps", "studio-steps-preview.png"), ("locators", "studio-locators-preview.png"), ("report", "studio-report-preview.png"),
+                       ("nfr", "studio-nfr-preview.png"), ("templates", "studio-templates-preview.png"), ("recorder", "studio-recorder-preview.png"),
+                       ("welcome", "studio-welcome-preview.png"), ("flow", "studio-flow-preview.png")):
         path = ROOT / "artifacts" / name
         args = [sys.executable, str(ROOT / "tools/capture_studio_preview.py"), "--view", view, "--output", str(path)]
         if view == "report":

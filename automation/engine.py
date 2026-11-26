@@ -30,6 +30,7 @@ class StepEngine:
         self.timers = {}
         self.metrics = []
         self.assertions = 0
+        self.sequence = 0
         self.secret_values = credential_values(self.variables)
 
     def emit(self, event, **values):
@@ -66,49 +67,144 @@ class StepEngine:
             return False
 
     def run_phase(self, steps, phase):
-        errors = []
-        for index, source in enumerate(steps, 1):
-            step = checked_step(source)
-            if step["phase"] != phase:
-                continue
-            if not step["enabled"] or step["command"] == "note":
-                self.records.append(dict(step_id=step["id"], index=index, phase=phase,
-                                         command=step["command"], status="SKIP", actual="Reference note" if step["command"] == "note" else "Disabled by user", duration_seconds=0))
-                continue
-            if self.control and phase != "cleanup":
-                self.control(step)
-            began = time.perf_counter()
-            record = dict(step_id=step["id"], index=index, phase=phase, command=step["command"],
-                          target=step["target"], expected=step["expected"], description=step["description"], status="RUNNING")
-            self.emit("step_start", **record, message=step["description"] or f"{step['command']} {step['target']}")
-            try:
-                record["input_value"] = resolve(step["value"], self.variables)
-                record["expected"] = resolve(step["expected"], self.variables)
-                actual = self.execute(step)
-                self.secret_values.update(credential_values(self.variables))
-                record.update(status="PASS", actual=actual)
-                if step["command"] == "screenshot":
-                    record["evidence"] = [actual]
-            except Exception as exc:
-                record.update(status="FAIL" if isinstance(exc, AssertionError) else "ERROR", actual=f"{type(exc).__name__}: {exc}")
-                self.capture(record, index)
-                errors.append(exc)
-            record["duration_seconds"] = round(time.perf_counter() - began, 6)
-            record = redact(record, self.secret_values)
-            self.records.append(record)
-            self.emit("step_end", **record)
-            if errors and phase != "cleanup":
-                raise errors[-1]
-            delay = float(self.settings.get("slow_ms", 0)) / 1000
-            if delay and phase != "cleanup":
-                time.sleep(min(delay, 10))
+        from automation.flow import CONDITIONS, CONTROL, MAX_EXPANDED_STEPS, check_budget, flow_plan, repeat_count
+        steps = [checked_step(s) for s in steps]
+        plan = flow_plan(steps, phase)
+        check_budget(steps, phase, self.variables)
+        errors, loops, taken = [], [], {}
+        missing = object()
+        def restore(frame):
+            if frame["previous"] is missing:
+                self.variables.pop(frame["variable"], None)
+            else:
+                self.variables[frame["variable"]] = frame["previous"]
+        def skip(start, stop, reason):
+            for position in range(start, stop):
+                if steps[position]["phase"] == phase:
+                    self.skipped_step(steps[position], position + 1, reason, loops)
+        pc, ticks = 0, 0
+        try:
+            while pc < len(steps):
+                step = steps[pc]
+                if step["phase"] != phase:
+                    pc += 1
+                    continue
+                ticks += 1
+                if ticks > MAX_EXPANDED_STEPS:
+                    raise ValueError("Execution exceeded the bounded step budget")
+                if not step["enabled"] or step["command"] == "note":
+                    self.skipped_step(step, pc + 1, "Reference note" if step["command"] == "note" else "Disabled by user", loops)
+                    pc += 1
+                    continue
+                command = step["command"]
+                outcome = {}
+                def control_action():
+                    target, value, expected = (resolve(step[k], self.variables) for k in ("target", "value", "expected"))
+                    if command in CONDITIONS:
+                        condition = bool(self.unique(target, visible=True)) if command == "if_visible" else expected in target if command == "if_contains" else target == expected
+                        taken[pc] = condition
+                        outcome["condition"] = condition
+                        return dict(condition=condition)
+                    if command == "repeat":
+                        outcome["count"] = repeat_count(value)
+                        return dict(iterations=outcome["count"], index_variable=target)
+                    return "Control boundary"
+                error = self.run_step(step, pc + 1, loops, control_action if command in CONTROL else None)
+                if error:
+                    errors.append(error)
+                    if phase != "cleanup":
+                        raise error
+                    if pc in plan["ends"]:
+                        end = plan["ends"][pc]
+                        skip(pc + 1, end + 1, "Control block could not be evaluated")
+                        pc = end + 1
+                        continue
+                if command in CONDITIONS and not error and not outcome["condition"]:
+                    destination = plan["alternatives"].get(pc, plan["ends"][pc])
+                    skip(pc + 1, destination, "Conditional branch was not selected")
+                    pc = destination
+                elif command == "else" and taken[plan["owners"][pc]]:
+                    end = plan["ends"][plan["owners"][pc]]
+                    skip(pc + 1, end, "Alternative branch was not selected")
+                    pc = end
+                elif command == "end_if":
+                    taken.pop(plan["owners"][pc], None)
+                    pc += 1
+                elif command == "repeat" and not error:
+                    if not outcome["count"]:
+                        end = plan["ends"][pc]
+                        skip(pc + 1, end + 1, "Repeat count is zero")
+                        pc = end + 1
+                    else:
+                        variable = step["target"]
+                        loops.append(dict(start=pc, end=plan["ends"][pc], count=outcome["count"], iteration=1,
+                                          variable=variable, previous=self.variables.get(variable, missing)))
+                        self.variables[variable] = "1"
+                        pc += 1
+                elif command == "end_repeat":
+                    frame = loops[-1]
+                    if frame["iteration"] < frame["count"]:
+                        frame["iteration"] += 1
+                        self.variables[frame["variable"]] = str(frame["iteration"])
+                        pc = frame["start"] + 1
+                    else:
+                        restore(loops.pop())
+                        pc += 1
+                else:
+                    pc += 1
+        finally:
+            for frame in reversed(loops):
+                restore(frame)
         if errors:
             raise RuntimeError("Cleanup did not complete: " + "; ".join(str(e) for e in errors))
+
+    def loop_context(self, loops):
+        return [dict(variable=f["variable"], iteration=f["iteration"]) for f in loops]
+
+    def skipped_step(self, step, index, reason, loops):
+        self.sequence += 1
+        record = dict(step_id=step["id"], index=index, execution=self.sequence, phase=step["phase"],
+                      command=step["command"], target=step["target"], loop_path=self.loop_context(loops),
+                      status="SKIP", actual=reason, duration_seconds=0)
+        self.records.append(record)
+        self.emit("step_end", **record)
+
+    def run_step(self, step, index, loops, action=None):
+        phase = step["phase"]
+        if self.control and phase != "cleanup":
+            self.control(step)
+        self.sequence += 1
+        began = time.perf_counter()
+        record = dict(step_id=step["id"], index=index, execution=self.sequence, loop_path=self.loop_context(loops),
+                      phase=phase, command=step["command"], target=step["target"], expected=step["expected"],
+                      description=step["description"], status="RUNNING")
+        self.emit("step_start", **record, message=step["description"] or f"{step['command']} {step['target']}")
+        error = None
+        try:
+            record["input_value"] = resolve(step["value"], self.variables)
+            record["expected"] = resolve(step["expected"], self.variables)
+            actual = action() if action else self.execute(step)
+            self.secret_values.update(credential_values(self.variables))
+            record.update(status="PASS", actual=actual)
+            if step["command"] == "screenshot":
+                record["evidence"] = [actual]
+        except Exception as exc:
+            record.update(status="FAIL" if isinstance(exc, AssertionError) else "ERROR", actual=f"{type(exc).__name__}: {exc}")
+            self.capture(record, index)
+            error = exc
+        record["duration_seconds"] = round(time.perf_counter() - began, 6)
+        record = redact(record, self.secret_values)
+        self.records.append(record)
+        self.emit("step_end", **record)
+        delay = float(self.settings.get("slow_ms", 0)) / 1000
+        if delay and phase != "cleanup":
+            time.sleep(min(delay, 10))
+        return error
 
     def capture(self, record, index):
         evidence = self.output / "evidence"
         evidence.mkdir(parents=True, exist_ok=True)
-        stem = f"step-{index:03}-{record['step_id'][:12]}"
+        stem = f"step-{index:03}-{record['step_id'][:12]}-execution-{self.sequence}"
         paths = []
         for suffix in ("png", "html"):
             path = evidence / f"{stem}.{suffix}"
@@ -150,6 +246,13 @@ class StepEngine:
             self.highlight(element)
             element.click()
             return "Clicked element"
+        if cmd == "press_key":
+            from selenium.webdriver.common.keys import Keys
+            allowed = {"ENTER", "TAB", "ESCAPE", "ARROW_DOWN", "ARROW_UP", "ARROW_LEFT", "ARROW_RIGHT", "SPACE", "BACKSPACE", "DELETE", "HOME", "END", "PAGE_UP", "PAGE_DOWN"}
+            if value not in allowed:
+                raise ValueError("Unsupported key: " + value)
+            self.element(target, timeout).send_keys(getattr(Keys, value))
+            return "Sent key " + value
         if cmd in {"type", "type_exact"}:
             field = self.element(target, timeout)
             if field.get_attribute("type") == "password" and value:
@@ -273,7 +376,7 @@ class StepEngine:
         if cmd == "screenshot":
             directory = self.output / "evidence"
             directory.mkdir(parents=True, exist_ok=True)
-            path = directory / f"screenshot-{step['id']}.png"
+            path = directory / f"screenshot-{step['id']}-{self.sequence}.png"
             if not self.driver.save_screenshot(str(path)):
                 raise RuntimeError("Browser could not save screenshot")
             return str(path)

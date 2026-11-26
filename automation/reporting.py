@@ -83,10 +83,10 @@ def report_html(document, output):
         rows = []
         for step in steps:
             rows.append("<tr>" + "".join(f"<td><pre>{escaped(step.get(key, ''))}</pre></td>" for key in
-                        ("index", "phase", "command", "target", "input_value", "expected", "actual", "status", "duration_seconds"))
+                        ("index", "execution", "loop_path", "phase", "command", "target", "input_value", "expected", "actual", "status", "duration_seconds"))
                         + f"<td>{evidence_links(step.get('evidence', []), output)}</td></tr>")
         table = ('<div class="scroll"><table><thead><tr>' + ''.join(f'<th>{name}</th>' for name in
-                 ("#", "Phase", "Action", "Target", "Input", "Expected", "Actual", "Status", "Seconds", "Evidence"))
+                 ("#", "Exec", "Loop", "Phase", "Action", "Target", "Input", "Expected", "Actual", "Status", "Seconds", "Evidence"))
                  + '</tr></thead><tbody>' + ''.join(rows) + '</tbody></table></div>') if rows else '<p>Legacy workflow: inspect unittest.log and the case trace in logs/ for action details.</p>'
         metrics = ''.join('<li><pre>' + escaped(metric) + '</pre></li>' for metric in record.get("metrics", []))
         row_number = int(record.get("row_index", 0)) + 1
@@ -161,7 +161,7 @@ def write_report(document, output):
         context = {key: record.get(key, "") for key in ("case_id", "level", "browser", "repetition", "row_index", "data_row")}
         steps.extend({**context, **step} for step in planned_results(record))
         metrics.extend({**context, **metric} for metric in record.get("metrics", []))
-    write_csv(output / "steps.csv", ["case_id", "level", "browser", "repetition", "row_index", "data_row", "index", "step_id", "phase", "command", "target",
+    write_csv(output / "steps.csv", ["case_id", "level", "browser", "repetition", "row_index", "data_row", "index", "execution", "loop_path", "step_id", "phase", "command", "target",
               "input_value", "expected", "actual", "status", "duration_seconds", "evidence"], steps)
     write_csv(output / "metrics.csv", ["case_id", "level", "browser", "repetition", "row_index", "data_row", "name", "elapsed_seconds", "maximum_seconds"], metrics)
     (output / "report.html").write_text(report_html(document, output), encoding="utf-8")

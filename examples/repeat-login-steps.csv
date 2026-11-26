@@ -1,0 +1,13 @@
+case_id,title,command,target,value,expected,phase
+DEMO-REPEAT,Repeated login with branches,open,${base_url},,,setup
+,,repeat,iteration,${count},,test
+,,if_equal,${iteration},,1,test
+,,wait_visible,id=username,,,test
+,,else,,,,test
+,,assert_visible,id=password,,,test
+,,end_if,,,,test
+,,type,id=username,${username},,test
+,,type,id=password,${password},,test
+,,click,id=login,,,test
+,,assert_text,id=message,,${expected_message},test
+,,end_repeat,,,,test

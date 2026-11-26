@@ -19,10 +19,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SETTING_KEYS = {"base_url", "locators", "window", "timeout", "page_load_timeout", "command_timeout",
                 "page_load_strategy", "poll_frequency", "opera_chromium_version", "highlight", "slow_ms",
                 "check_connection", "course_id"}
-VALUE_COMMANDS = {"type", "type_exact", "select", "select_value", "check", "upload", "accept_alert", "switch_window"}
-EXPECTED_COMMANDS = {"assert_text", "assert_contains", "assert_value", "assert_checked", "assert_enabled", "assert_url", "stop_timer"}
+VALUE_COMMANDS = {"type", "type_exact", "select", "select_value", "check", "upload", "accept_alert", "switch_window", "repeat", "press_key"}
+EXPECTED_COMMANDS = {"assert_text", "assert_contains", "assert_value", "assert_checked", "assert_enabled", "assert_url", "stop_timer", "if_equal", "if_contains"}
 ELEMENT_COMMANDS = {name for name, info in COMMANDS.items() if info[0]} - {
-    "open", "set_variable", "switch_window", "start_timer", "stop_timer"}
+    "open", "set_variable", "switch_window", "start_timer", "stop_timer", "repeat"}
 
 
 def csv_text(rows, columns):
@@ -211,7 +211,7 @@ def export_python(path, records, settings, *, levels=(1, 2), project_dir=None, l
     files = {"README.md": GUIDE, "requirements.txt": "selenium==4.53.0\n", **datasets, **assets}
     for package in ("automation", "gradebook"):
         for source in sorted((ROOT / package).glob("*.py")):
-            if source.name in {"exporting.py", "nfr.py"}:
+            if source.name in {"exporting.py", "nfr.py", "recording.py"}:
                 continue
             files[f"runtime/{package}/{source.name}"] = source.read_bytes()
     for level in levels:

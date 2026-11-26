@@ -45,7 +45,7 @@ class ReportViewer(tk.Toplevel):
         panes.add(details, weight=2)
         self.cases = self.table(case_frame, [("case", "CASE", 150), ("level", "LEVEL", 60), ("browser", "BROWSER", 100), ("repeat", "REPEAT", 65), ("row", "DATA ROW", 80),
                                            ("status", "STATUS", 90), ("seconds", "SECONDS", 100), ("title", "NAME", 550)])
-        self.steps = self.table(step_frame, [("index", "#", 40), ("phase", "PHASE", 80), ("command", "ACTION", 150),
+        self.steps = self.table(step_frame, [("index", "# / LOOP", 100), ("phase", "PHASE", 80), ("command", "ACTION", 150),
                                            ("target", "TARGET", 200), ("expected", "EXPECTED", 220), ("actual", "ACTUAL", 250), ("status", "STATUS", 100)])
         self.details = dark_text(details, height=6)
         self.details.pack(fill="both", expand=True)
@@ -108,7 +108,8 @@ class ReportViewer(tk.Toplevel):
         self.steps.delete(*self.steps.get_children())
         self.current_steps = planned_results(record)
         for index, step in enumerate(self.current_steps):
-            self.steps.insert("", "end", iid=str(index), values=(step.get("index", ""), step.get("phase", ""), step.get("command", ""),
+            identity = str(step.get("index", "")) + (" · " + "/".join(str(item["iteration"]) for item in step["loop_path"]) if step.get("loop_path") else "")
+            self.steps.insert("", "end", iid=str(index), values=(identity, step.get("phase", ""), step.get("command", ""),
                               step.get("target", ""), text(step.get("expected", "")), text(step.get("actual", "")), step["status"]), tags=(step["status"],))
         self.detail("CASE OUTCOME\n" + record.get("actual", "") + "\n\nCLEANUP\n" + (record.get("cleanup_error") or "No cleanup error")
                     + "\n\nMEASUREMENTS\n" + text(record.get("metrics", [])))

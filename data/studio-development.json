@@ -81,7 +81,9 @@
     {
       "id": "F12",
       "name": "Reusable templates, browser element picker/recorder, conditions and loops",
-      "status": "pending"
+      "status": "implemented_initial_verification",
+      "evidence_summary": "Reusable templates with JSON exchange; owned Chrome recorder/picker with password placeholders, parameterized text and manual assertions; safe structured conditions and bounded repeats. Native capture/replay, document navigation, non-activating picking, both-level exported control flow, template execution and GUI tests pass. 68 development checks pass; final audit remains.",
+      "initial_verification": "artifacts/studio-authoring-verification.json"
     }
   ],
   "invariants": [
@@ -91,10 +93,8 @@
     "Existing user workspace files and running app instances are not overwritten or closed automatically",
     "General-purpose projects do not require Moodle-specific columns or credentials"
   ],
-  "current_stage": "Core, playback, reports, standalone Python export and both-level NFR verified. Reusable templates/recorder/conditions/loops and final regression remain.",
-  "next_features": [
-    "F12"
-  ],
+  "current_stage": "All twelve feature scopes have implementations with initial verification. Final requirement audit, remaining robustness fixes and native Gradebook regression still prevent completion.",
+  "next_features": [],
   "completion_gates": [
     "All twelve feature scopes are implemented and verified, including advanced picker/recorder and conditions/loops.",
     "Imported arbitrary supported spreadsheet schemas can become editable executable tests without Gradebook columns.",
@@ -110,6 +110,9 @@
     "Audit optional browser reuse isolation across multiple origins; fresh profiles remain the GUI default.",
     "Inspect all new NFR and template/picker/recorder views as rendered, including report ZIP evidence links.",
     "Recheck CSV encodings, large-file responsiveness, environment profile undo and legacy-workspace migration.",
-    "Rerun native Gradebook cases on both levels with source oracles unchanged; retain TC-003-036 failure."
+    "Rerun native Gradebook cases on both levels with source oracles unchanged; retain TC-003-036 failure.",
+    "On an empty workspace, hide legacy Gradebook forms and show an accurate unsaved/untitled status.",
+    "Check NFR mode controls clearly indicate that the NFR matrix selects Level/browser rather than the Functional fields.",
+    "Exercise recorder alert handling, manual close/reopen and application-close ownership beyond basic capture/picker/replay."
   ]
 }

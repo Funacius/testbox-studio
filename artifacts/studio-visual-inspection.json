@@ -1,11 +1,17 @@
 {
-  "scope": "Owned Tk views and generated HTML reports inspected visually",
+  "scope": "Owned Tk views and real generated HTML reports inspected visually; remaining final-audit issues are tracked separately",
   "images": [
+    {
+      "path": "artifacts/studio-flow-preview.png",
+      "width": 1616,
+      "height": 1009,
+      "sha256": "b778fe673aed99effbb5aed6679a85bb1d1e1f832278d6939f4c5594bc556fee"
+    },
     {
       "path": "artifacts/studio-html-report-preview.png",
       "width": 1440,
       "height": 1200,
-      "sha256": "3f4fa806261008cf2543234cb2096def73af82e8650f31b0ff2a221720d3f9ef"
+      "sha256": "f9625e9f49ad0c11514d9181de9c223e0c1a952c9bafe96ad29495c944f64a12"
     },
     {
       "path": "artifacts/studio-locators-preview.png",
@@ -17,7 +23,7 @@
       "path": "artifacts/studio-nfr-preview.png",
       "width": 916,
       "height": 739,
-      "sha256": "b924d584f993589fca2c0e60a53c02f59bd126bad5b5fe66404c90232fc44ebd"
+      "sha256": "32c0af24e1fe3a9e7c5beaa606b027b34e70f1dcb10b16ac39be60f5be839f82"
     },
     {
       "path": "artifacts/studio-nfr-report-preview.png",
@@ -26,19 +32,36 @@
       "sha256": "a7b56552b6721000f358e4971af682b085a185c6e40629ff52ad4cb52973735e"
     },
     {
+      "path": "artifacts/studio-recorder-preview.png",
+      "width": 1156,
+      "height": 889,
+      "sha256": "d7ce6f2fdaabd101eaa40afa8761f9a471169b91463713dd70a8f976a71ed938"
+    },
+    {
       "path": "artifacts/studio-report-preview.png",
       "width": 1216,
       "height": 839,
-      "sha256": "79ff1005ab74aee4da5d37b4cd4e1a5cb387802de7eb7d961d90a3209570fcaf"
+      "sha256": "c0f5dbeb09ef3655c7aa303b51124007627dc19c4c93407f361491bf7b47a21c"
     },
     {
       "path": "artifacts/studio-steps-preview.png",
       "width": 1616,
       "height": 1009,
-      "sha256": "d802201b16643f96c283114838eee1db81ce6f229a2a0367a01967c86345bbcc"
+      "sha256": "5fba03da5253a9ee6e9e49b164ac285489457fc667ae3ef4992e2bf4116b0469"
+    },
+    {
+      "path": "artifacts/studio-templates-preview.png",
+      "width": 1066,
+      "height": 759,
+      "sha256": "ef626ee44e40bef5cc7ac66913f3856a7b7833969bca276e2d485e106aff9baf"
+    },
+    {
+      "path": "artifacts/studio-welcome-preview.png",
+      "width": 1616,
+      "height": 1009,
+      "sha256": "d570fcf12d128464c5d7422fd7e3e178d5feddaf20fffb4ead80396acfcb180f"
     }
   ],
-  "verification": "artifacts/studio-nfr-verification.json",
-  "followup": "artifacts/studio-nfr-visual-verification.json",
-  "note": "HTML case labels gained Level identity and metric display rounds to six decimals after the 55-test run. Six targeted checks plus actual Chrome rendering verify this presentation-only follow-up."
+  "verification": "artifacts/studio-authoring-verification.json",
+  "note": "Recorder footer clipping found in initial capture was corrected before the 68-test verification. Preview dialogs are mapped with no activation; no unrelated desktop images are captured."
 }

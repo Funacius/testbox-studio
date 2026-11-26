@@ -45,7 +45,10 @@ def create_browser(name: str, site: dict, headless: bool = False):
         "profile.password_manager_enabled": False,
         "profile.password_manager_leak_detection": False,
     })
-    options.add_argument("--disable-features=PasswordLeakDetection")
+    if site.get("browser_logging"):
+        options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
+        options.unhandled_prompt_behavior = "ignore"
+    options.add_argument("--disable-features=PasswordLeakDetection" + (",BackForwardCache" if site.get("browser_logging") else ""))
     if headless:
         options.add_argument("--headless=new")
         options.add_argument("--disable-gpu")

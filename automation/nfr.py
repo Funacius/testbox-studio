@@ -46,9 +46,15 @@ def checked_nfr(config, records, kind):
             if not isinstance(rule, dict):
                 raise ValueError(f"{record['case_id']}: invalid measurement rule")
             steps = script_data(record, runnable=True)["steps"]
+            from automation.flow import CONTROL, flow_plan
+            plan = flow_plan(steps, "test")
             positions = {s["id"]: i for i, s in enumerate(steps) if s["enabled"] and s["phase"] == "test" and s["command"] != "note"}
             if rule.get("start") not in positions or rule.get("end") not in positions or positions[rule["start"]] > positions[rule["end"]]:
                 raise ValueError(f"{record['case_id']}: choose enabled test steps in order as measurement start/end")
+            for boundary in (rule["start"], rule["end"]):
+                position = positions[boundary]
+                if steps[position]["command"] in CONTROL or any(start < position < end for start, end in plan["ends"].items()):
+                    raise ValueError(f"{record['case_id']}: measurement boundaries must be actions outside conditional/repeat blocks")
             try:
                 maximum = float(rule.get("maximum_seconds", ""))
             except (ValueError, TypeError) as exc:

@@ -46,6 +46,11 @@ def preflight(records, settings):
         for row_number, row in enumerate(data["dataset"], 1):
             values = variables_for(record, row, settings, "preflight")
             for phase in PHASES:
+                from automation.flow import check_budget, repeat_count
+                try:
+                    check_budget(data["steps"], phase, values)
+                except ValueError as exc:
+                    problems.append(f"{record['case_id']}, data row {row_number}: {exc}")
                 for index, step in enumerate(data["steps"], 1):
                     if not step["enabled"] or step["phase"] != phase:
                         continue
@@ -54,13 +59,17 @@ def preflight(records, settings):
                         resolve(step["expected"], values)
                         if COMMANDS[step["command"]][0] and not target:
                             raise ValueError("Target resolves to an empty value")
-                        if COMMANDS[step["command"]][0] and step["command"] not in {"open", "set_variable", "switch_window", "start_timer", "stop_timer"}:
+                        if COMMANDS[step["command"]][0] and step["command"] not in {"open", "set_variable", "switch_window", "start_timer", "stop_timer", "repeat"}:
                             _, selector = locator(target, settings.get("locators", {}))
                             resolve(selector, values)
                         if step["command"] in {"store_text", "store_value"}:
                             values[value] = "<runtime value>"
                         if step["command"] == "set_variable":
                             values[target] = value
+                        if step["command"] == "repeat":
+                            if not value.startswith("<runtime"):
+                                repeat_count(value)
+                            values[target] = "<runtime loop index>"
                     except ValueError as exc:
                         problems.append(f"{record['case_id']}, data row {row_number}, step {index}: {exc}")
     if problems:
@@ -140,6 +149,10 @@ class ScriptCase(unittest.TestCase):
         try:
             self.engine.run_phase(self.data["steps"], "setup")
             self.engine.run_phase(self.data["steps"], "test")
+            from automation.flow import CONTROL
+            if not any(r["phase"] == "test" and r["status"] == "PASS" and r["command"] not in CONTROL | {"note"}
+                       for r in self.engine.records):
+                raise ValueError("No test action executed: every action was disabled or its branch/repeat was skipped")
         except ExecutionStopped as exc:
             raise unittest.SkipTest(str(exc)) from exc
         self.completed_main = True

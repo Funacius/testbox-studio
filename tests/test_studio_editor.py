@@ -170,6 +170,74 @@ class StudioEditorTests(unittest.TestCase):
             if dialog.winfo_exists():
                 dialog.destroy()
 
+    def test_template_creation_keeps_the_original_case_and_supports_undo(self):
+        app = self.app
+        app._show_node(self.uid)
+        app.tree.selection_set(self.uid)
+        original = json.loads(json.dumps(app.workspace.find(self.uid)))
+        fake = type("Dialog", (), {"result": dict(templates={"Reusable": self.record}, record=self.record)})()
+        with patch("studio.app.TemplateDialog", return_value=fake):
+            app._templates()
+        created_uid = app.editor_uid
+        self.assertNotEqual(created_uid, self.uid)
+        self.assertIn("Reusable", app.workspace.settings["templates"])
+        self.assertEqual(app.workspace.find(self.uid), original)
+        app._undo()
+        self.assertNotIn(created_uid, {node["uid"] for node, _ in app.workspace.walk()})
+
+    def test_recorder_applies_steps_variables_and_locator_without_replacing_sources(self):
+        app = self.app
+        app._show_node(self.uid)
+        app.tree.selection_set(self.uid)
+        original = json.loads(json.dumps(app.workspace.find(self.uid)))
+        result = dict(steps=[new_step("type", target="@captured", value="${recorded_input_1}")],
+            variables={"recorded_input_1": "  0007  "}, locators={"captured": "id=name"}, destination="Append to selected case")
+        fake = type("Dialog", (), {"result": result})()
+        with patch("studio.app.RecorderDialog", return_value=fake):
+            app._recorder()
+        node = app.workspace.find(self.uid)
+        self.assertEqual(node["steps"], original["steps"])
+        self.assertEqual(len(json.loads(node["record"]["actions_json"])), 3)
+        self.assertEqual(json.loads(node["record"]["variables_json"])["recorded_input_1"], "  0007  ")
+        self.assertEqual(app.workspace.settings["locators"]["captured"], "id=name")
+        self.assertTrue(app._save())
+        self.assertEqual(Workspace.load(self.path).find(self.uid)["record"], node["record"])
+
+    def test_first_launch_without_workspace_is_general_and_opens_no_browser(self):
+        path = Path(self.directory.name) / "new-install.json"
+        with patch("studio.app.subprocess.Popen") as process:
+            other = Studio(path)
+        try:
+            other.withdraw()
+            self.assertEqual(other.workspace.rows(), [])
+            self.assertEqual(other.run_vars["base_url"].get(), "")
+            self.assertEqual(other.run_vars["username"].get(), "")
+            self.assertFalse(path.exists())
+            process.assert_not_called()
+        finally:
+            other.destroy()
+
+    def test_recorder_and_template_dialogs_are_reviewable_without_opening_a_browser(self):
+        from studio.recorder_dialog import RecorderDialog
+        from studio.templates import TemplateDialog
+        with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"), \
+             patch("tkinter.Toplevel.deiconify"), patch("studio.recorder_dialog.threading.Thread.start"):
+            dialog = RecorderDialog(self.app, {}, can_append=True)
+            template = TemplateDialog(self.app, {}, self.record)
+        try:
+            dialog.target.set("id=name")
+            dialog.command.set("assert_value")
+            dialog.expected.set("  0007  ")
+            dialog.add_step()
+            self.assertEqual(dialog.buffer.steps[0]["expected"], "  0007  ")
+            template.list.selection_set("1")
+            template.finish(True)
+            self.assertEqual(template.result["record"]["title"], "Open page and verify body")
+        finally:
+            dialog.destroy()
+            if template.winfo_exists():
+                template.destroy()
+
     def test_dataset_and_variables_grid_apply_and_undo_exact_values(self):
         app = self.app
         app._show_node(self.uid)
