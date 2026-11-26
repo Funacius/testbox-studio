@@ -53,6 +53,8 @@ RECORDER_HTML = b'''<!doctype html><meta charset="utf-8"><title>Recorder fixture
 <output id="message"></output><input type="checkbox" id="checked">
 <select id="kind"><option value="a">Alpha</option><option value="b">Beta</option></select>
 <a id="next" href="/next">Next page</a>
+<button id="alert" onclick="alert('hello')">Alert</button>
+<button id="prompt" onclick="document.getElementById('message').textContent=prompt('name')||'dismissed'">Prompt</button>
 '''
 
 
@@ -68,6 +70,50 @@ class RecorderHandler(BaseHTTPRequestHandler):
 
 @unittest.skipUnless(os.environ.get("TESTBOX_BROWSER_TESTS") == "1", "Set TESTBOX_BROWSER_TESTS=1 for actual Chrome recorder verification")
 class RecordingBrowserTests(unittest.TestCase):
+    def test_alerts_manual_window_close_reopen_and_synthetic_events(self):
+        from selenium.common.exceptions import UnexpectedAlertPresentException
+        server = ThreadingHTTPServer(("127.0.0.1", 0), RecorderHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        session = RecorderSession(headless=True)
+        url = f"http://127.0.0.1:{server.server_port}"
+        try:
+            session.open(url)
+            session.poll()
+            session.set_mode("record")
+            session.driver.execute_script("const e=document.getElementById('name');e.value='synthetic';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));")
+            self.assertFalse(any(e.get("event") == "step" for e in session.poll()))
+            session.driver.find_element("id", "alert").click()
+            try:
+                queued = session.poll()
+            except UnexpectedAlertPresentException:
+                queued = []
+            self.assertEqual(session.driver.switch_to.alert.text, "hello")
+            step = session.handle_alert("accept_alert")
+            self.assertEqual(step["command"], "accept_alert")
+            self.assertTrue(any(e.get("command") == "click" for e in queued + session.poll()))
+            session.driver.find_element("id", "prompt").click()
+            session.handle_alert("accept_alert", "native reply")
+            self.assertEqual(session.driver.find_element("id", "message").text, "native reply")
+            session.driver.find_element("id", "prompt").click()
+            session.handle_alert("dismiss_alert")
+            self.assertEqual(session.driver.find_element("id", "message").text, "dismissed")
+            old_driver = session.driver
+            session.driver.close()
+            session.open(url)
+            self.assertIsNot(session.driver, old_driver)
+            self.assertIsNotNone(session.script_id)
+            session.set_mode("record")
+            session.driver.find_element("id", "name").send_keys("reopened")
+            session.driver.find_element("id", "save").click()
+            session.set_mode("idle")
+            self.assertTrue(any(e.get("value") == "reopened" for e in session.poll()))
+        finally:
+            session.close()
+            server.shutdown()
+            server.server_close()
+            thread.join()
+
     def test_builtin_login_template_runs_both_dataset_rows_against_its_documented_demo(self):
         import contextlib
         import io
@@ -96,7 +142,6 @@ class RecordingBrowserTests(unittest.TestCase):
         from automation.engine import StepEngine
         from gradebook.browser import close_browser, create_browser
         from selenium.webdriver.common.keys import Keys
-        from selenium.webdriver.support.ui import Select
         server = ThreadingHTTPServer(("127.0.0.1", 0), RecorderHandler)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -112,7 +157,11 @@ class RecordingBrowserTests(unittest.TestCase):
             session.driver.find_element("id", "password").send_keys(Keys.TAB)
             session.driver.find_element("id", "save").click()
             session.driver.find_element("id", "checked").click()
-            Select(session.driver.find_element("id", "kind")).select_by_value("b")
+            # Selenium Select synthesizes an untrusted change event in Chrome.
+            # Exercise native keyboard selection, as a recorder user would.
+            kind = session.driver.find_element("id", "kind")
+            kind.send_keys(Keys.END, Keys.TAB)
+            self.assertEqual(kind.get_property("value"), "b")
             session.set_mode("idle")
             events = session.poll()
             self.assertNotIn("private-recorder-secret-93741", json.dumps(events))

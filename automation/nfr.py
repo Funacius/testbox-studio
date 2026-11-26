@@ -93,7 +93,7 @@ def summarize(records, config, kind, planned, interrupted=False):
         key = (record["level"], record["browser"], record["case_id"], record.get("row_index", 0))
         group = groups.setdefault(key, dict(level=key[0], browser=key[1], case_id=key[2], data_row=key[3] + 1,
             executions=0, pass_count=0, samples=[]))
-        group["executions"] += 1
+        group["executions"] += record["status"] != "NOT_RUN"
         group["pass_count"] += record["status"] == "PASS"
         if kind == "elapsed":
             metrics = [m for m in record.get("metrics", []) if m.get("name") == config["measurements"][record["case_id"]].get("timer_name")]
@@ -107,9 +107,10 @@ def summarize(records, config, kind, planned, interrupted=False):
                 limit_seconds=config["measurements"][group["case_id"]]["maximum_seconds"])
         group["successful"] = group["executions"] == config["repetitions"] and group["pass_count"] == config["repetitions"] and (kind != "elapsed" or
             len(values) == config["repetitions"] and all(math.isfinite(value) and 0 <= value <= group["limit_seconds"] for value in values))
-    success = not interrupted and bool(records) and len(records) == planned and all(g["successful"] for g in groups.values())
+    completed = sum(record["status"] != "NOT_RUN" for record in records)
+    success = not interrupted and bool(records) and completed == planned and all(g["successful"] for g in groups.values())
     return dict(kind=kind, successful=success, levels=config["levels"], browsers=config["browsers"],
-        repetitions=config["repetitions"], planned_executions=planned, completed_executions=len(records),
+        repetitions=config["repetitions"], planned_executions=planned, completed_executions=completed,
         acceptance="Every functional assertion must pass in every selected browser/level/iteration; elapsed mode additionally requires every measurement within its per-case limit.",
         percentile_method="nearest-rank p95 (ceil(0.95*n)); small samples are descriptive, not a load-test benchmark",
         groups=list(groups.values()))
@@ -193,19 +194,24 @@ def main(argv=None):
                     failures.append(f"Level {level}/{browser}/repeat {repetition}: process exited {code} without report; inspect {child_dir.relative_to(output)}/console.log")
                 if args.stop_file and args.stop_file.exists():
                     stopped = True
+    from automation.outcomes import complete_matrix, status_counts
+    results = complete_matrix(results, records, config["levels"], config["browsers"], config["repetitions"])
+    completed = sum(record["status"] != "NOT_RUN" for record in results)
     summary = summarize(results, config, args.kind, planned, stopped)
     successful = summary["successful"] and not failures
     summary.update(successful=successful, infrastructure_errors=failures)
     metadata = dict(run_id=run_id, executed_at=datetime.now(BANGKOK).isoformat(), type="nfr_" + args.kind,
         levels=config["levels"], browsers=config["browsers"], repetitions=config["repetitions"], headless=args.headless,
-        planned_executions=planned, completed_executions=len(results), stopped=stopped,
+        planned_executions=planned, completed_executions=completed, stopped=stopped,
         source_project=str(args.project.resolve()), slow_ms=settings.get("slow_ms", 0), pause_seconds=0,
         level_execution="Level 1 runs exported Python definitions; Level 2 reads external JSON definitions.")
     (output / "nfr-summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (output / "unittest.log").write_text("\n\n".join(logs + failures), encoding="utf-8")
-    write_report(dict(metadata=metadata, successful=successful, counts={status: sum(r["status"] == status for r in results)
-        for status in ("PASS", "FAIL", "ERROR", "SKIP")}, results=results, nfr=summary), output)
-    emit("run_end", successful=successful, stopped=stopped, output=str(output), total=len(results))
+    write_report(dict(metadata=metadata, successful=successful, counts=status_counts(results), results=results, nfr=summary), output)
+    for record in results:
+        if record["status"] == "NOT_RUN":
+            emit("case_not_run", **record)
+    emit("run_end", successful=successful, stopped=stopped, output=str(output), total=completed)
     print(f"NFR {'PASS' if successful else 'FAIL / INCOMPLETE'}: {output}")
     return 0 if successful else 1
 

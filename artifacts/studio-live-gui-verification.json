@@ -1,0 +1,18 @@
+{
+  "successful": true,
+  "scope": "Actual Studio Run -> immutable snapshot -> headless Chrome -> live GUI events -> three dataset results",
+  "report": "results/studio-20261126-134153-b5ba136c/automation-20261126-134153-2347985b/results.json",
+  "counts": {
+    "PASS": 3,
+    "FAIL": 0,
+    "ERROR": 0,
+    "SKIP": 0
+  },
+  "gui_completed": 3,
+  "gui_planned": 3,
+  "gui_finish_label": "Finished · 3/3 · exit 0",
+  "previews": [
+    "artifacts/studio-live-steps-preview.png",
+    "artifacts/studio-live-results-preview.png"
+  ]
+}

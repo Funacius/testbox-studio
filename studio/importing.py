@@ -19,25 +19,41 @@ ALIASES = {"case_id": ("caseid", "testcaseid", "testid", "id"), "title": ("title
            "description": ("description", "notes"), "folder_path": ("folder", "folderpath", "suite")}
 
 
-def read_grids(path: Path):
+def read_grids(path: Path, encoding="auto", cancelled=None):
     """Return all sheets without silently picking a member's feature."""
     suffix = path.suffix.lower()
+    def check_cancel():
+        if cancelled is not None and cancelled.is_set():
+            raise ValueError("Import canceled")
+    check_cancel()
     if suffix == ".csv":
-        with path.open(encoding="utf-8-sig", newline="") as stream:
+        if encoding == "auto":
+            with path.open("rb") as stream:
+                prefix = stream.read(4)
+            encoding = "utf-32" if prefix in {b"\xff\xfe\x00\x00", b"\x00\x00\xfe\xff"} else "utf-16" if prefix.startswith((b"\xff\xfe", b"\xfe\xff")) else "utf-8-sig"
+        csv.field_size_limit(max(csv.field_size_limit(), 10 * 1024 * 1024))
+        with path.open(encoding=encoding, newline="") as stream:
             sample = stream.read(8192)
             stream.seek(0)
             try:
                 dialect = csv.Sniffer().sniff(sample, delimiters=",;\t")
             except csv.Error:
                 dialect = csv.excel
-            return [dict(name=path.stem, rows=list(csv.reader(stream, dialect)), formulas=[])]
+            rows = []
+            for i, row in enumerate(csv.reader(stream, dialect)):
+                if i % 256 == 0:
+                    check_cancel()
+                rows.append(row)
+            return [dict(name=path.stem, rows=rows, formulas=[], csv_encoding=encoding)]
     if suffix == ".xlsx":
         workbook = _module("openpyxl").load_workbook(path, read_only=True, data_only=False)
         result = []
         try:
             for sheet in workbook:
                 rows, formulas = [], []
-                for row in sheet:
+                for i, row in enumerate(sheet):
+                    if i % 256 == 0:
+                        check_cancel()
                     rows.append([_string(cell.value) for cell in row])
                     formulas.extend((cell.row, cell.column) for cell in row if cell.data_type == "f")
                 result.append(dict(name=sheet.title, rows=rows, formulas=formulas))
@@ -47,8 +63,15 @@ def read_grids(path: Path):
     if suffix == ".xls":
         workbook = _module("xlrd").open_workbook(str(path), on_demand=True)
         try:
-            return [dict(name=s.name, rows=[[_string(v) for v in s.row_values(i)] for i in range(s.nrows)], formulas=[])
-                    for s in workbook.sheets()]
+            result = []
+            for sheet in workbook.sheets():
+                rows = []
+                for i in range(sheet.nrows):
+                    if i % 256 == 0:
+                        check_cancel()
+                    rows.append([_string(v) for v in sheet.row_values(i)])
+                result.append(dict(name=sheet.name, rows=rows, formulas=[]))
+            return result
         finally:
             workbook.release_resources()
     raise ValueError("Choose a CSV, XLS or XLSX file")

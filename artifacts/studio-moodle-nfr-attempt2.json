@@ -1,0 +1,54 @@
+{
+  "successful": false,
+  "suites": [
+    {
+      "kind": "elapsed",
+      "successful": false,
+      "report": "results/studio-moodle-nfr-20261126-132426/elapsed/nfr-20261126-132426-795c7598/results.json",
+      "counts": {
+        "PASS": 0,
+        "FAIL": 0,
+        "ERROR": 6,
+        "SKIP": 0
+      },
+      "nfr": {
+        "kind": "elapsed",
+        "successful": false,
+        "levels": [
+          1,
+          2
+        ],
+        "browsers": [
+          "chrome"
+        ],
+        "repetitions": 3,
+        "planned_executions": 6,
+        "completed_executions": 6,
+        "acceptance": "Every functional assertion must pass in every selected browser/level/iteration; elapsed mode additionally requires every measurement within its per-case limit.",
+        "percentile_method": "nearest-rank p95 (ceil(0.95*n)); small samples are descriptive, not a load-test benchmark",
+        "groups": [
+          {
+            "level": 1,
+            "browser": "chrome",
+            "case_id": "GRADEBOOK-SAVE-NFR",
+            "data_row": 1,
+            "executions": 3,
+            "pass_count": 0,
+            "successful": false
+          },
+          {
+            "level": 2,
+            "browser": "chrome",
+            "case_id": "GRADEBOOK-SAVE-NFR",
+            "data_row": 1,
+            "executions": 3,
+            "pass_count": 0,
+            "successful": false
+          }
+        ],
+        "infrastructure_errors": []
+      }
+    }
+  ],
+  "output": "results/studio-moodle-nfr-20261126-132426"
+}

@@ -1,0 +1,48 @@
+{
+  "successful": true,
+  "executed_at": "2026-11-26T06:52:25.113892+00:00",
+  "fixture_manual_items_after_verification": [],
+  "fixture_evidence": "artifacts/studio-moodle-nfr-verification.json",
+  "report_zips": [
+    {
+      "path": "artifacts/gradebook-compatibility-report.zip",
+      "sha256": "a00fafb987e6a7a01433f666dd53f55ecba3c3f53cc1d536aa0b1f18db31f2c4",
+      "counts": {
+        "PASS": 30,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    },
+    {
+      "path": "artifacts/gradebook-elapsed-report.zip",
+      "sha256": "52a0ca2a378348c310f481c15d36718f8f282c80d6e7064ddb5cdddf748e32a3",
+      "counts": {
+        "PASS": 6,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    },
+    {
+      "path": "artifacts/gradebook-level1-report.zip",
+      "sha256": "8a463492a78439bec170b58396cdf3c2a85fd564224dd24ae1a8b51886f119d4",
+      "counts": {
+        "PASS": 35,
+        "FAIL": 1,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    },
+    {
+      "path": "artifacts/gradebook-level2-report.zip",
+      "sha256": "6e648c5250cb9f27b04c62c87152d960f466f4bebe0e3533a4aa97177848839f",
+      "counts": {
+        "PASS": 35,
+        "FAIL": 1,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    }
+  ]
+}

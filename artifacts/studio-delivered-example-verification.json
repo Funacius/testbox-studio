@@ -1,0 +1,28 @@
+{
+  "successful": true,
+  "archive": "artifacts/testbox-login-python.zip",
+  "sha256": "cb1013fd0cf9d9ae3d5a843e0c74c88c01f1987a84fe20ea5d3fb2eb10d28189",
+  "executed_outside_repository": true,
+  "suites": [
+    {
+      "level": 1,
+      "report": "results/delivered-example-final-20261126/level1/automation-20261126-132803-af774429/results.json",
+      "counts": {
+        "PASS": 3,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    },
+    {
+      "level": 2,
+      "report": "results/delivered-example-final-20261126/level2/automation-20261126-132824-d4c71d53/results.json",
+      "counts": {
+        "PASS": 3,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    }
+  ]
+}

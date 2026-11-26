@@ -45,8 +45,14 @@ def create_browser(name: str, site: dict, headless: bool = False):
         "profile.password_manager_enabled": False,
         "profile.password_manager_leak_detection": False,
     })
+    if site.get("browser_logging") or site.get("isolation_logging"):
+        logs = {}
+        if site.get("browser_logging"):
+            logs["browser"] = "ALL"
+        if site.get("isolation_logging"):
+            logs["performance"] = "ALL"
+        options.set_capability("ms:loggingPrefs" if name == "edge" else "goog:loggingPrefs", logs)
     if site.get("browser_logging"):
-        options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
         options.unhandled_prompt_behavior = "ignore"
     options.add_argument("--disable-features=PasswordLeakDetection" + (",BackForwardCache" if site.get("browser_logging") else ""))
     if headless:

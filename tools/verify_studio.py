@@ -61,7 +61,9 @@ def screenshots(output):
     captures = []
     for view, name in (("steps", "studio-steps-preview.png"), ("locators", "studio-locators-preview.png"), ("report", "studio-report-preview.png"),
                        ("nfr", "studio-nfr-preview.png"), ("templates", "studio-templates-preview.png"), ("recorder", "studio-recorder-preview.png"),
-                       ("welcome", "studio-welcome-preview.png"), ("flow", "studio-flow-preview.png")):
+                       ("welcome", "studio-welcome-preview.png"), ("flow", "studio-flow-preview.png"),
+                       ("data", "studio-data-preview.png"), ("loading", "studio-loading-preview.png"),
+                       ("import", "studio-import-preview.png"), ("small", "studio-small-window-preview.png")):
         path = ROOT / "artifacts" / name
         args = [sys.executable, str(ROOT / "tools/capture_studio_preview.py"), "--view", view, "--output", str(path)]
         if view == "report":

@@ -1,0 +1,507 @@
+{
+  "successful": true,
+  "suites": [
+    {
+      "kind": "elapsed",
+      "successful": true,
+      "report": "results/studio-moodle-nfr-20261126-132730/elapsed/nfr-20261126-132730-de17bdb7/results.json",
+      "counts": {
+        "PASS": 6,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "nfr": {
+        "kind": "elapsed",
+        "successful": true,
+        "levels": [
+          1,
+          2
+        ],
+        "browsers": [
+          "chrome"
+        ],
+        "repetitions": 3,
+        "planned_executions": 6,
+        "completed_executions": 6,
+        "acceptance": "Every functional assertion must pass in every selected browser/level/iteration; elapsed mode additionally requires every measurement within its per-case limit.",
+        "percentile_method": "nearest-rank p95 (ceil(0.95*n)); small samples are descriptive, not a load-test benchmark",
+        "groups": [
+          {
+            "level": 1,
+            "browser": "chrome",
+            "case_id": "GRADEBOOK-SAVE-NFR",
+            "data_row": 1,
+            "executions": 3,
+            "pass_count": 3,
+            "samples_seconds": [
+              0.686503,
+              0.710653,
+              0.719652
+            ],
+            "minimum_seconds": 0.686503,
+            "median_seconds": 0.710653,
+            "p95_seconds": 0.719652,
+            "maximum_seconds": 0.719652,
+            "limit_seconds": 5.0,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "chrome",
+            "case_id": "GRADEBOOK-SAVE-NFR",
+            "data_row": 1,
+            "executions": 3,
+            "pass_count": 3,
+            "samples_seconds": [
+              0.743063,
+              0.75573,
+              0.77948
+            ],
+            "minimum_seconds": 0.743063,
+            "median_seconds": 0.75573,
+            "p95_seconds": 0.77948,
+            "maximum_seconds": 0.77948,
+            "limit_seconds": 5.0,
+            "successful": true
+          }
+        ],
+        "infrastructure_errors": []
+      }
+    },
+    {
+      "kind": "compatibility",
+      "successful": true,
+      "report": "results/studio-moodle-compatibility-20261126-133535/nfr-20261126-133535-247d7ce0/results.json",
+      "counts": {
+        "PASS": 30,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "nfr": {
+        "kind": "compatibility",
+        "successful": true,
+        "levels": [
+          1,
+          2
+        ],
+        "browsers": [
+          "chrome",
+          "edge",
+          "opera"
+        ],
+        "repetitions": 1,
+        "planned_executions": 30,
+        "completed_executions": 30,
+        "acceptance": "Every functional assertion must pass in every selected browser/level/iteration; elapsed mode additionally requires every measurement within its per-case limit.",
+        "percentile_method": "nearest-rank p95 (ceil(0.95*n)); small samples are descriptive, not a load-test benchmark",
+        "groups": [
+          {
+            "level": 1,
+            "browser": "chrome",
+            "case_id": "TC-003-007",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "chrome",
+            "case_id": "TC-003-011",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "chrome",
+            "case_id": "TC-003-012",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "chrome",
+            "case_id": "TC-003-018",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "chrome",
+            "case_id": "TC-003-029",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "edge",
+            "case_id": "TC-003-007",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "edge",
+            "case_id": "TC-003-011",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "edge",
+            "case_id": "TC-003-012",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "edge",
+            "case_id": "TC-003-018",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "edge",
+            "case_id": "TC-003-029",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "opera",
+            "case_id": "TC-003-007",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "opera",
+            "case_id": "TC-003-011",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "opera",
+            "case_id": "TC-003-012",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "opera",
+            "case_id": "TC-003-018",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 1,
+            "browser": "opera",
+            "case_id": "TC-003-029",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "chrome",
+            "case_id": "TC-003-007",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "chrome",
+            "case_id": "TC-003-011",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "chrome",
+            "case_id": "TC-003-012",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "chrome",
+            "case_id": "TC-003-018",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "chrome",
+            "case_id": "TC-003-029",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "edge",
+            "case_id": "TC-003-007",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "edge",
+            "case_id": "TC-003-011",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "edge",
+            "case_id": "TC-003-012",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "edge",
+            "case_id": "TC-003-018",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "edge",
+            "case_id": "TC-003-029",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "opera",
+            "case_id": "TC-003-007",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "opera",
+            "case_id": "TC-003-011",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "opera",
+            "case_id": "TC-003-012",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "opera",
+            "case_id": "TC-003-018",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          },
+          {
+            "level": 2,
+            "browser": "opera",
+            "case_id": "TC-003-029",
+            "data_row": 1,
+            "executions": 1,
+            "pass_count": 1,
+            "successful": true
+          }
+        ],
+        "infrastructure_errors": []
+      },
+      "capabilities": [
+        {
+          "level": 1,
+          "browser": "chrome",
+          "capabilities": {
+            "browserName": "chrome",
+            "browserVersion": "158.0.8127.88",
+            "platformName": "windows",
+            "window": {
+              "height": 900,
+              "width": 1440,
+              "x": 10,
+              "y": 10
+            },
+            "viewport": {
+              "devicePixelRatio": 1,
+              "height": 900,
+              "width": 1440
+            },
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "level": 1,
+          "browser": "edge",
+          "capabilities": {
+            "browserName": "MicrosoftEdge",
+            "browserVersion": "158.0.4370.33",
+            "platformName": "windows",
+            "window": {
+              "height": 900,
+              "width": 1440,
+              "x": 10,
+              "y": 10
+            },
+            "viewport": {
+              "devicePixelRatio": 1,
+              "height": 900,
+              "width": 1440
+            },
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36 Edg/158.0.0.0"
+          }
+        },
+        {
+          "level": 1,
+          "browser": "opera",
+          "capabilities": {
+            "browserName": "chrome",
+            "browserVersion": "157.0.8103.79",
+            "platformName": "windows",
+            "window": {
+              "height": 900,
+              "width": 1440,
+              "x": -8,
+              "y": -8
+            },
+            "viewport": {
+              "devicePixelRatio": 1,
+              "height": 900,
+              "width": 1440
+            },
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 OPR/140.0.0.0"
+          }
+        },
+        {
+          "level": 2,
+          "browser": "chrome",
+          "capabilities": {
+            "browserName": "chrome",
+            "browserVersion": "158.0.8127.88",
+            "platformName": "windows",
+            "window": {
+              "height": 900,
+              "width": 1440,
+              "x": 10,
+              "y": 10
+            },
+            "viewport": {
+              "devicePixelRatio": 1,
+              "height": 900,
+              "width": 1440
+            },
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36"
+          }
+        },
+        {
+          "level": 2,
+          "browser": "edge",
+          "capabilities": {
+            "browserName": "MicrosoftEdge",
+            "browserVersion": "158.0.4370.33",
+            "platformName": "windows",
+            "window": {
+              "height": 900,
+              "width": 1440,
+              "x": 10,
+              "y": 10
+            },
+            "viewport": {
+              "devicePixelRatio": 1,
+              "height": 900,
+              "width": 1440
+            },
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36 Edg/158.0.0.0"
+          }
+        },
+        {
+          "level": 2,
+          "browser": "opera",
+          "capabilities": {
+            "browserName": "chrome",
+            "browserVersion": "157.0.8103.79",
+            "platformName": "windows",
+            "window": {
+              "height": 900,
+              "width": 1440,
+              "x": -8,
+              "y": -8
+            },
+            "viewport": {
+              "devicePixelRatio": 1,
+              "height": 900,
+              "width": 1440
+            },
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 OPR/140.0.0.0"
+          }
+        }
+      ]
+    }
+  ],
+  "compatibility_output": "results/studio-moodle-compatibility-20261126-133535",
+  "note": "Elapsed report and compatibility report use separate sequential runs. GX updated to Chromium 157; previous 155-driver attempt retained separately.",
+  "release_certified": false,
+  "superseded_reason": "Elapsed assertions passed, but a subsequent persisted-state audit found seven owned items. The elapsed example now waits positively for the saved row before deleting it; final evidence is in studio-moodle-nfr-verification.json."
+}

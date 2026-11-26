@@ -1,0 +1,62 @@
+{
+  "successful": false,
+  "suites": [
+    {
+      "kind": "elapsed",
+      "successful": false,
+      "report": "results/studio-moodle-nfr-20261126-132244/elapsed/nfr-20261126-132244-ec3c8c2c/results.json",
+      "counts": {
+        "PASS": 0,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0,
+        "NOT_RUN": 6
+      },
+      "nfr": {
+        "kind": "elapsed",
+        "successful": false,
+        "levels": [
+          1,
+          2
+        ],
+        "browsers": [
+          "chrome"
+        ],
+        "repetitions": 3,
+        "planned_executions": 6,
+        "completed_executions": 0,
+        "acceptance": "Every functional assertion must pass in every selected browser/level/iteration; elapsed mode additionally requires every measurement within its per-case limit.",
+        "percentile_method": "nearest-rank p95 (ceil(0.95*n)); small samples are descriptive, not a load-test benchmark",
+        "groups": [
+          {
+            "level": 1,
+            "browser": "chrome",
+            "case_id": "GRADEBOOK-SAVE-NFR",
+            "data_row": 1,
+            "executions": 0,
+            "pass_count": 0,
+            "successful": false
+          },
+          {
+            "level": 2,
+            "browser": "chrome",
+            "case_id": "GRADEBOOK-SAVE-NFR",
+            "data_row": 1,
+            "executions": 0,
+            "pass_count": 0,
+            "successful": false
+          }
+        ],
+        "infrastructure_errors": [
+          "Level 1/chrome/repeat 1: process exited 2 without report; inspect runs\\level1-chrome-repeat1/console.log",
+          "Level 1/chrome/repeat 2: process exited 2 without report; inspect runs\\level1-chrome-repeat2/console.log",
+          "Level 1/chrome/repeat 3: process exited 2 without report; inspect runs\\level1-chrome-repeat3/console.log",
+          "Level 2/chrome/repeat 1: process exited 2 without report; inspect runs\\level2-chrome-repeat1/console.log",
+          "Level 2/chrome/repeat 2: process exited 2 without report; inspect runs\\level2-chrome-repeat2/console.log",
+          "Level 2/chrome/repeat 3: process exited 2 without report; inspect runs\\level2-chrome-repeat3/console.log"
+        ]
+      }
+    }
+  ],
+  "output": "results/studio-moodle-nfr-20261126-132244"
+}

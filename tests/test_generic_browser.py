@@ -171,6 +171,34 @@ class BrowserContractTests(unittest.TestCase):
         finally:
             close_browser(driver)
 
+    def test_offscreen_native_click_waits_for_overlay_and_does_not_force_a_covered_element(self):
+        from automation.engine import StepEngine
+        from gradebook.browser import close_browser, create_browser
+        from selenium.common.exceptions import TimeoutException
+        driver = create_browser("chrome", {}, headless=True)
+        try:
+            driver.get(self.url)
+            driver.execute_script('''
+                const button=document.createElement('button');button.id='offscreen';button.textContent='Save below fold';
+                button.style.cssText='display:block;margin-top:1800px;margin-bottom:300px';
+                window.nativeClicks=0;button.onclick=e=>{if(e.isTrusted)window.nativeClicks++};document.body.append(button);
+                const cover=document.createElement('div');cover.id='cover';cover.style.cssText='position:fixed;inset:0;z-index:99999;background:#333';
+                document.body.append(cover);setTimeout(()=>cover.remove(),400);
+            ''')
+            with tempfile.TemporaryDirectory() as directory:
+                engine = StepEngine(driver, {}, output=directory)
+                engine.run_phase([new_step("click", target="id=offscreen", timeout=3),
+                                  new_step("check", target="id=checked", value="true")], "test")
+                self.assertEqual(driver.execute_script("return window.nativeClicks"), 1)
+                self.assertTrue(driver.find_element("id", "checked").is_selected())
+                driver.execute_script("const c=document.createElement('div');c.style.cssText='position:fixed;inset:0;z-index:99999';document.body.append(c)")
+                with self.assertRaises(TimeoutException):
+                    engine.run_phase([new_step("click", target="id=offscreen", timeout=.2)], "test")
+                self.assertEqual(driver.execute_script("return window.nativeClicks"), 1)
+                self.assertEqual(engine.records[-1]["status"], "ERROR")
+        finally:
+            close_browser(driver)
+
     def test_frame_window_alert_upload_stored_variables_and_explicit_screenshot(self):
         from automation.engine import StepEngine
         from gradebook.browser import close_browser, create_browser
@@ -286,7 +314,11 @@ class BrowserContractTests(unittest.TestCase):
                 self.assertTrue(report["metadata"]["stopped"])
                 self.assertFalse(report["successful"])
                 self.assertEqual(report["metadata"]["planned_executions"], 2)
-                self.assertEqual(report["counts"], {"PASS": 0, "FAIL": 0, "ERROR": 0, "SKIP": 1})
+                self.assertEqual(report["counts"], {"PASS": 0, "FAIL": 0, "ERROR": 0, "SKIP": 1, "NOT_RUN": 1})
+                self.assertEqual(report["metadata"]["completed_executions"], 1)
+                self.assertEqual(report["results"][1]["status"], "NOT_RUN")
+                self.assertEqual(report["results"][1]["row_index"], 1)
+                self.assertNotIn("value", report["results"][1]["expected_json"]["steps"][1])
                 result = report["results"][0]
                 self.assertEqual(result["cleanup_error"], "")
                 self.assertEqual([s["status"] for s in result["step_results"] if s["phase"] == "cleanup"], ["PASS", "PASS"])

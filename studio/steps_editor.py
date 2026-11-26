@@ -246,12 +246,14 @@ class ScriptDataEditor(ttk.Frame):
     def __init__(self, parent, on_change):
         super().__init__(parent)
         self.variables = {}
+        metadata = ttk.Frame(self)
+        metadata.pack(fill="x", pady=(6, 8))
         for key, label in (("case_id", "Case ID"), ("title", "Name")):
-            ttk.Label(self, text=label).pack(anchor="w", pady=(5, 3))
+            ttk.Label(metadata, text=label).pack(side="left", padx=(0 if key == "case_id" else 14, 6))
             var = tk.StringVar(self)
             self.variables[key] = var
             var.trace_add("write", lambda *_: on_change())
-            ttk.Entry(self, textvariable=var).pack(fill="x")
+            ttk.Entry(metadata, textvariable=var, width=18 if key == "case_id" else 35).pack(side="left", fill="x", expand=key == "title")
         self.texts = {}
         tabs = ttk.Notebook(self)
         tabs.pack(fill="both", expand=True, pady=(10, 0))

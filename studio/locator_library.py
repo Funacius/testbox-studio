@@ -86,6 +86,7 @@ class LocatorLibraryDialog(tk.Toplevel):
             return
         def task():
             from gradebook.browser import close_browser, create_browser
+            self.release_closed_session()
             if self.driver is not None and not self.browser_visible:
                 close_browser(self.driver)
                 self.driver = None
@@ -111,6 +112,7 @@ class LocatorLibraryDialog(tk.Toplevel):
         url = self.url.get().strip()
         def task():
             from gradebook.browser import create_browser
+            self.release_closed_session()
             if self.driver is None:
                 if not url:
                     raise ValueError("Enter a URL first")
@@ -118,6 +120,22 @@ class LocatorLibraryDialog(tk.Toplevel):
                 self.driver.get(url)
             return json.dumps(probe_locator(self.driver, target, library, self.variables), ensure_ascii=False, indent=2)
         self.start("Checking locator", task)
+
+    def release_closed_session(self):
+        if self.driver is not None:
+            try:
+                if self.driver.window_handles:
+                    return
+            except Exception:
+                pass
+            from gradebook.browser import close_browser
+            try:
+                close_browser(self.driver)
+            except Exception:
+                pass
+            finally:
+                self.driver = None
+                self.browser_visible = False
 
     def save(self):
         try:

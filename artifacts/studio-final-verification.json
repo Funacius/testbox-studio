@@ -1,0 +1,434 @@
+{
+  "scope": "Development tests for the implemented roadmap features; pending features are not certified.",
+  "executed_at": "2026-11-26T13:41:04.272024+07:00",
+  "tests_run": 84,
+  "counts": {
+    "PASS": 84,
+    "FAIL": 0,
+    "ERROR": 0,
+    "SKIP": 0
+  },
+  "successful": true,
+  "source_unchanged_during_verification": true,
+  "duration_seconds": 363.887,
+  "source_sha256": {
+    "automation/__init__.py": "e43d4a4ab8a60fc8c7dd997fb5f3c19a21a513e05f4da83901283f7864a10fd3",
+    "automation/engine.py": "d2d3f67a460095756aaf4dc6bcd95e4d032fee58e873594f8c6c8af2d30769b5",
+    "automation/export_runtime.py": "35f08d8720328806000aa9b95faaabc7fd4a14080595ef19ee3cf44dcdf3e46b",
+    "automation/exporting.py": "54784a9cf51c2bfedc3320793eac604e2ee130410a647b4a53c24b4e2b81aaf1",
+    "automation/flow.py": "d67ccac6f3e7c016a085d909f9cb0fe907cf295b8ce646fb960f587715a89d98",
+    "automation/isolation.py": "ea69107b1e8ec0392ca6adba13f2ac86b53d8cba412f166656ab9fde6229e334",
+    "automation/locators.py": "f23d6b8c8df734b5574b6c856b524cd5bed618ca20895aff69cd531586aad6c3",
+    "automation/nfr.py": "64608279a220086a4d92220d79a3a91891ea7deba9f91882c0fdb0eb28fa40ca",
+    "automation/outcomes.py": "9f2c66bd41ea94445e583003e2723a660c8b3c751d874d354da5cf6e0d1a0b52",
+    "automation/playback.py": "405df8d95b54ebc83c17abb5af581f8718420cde051a18761bef00a5dc6e581b",
+    "automation/privacy.py": "4b0812f8298007d88b28497cfebd816dbea64d7555defd1ac7915562a08a34c4",
+    "automation/readiness.py": "09beac663250dd9a64591df05267076ef34e2d8fa8b8127b799646791276951a",
+    "automation/recorder.js": "9983d12bd7cd6e0af524e9810a070d05bbd2312579c9a2e76feda9e5cd59a68c",
+    "automation/recording.py": "d79df3fb932fb9ec46d8e383266789b00a469f9ea345fa3ee2b1ec5c5280cb6d",
+    "automation/reporting.py": "08573dd43e72000a3536cbf98ecd59573e4ad831393d325cdbbc349a2ba49b69",
+    "automation/runner.py": "c9b4eb20043ce1dea970860d6dcdc3156aa2aa7fb09df01b2742b8077effa730",
+    "automation/schema.py": "01a2db760737b6f3c2c6e94982a8bc2468c4c984eacc2fda205fff68c6b7f229",
+    "gradebook/__init__.py": "21369289d73168909cd3a535a13faeb93ad82ffceffca04e41798520bead2c10",
+    "gradebook/browser.py": "c88c5a9d50e62fb5de82623423551961af3a02c833d67fe61d0b5436029f26a2",
+    "gradebook/config.py": "d205a764a3ca3a6da8569b23f18cc6b2a515d624ba2d09ec1c102221c17e125e",
+    "gradebook/data.py": "5606de290d7468105183b4e27ee19a583e7cd277c1b5a255ef9de99ac90b2bdb",
+    "gradebook/page.py": "4a4e32029316d0a14f64c6fdae825050bcc709b87bf94b0032cc10706e9273ec",
+    "gradebook/runner.py": "45fcbb9d6e8f0e80767020143404a8bb07a89005e03fc9af794f73cab66ffead",
+    "studio/__init__.py": "76e482c5ab8c7e0a89257371da6505a2e7c469fa8ff46d23161bfa436bf067f5",
+    "studio/app.py": "070a7b668724a27877e4c51ebbbd63b1bffb90e3b9e48842ea07c9e67b3a8075",
+    "studio/background.py": "83071e815b1a58737b4e6da5a74eb31155a8ae23c56c481b2f79e0e814f001c5",
+    "studio/dialogs.py": "2726cb68b528c1d5532b01e96b43e51609d4754b04966e872f03ab5b39a7e3a4",
+    "studio/exchange.py": "e9c5463dbc105e854294162483de1818bac586835f91f9ec267a09eb1ed7467d",
+    "studio/import_wizard.py": "3f1959ba7909daa5ce959588aac30d47bbed8468b2e7dd4832e352fe0496b8ea",
+    "studio/importing.py": "ff419f6b41216d83a841e5c0c0ffa09e1168e777945c92edc34e33573498060a",
+    "studio/locator_library.py": "2957a44380b31b705575eead0033284c9a5b3b909fcc811412f70cce0436ab53",
+    "studio/model.py": "c0b95b92be985f2064eb33476d782467e3930605f0110bed3d9b1ddfdc14d268",
+    "studio/nfr_dialog.py": "d895959a4ed2b9f954c8e87c719ba771ef4a470bc5c4d1dc0c7f64757ac07246",
+    "studio/recorder_dialog.py": "510b9b08b7d101092239652d7ad73916c03789de8933b0a06f574668407a4ed1",
+    "studio/report_viewer.py": "4f8a61d9ca9be7972712e004ca6765a7c87dff7ac9b020c611a8b69a4466111b",
+    "studio/steps_editor.py": "313c28d993d7a333cb6d79438e0d3d09f2be4477fc60a92e24a1648b0939d9bc",
+    "studio/table_editor.py": "045e32650ff0da359d5567d770950f7026694c091202ef502c15e5b319ee183c",
+    "studio/templates.py": "890f438c04075a4c3851a989c999adbd4a9a8e2c5e6dbef243843d9a58d23508",
+    "studio/theme.py": "061954877ddfb80815f00b38e3c173fbbde89d443f497e83165f5a787ad1cbe2",
+    "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests/test_final_ui.py": "ed30594b0abd6dcb8e146241a5f59ef85f0fee831968384352e8888f624f97b3",
+    "tests/test_flow.py": "c59e7a8dcc8a4019d8eb1f0c8897aab206e9fc34f8c8ff4135d377f27f30ca95",
+    "tests/test_generic_browser.py": "aca79c6a2251a07832d7a46909c48e07315a6f5577c2d9f8f99280056896c163",
+    "tests/test_generic_model.py": "c7d5a2766c9f5a699d6062f2785e169d5b65773c1396a5da8cd3e4af87cfe4a1",
+    "tests/test_import_mapping.py": "9defd0af0405bce6bf895e00fb92998f76f0eb12305b5c637a7b468d68982042",
+    "tests/test_input_readiness.py": "442eee64fe9fe8197176d79863efbd07483d34afde9b26c7c7907ab0722fc514",
+    "tests/test_isolation.py": "0312d340d5152cc2296c82d224fbf449d9ecbf281017f0fdbb98856ab57dd996",
+    "tests/test_locators.py": "4904c38cf2d17fd18d591d9b0320edb497771b214e732764274440436b87df47",
+    "tests/test_nfr.py": "a0299446f4e8e9852aa2cb50e1e1c35888f023dbcfd5b4dc51dd46c0328b2b6a",
+    "tests/test_playback.py": "ef151d20a0146b779231bd78002f170627129d79b22f8988c7f2010ec6aab437",
+    "tests/test_python_export.py": "9e64e831b1427c15f2bc59f5f050d4baf83a51eb3ac8cec2cadd26cffb612b5c",
+    "tests/test_readiness.py": "5055aebb2701905f4fc7197517f9e37b4ba40565fc6ce39b788481ed34471156",
+    "tests/test_recording.py": "1d3355170b5c0d6f561d1d3cd404ab8951bfb51d28e48375f0656fe31759c508",
+    "tests/test_reporting.py": "3f034c7b45509f38a3f9b2964ee441dfebe828f98fa758fa0e3ff7da05d2dc49",
+    "tests/test_studio_editor.py": "039bc0a88c8912f9d3304f10a3fc7b7b637e792b12abd2d4aa32151c1ab455af",
+    "tools/capture_studio_preview.py": "c0f9197bc5bd15bff5be72fb7c1e8acd09ae7ee4de498e90a2ecc9d99575dfd3",
+    "tools/demo_site.py": "995f27b7552db98cad3411c37fdc564c701909c8406a6bab4c0ca9e352a8e795",
+    "tools/extract_gradebook.py": "bef1c041f15c49c972fe60aefb95c99be320ae67399a98e1b2b440500569f66f",
+    "tools/summarize_verification.py": "66f793009af8a99dd1cc85f484f2d1eade908f4222f6b50adebcf937b53b5659",
+    "tools/verify_gradebook_regression.py": "99e959b13ee5d8c2d5c415563c121a8b8d51aa5eea12a10d87a19b80289cb485",
+    "tools/verify_studio.py": "8880e7e2cc47d81d4337ba95b612fc3618abcb0c588c06914bbf8f11b5779610",
+    "tools/wait_for_moodle.py": "30219351ba6002f158e18381bfd8428bbc17f0a809ce416385963a8f3fa20fcf"
+  },
+  "results": [
+    {
+      "test": "test_final_ui.FinalUiTests.test_application_close_waits_for_recorder_owned_session",
+      "status": "PASS"
+    },
+    {
+      "test": "test_final_ui.FinalUiTests.test_background_loading_runs_tk_heartbeat_and_can_cancel",
+      "status": "PASS"
+    },
+    {
+      "test": "test_final_ui.FinalUiTests.test_empty_workspace_hides_gradebook_tabs_and_nfr_fields_explain_matrix",
+      "status": "PASS"
+    },
+    {
+      "test": "test_final_ui.FinalUiTests.test_environment_undo_redo_and_switch_to_current_restore_visible_values",
+      "status": "PASS"
+    },
+    {
+      "test": "test_final_ui.FinalUiTests.test_folder_case_management_persists_order_and_last_case_delete_clears_editor",
+      "status": "PASS"
+    },
+    {
+      "test": "test_final_ui.FinalUiTests.test_large_csv_read_keeps_the_event_loop_active",
+      "status": "PASS"
+    },
+    {
+      "test": "test_final_ui.FinalUiTests.test_large_dataset_pages_preserve_absolute_row_edits_and_undo",
+      "status": "PASS"
+    },
+    {
+      "test": "test_final_ui.FinalUiTests.test_utf16_and_selected_legacy_encoding_preserve_exact_values",
+      "status": "PASS"
+    },
+    {
+      "test": "test_flow.FlowBrowserTests.test_real_browser_repeat_conditions_and_portable_export_on_both_levels",
+      "status": "PASS"
+    },
+    {
+      "test": "test_flow.FlowTests.test_cleanup_continues_after_error_in_loop_and_restores_scope",
+      "status": "PASS"
+    },
+    {
+      "test": "test_flow.FlowTests.test_invalid_blocks_and_expansion_are_rejected_before_browser_creation",
+      "status": "PASS"
+    },
+    {
+      "test": "test_flow.FlowTests.test_nested_branches_loops_and_scoped_index_do_not_evaluate_skipped_actions",
+      "status": "PASS"
+    },
+    {
+      "test": "test_flow.FlowTests.test_stop_inside_repeat_restores_index_and_cleanup_remains_available",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_browser_normalization_and_multiple_matches_do_not_produce_false_passes",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_child_runner_breakpoint_single_step_and_stop_preserve_cleanup",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_dataset_execution_assertion_failure_evidence_and_cleanup",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_frame_window_alert_upload_stored_variables_and_explicit_screenshot",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_imported_example_steps_and_three_dataset_rows_run_as_real_browser_cases",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_locator_probe_counts_visible_matches_and_restores_previous_highlight",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_offscreen_native_click_waits_for_overlay_and_does_not_force_a_covered_element",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_browser.BrowserContractTests.test_typed_credentials_are_masked_in_textual_failure_reports_and_logs",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_alias_variables_empty_values_and_missing_names",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_data_variable_failure_identifies_case_row_and_step",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_disabled_draft_step_and_invalid_timeout",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_duplicate_ids_are_renamed_without_replacing_steps",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_empty_case_can_be_saved_but_cannot_run",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_mixed_workspace_and_file_exchange_preserve_executable_and_manual_steps",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generic_model.GenericModelTests.test_old_workspace_migrates_without_rewriting_cases_or_sources",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_dataset_columns_are_unique_and_exact_values_are_preserved",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_dataset_values_override_default_credentials",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_invalid_row_mapping_reports_location_without_partial_import",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_manual_prose_is_not_silently_executable_or_reported_as_pass",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_multiline_cases_header_and_custom_mapping",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_runtime_environment_preserves_declared_variable_case_and_dataset_precedence",
+      "status": "PASS"
+    },
+    {
+      "test": "test_import_mapping.MappingTests.test_sheet_choice_and_formula_rejection_are_explicit",
+      "status": "PASS"
+    },
+    {
+      "test": "test_input_readiness.InputReadinessTests.test_generic_input_retry_is_bounded_and_readonly_cannot_pass",
+      "status": "PASS"
+    },
+    {
+      "test": "test_input_readiness.InputReadinessTests.test_native_gradebook_waits_for_input_without_changing_the_data",
+      "status": "PASS"
+    },
+    {
+      "test": "test_input_readiness.LoginInitializationTests.test_async_password_replacement_finishes_before_native_credentials_are_entered",
+      "status": "PASS"
+    },
+    {
+      "test": "test_isolation.IsolationBrowserTests.test_same_chrome_and_edge_session_resets_two_origins_and_preserves_viewport",
+      "status": "PASS"
+    },
+    {
+      "test": "test_isolation.IsolationTests.test_origin_drops_credentials_paths_and_default_ports",
+      "status": "PASS"
+    },
+    {
+      "test": "test_locators.LocatorTests.test_bad_alias_and_step_ids_are_rejected",
+      "status": "PASS"
+    },
+    {
+      "test": "test_locators.LocatorTests.test_library_accepts_explicit_aliases_and_existing_selenium_locator_pairs",
+      "status": "PASS"
+    },
+    {
+      "test": "test_nfr.NfrBrowserTests.test_compatibility_executes_chrome_and_edge_through_both_level_programs",
+      "status": "PASS"
+    },
+    {
+      "test": "test_nfr.NfrBrowserTests.test_elapsed_samples_limits_and_stop_are_reported_without_false_pass",
+      "status": "PASS"
+    },
+    {
+      "test": "test_nfr.NfrTests.test_matrix_requires_distinct_browsers_and_finite_limits",
+      "status": "PASS"
+    },
+    {
+      "test": "test_nfr.NfrTests.test_summary_does_not_accept_missing_or_failing_samples",
+      "status": "PASS"
+    },
+    {
+      "test": "test_nfr.NfrTests.test_timer_snapshot_preserves_authored_steps_and_measures_selected_interval",
+      "status": "PASS"
+    },
+    {
+      "test": "test_playback.PlaybackTests.test_missing_and_invalid_control_are_errors_instead_of_silent_resume",
+      "status": "PASS"
+    },
+    {
+      "test": "test_playback.PlaybackTests.test_pause_single_step_resume_breakpoint_and_stop",
+      "status": "PASS"
+    },
+    {
+      "test": "test_playback.PlaybackTests.test_stop_file_is_respected_before_next_action",
+      "status": "PASS"
+    },
+    {
+      "test": "test_python_export.PortableBrowserTests.test_exported_levels_read_changed_csv_and_config_and_support_unittest_discovery",
+      "status": "PASS"
+    },
+    {
+      "test": "test_python_export.PortableBrowserTests.test_exported_upload_uses_copied_asset_after_original_removed",
+      "status": "PASS"
+    },
+    {
+      "test": "test_python_export.PythonExportTests.test_legacy_csv_is_exact_and_listing_works_without_source_repo",
+      "status": "PASS"
+    },
+    {
+      "test": "test_python_export.PythonExportTests.test_levels_runtime_and_csv_preserve_inputs_expected_and_source",
+      "status": "PASS"
+    },
+    {
+      "test": "test_python_export.PythonExportTests.test_sparse_rows_preserve_empty_vs_absent_defaults_and_zero_columns",
+      "status": "PASS"
+    },
+    {
+      "test": "test_python_export.PythonExportTests.test_uploads_are_packaged_and_missing_file_does_not_replace_previous_zip",
+      "status": "PASS"
+    },
+    {
+      "test": "test_readiness.ReadinessTests.test_connection_probe_uses_origin_not_the_test_action_path",
+      "status": "PASS"
+    },
+    {
+      "test": "test_readiness.ReadinessTests.test_connection_refusal_has_actionable_message",
+      "status": "PASS"
+    },
+    {
+      "test": "test_readiness.ReadinessTests.test_invalid_runtime_settings_fail_before_browser_start",
+      "status": "PASS"
+    },
+    {
+      "test": "test_recording.RecordingBrowserTests.test_alerts_manual_window_close_reopen_and_synthetic_events",
+      "status": "PASS"
+    },
+    {
+      "test": "test_recording.RecordingBrowserTests.test_builtin_login_template_runs_both_dataset_rows_against_its_documented_demo",
+      "status": "PASS"
+    },
+    {
+      "test": "test_recording.RecordingBrowserTests.test_native_events_picker_does_not_click_and_capture_survives_navigation",
+      "status": "PASS"
+    },
+    {
+      "test": "test_recording.RecordingTests.test_console_decoding_and_data_parameterization_preserve_literal_text",
+      "status": "PASS"
+    },
+    {
+      "test": "test_recording.RecordingTests.test_templates_keep_dataset_cleanup_and_generate_independent_step_ids",
+      "status": "PASS"
+    },
+    {
+      "test": "test_reporting.ReportingTests.test_html_and_csv_preserve_incomplete_status_row_identity_and_unexecuted_steps",
+      "status": "PASS"
+    },
+    {
+      "test": "test_reporting.ReportingTests.test_legacy_expected_extensions_do_not_break_report_generation",
+      "status": "PASS"
+    },
+    {
+      "test": "test_reporting.ReportingTests.test_report_zip_makes_evidence_portable_and_excludes_input_snapshots",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_dataset_and_variables_grid_apply_and_undo_exact_values",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_dataset_import_targets_selected_case_and_preserves_its_steps",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_edit_duplicate_reorder_toggle_and_save_actual_steps",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_first_launch_without_workspace_is_general_and_opens_no_browser",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_general_case_hides_gradebook_controls_and_report_viewer_shows_unexecuted_steps",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_import_wizard_builds_a_foreign_steps_file_without_gradebook_columns",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_locator_library_is_saved_to_the_selected_environment",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_nfr_dialog_saves_boundaries_for_the_actual_case",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_nfr_matrix_honors_selected_cases_and_keeps_levels_and_repeats_separate",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_playback_controls_write_versioned_commands_and_stop_request",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_python_export_commits_selected_edits_and_excludes_run_credentials",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_recorder_and_template_dialogs_are_reviewable_without_opening_a_browser",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_recorder_applies_steps_variables_and_locator_without_replacing_sources",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_run_uses_current_immutable_steps_and_keeps_credentials_in_environment",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_selected_environment_applies_and_persists_without_credentials",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_template_creation_keeps_the_original_case_and_supports_undo",
+      "status": "PASS"
+    },
+    {
+      "test": "test_studio_editor.StudioEditorTests.test_unreachable_website_blocks_browser_start_with_readable_error",
+      "status": "PASS"
+    }
+  ],
+  "retained_demo": "results/studio-demo-20261126-133945/automation-20261126-133945-e1a1f007",
+  "demo_note": "The retained demo intentionally has 3 PASS and 1 FAIL to exercise reporting; it is not a Moodle result.",
+  "previews": [
+    "artifacts/studio-steps-preview.png",
+    "artifacts/studio-locators-preview.png",
+    "artifacts/studio-report-preview.png",
+    "artifacts/studio-nfr-preview.png",
+    "artifacts/studio-templates-preview.png",
+    "artifacts/studio-recorder-preview.png",
+    "artifacts/studio-welcome-preview.png",
+    "artifacts/studio-flow-preview.png",
+    "artifacts/studio-data-preview.png",
+    "artifacts/studio-loading-preview.png",
+    "artifacts/studio-import-preview.png",
+    "artifacts/studio-small-window-preview.png",
+    "artifacts/studio-html-report-preview.png"
+  ],
+  "extra_error": ""
+}

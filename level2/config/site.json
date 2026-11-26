@@ -5,7 +5,7 @@
   "page_load_timeout": 30,
   "command_timeout": 60,
   "page_load_strategy": "eager",
-  "opera_chromium_version": "155",
+  "opera_chromium_version": "157",
   "poll_frequency": 0.1,
   "window": [
     1440,

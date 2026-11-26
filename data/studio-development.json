@@ -4,86 +4,98 @@
     {
       "id": "F01",
       "name": "Portable mixed project and editable executable step model",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Workspace format 2 loads legacy format 1 without changing records/source steps; explicit Save preserves a v1 backup.",
-      "initial_verification": "artifacts/studio-core-verification.json"
+      "initial_verification": "artifacts/studio-core-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F02",
       "name": "Generic Selenium runner, assertions, setup and cleanup",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Generic runner, assertions, setup/cleanup, timers, dataset iterations; Chrome fixture covers success, failure, evidence and cleanup. Full command/context and regression audit remains.",
-      "initial_verification": "artifacts/studio-core-verification.json"
+      "initial_verification": "artifacts/studio-core-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F03",
       "name": "Steps editor, reorder, duplicate, enable/disable and undo",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Editable action/target/value/expected/phase/timeout, duplicate/reorder/toggle, drag/drop, undo/redo; Tk editing and snapshot tests pass.",
-      "initial_verification": "artifacts/studio-core-verification.json"
+      "initial_verification": "artifacts/studio-core-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F04",
       "name": "CSV/XLS/XLSX import wizard, sheet/header/column mapping and preview",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Sheet/header/mode/mapping/preview and reusable profiles; explicit Gradebook adapter; prose imports as disabled notes. More encoding/large-file UI checks remain.",
-      "initial_verification": "artifacts/studio-core-verification.json"
+      "initial_verification": "artifacts/studio-core-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F05",
       "name": "Dataset and variable editors with data-driven execution",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Editable data and variable tables preserve empty strings/spaces; imported three-row login example executes three real Chrome cases.",
-      "initial_verification": "artifacts/studio-core-verification.json"
+      "initial_verification": "artifacts/studio-core-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F06",
       "name": "Locator library, checking and element highlighting",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Editable locator library; read-only ambiguity/visibility checks and reversible highlighting in a separate owned browser; real Chrome and Tk checks pass.",
-      "initial_verification": "artifacts/studio-development-verification.json"
+      "initial_verification": "artifacts/studio-development-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F07",
       "name": "Visible/headless, slow playback, pause/resume, step and breakpoints",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Visible/headless, slow/highlight, pause/resume/next, enforced breakpoints and stop with cleanup; real child-runner test proves interrupted work is not PASS. Reports retain planned/completed counts and NOT_RUN steps.",
-      "initial_verification": "artifacts/studio-development-verification.json"
+      "initial_verification": "artifacts/studio-development-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F08",
       "name": "Environment profiles and preflight readiness",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Read-only origin connection checks block browser launch on unreachable website; project environments save/apply URL, browser, viewport and timeout. Wider UI audit remains.",
-      "initial_verification": "artifacts/studio-core-verification.json"
+      "initial_verification": "artifacts/studio-core-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F09",
       "name": "Per-step and per-dataset reports, screenshots and exports",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Row-aware JSON/CSV, planned and completed steps, standalone HTML, Tk report viewer, evidence ZIP and credential masking; real deliberate-failure demo retained.",
-      "initial_verification": "artifacts/studio-development-verification.json"
+      "initial_verification": "artifacts/studio-development-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F10",
       "name": "Standalone Python/unittest export for Level 1 and Level 2",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Standalone ZIP includes Selenium/unittest runtime, Level 1 Python items, Level 2 JSON items and runtime CSV inputs/oracles. Real browser checks run outside repository, preserve CSV failures, prove external locator changes and copied uploads; standard unittest discovery works.",
-      "initial_verification": "artifacts/studio-python-export-verification.json"
+      "initial_verification": "artifacts/studio-python-export-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F11",
       "name": "Compatibility and elapsed-time NFR configuration for both levels",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "NFR dialog and selected-case browser/level/repetition matrix execute actual exported Level 1 Python and Level 2 JSON programs. Per-case elapsed boundaries and limits are inserted into immutable snapshots; summary includes completeness and per-sample acceptance. Native Gradebook supports compatibility; elapsed mode requires editable steps.",
-      "initial_verification": "artifacts/studio-nfr-verification.json"
+      "initial_verification": "artifacts/studio-nfr-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     },
     {
       "id": "F12",
       "name": "Reusable templates, browser element picker/recorder, conditions and loops",
-      "status": "implemented_initial_verification",
+      "status": "verified",
       "evidence_summary": "Reusable templates with JSON exchange; owned Chrome recorder/picker with password placeholders, parameterized text and manual assertions; safe structured conditions and bounded repeats. Native capture/replay, document navigation, non-activating picking, both-level exported control flow, template execution and GUI tests pass. 68 development checks pass; final audit remains.",
-      "initial_verification": "artifacts/studio-authoring-verification.json"
+      "initial_verification": "artifacts/studio-authoring-verification.json",
+      "final_verification": "artifacts/studio-final-verification.json"
     }
   ],
   "invariants": [
@@ -93,7 +105,7 @@
     "Existing user workspace files and running app instances are not overwritten or closed automatically",
     "General-purpose projects do not require Moodle-specific columns or credentials"
   ],
-  "current_stage": "All twelve feature scopes have implementations with initial verification. Final requirement audit, remaining robustness fixes and native Gradebook regression still prevent completion.",
+  "current_stage": "Complete: all twelve feature scopes and original completion gates verified. The known Moodle TC-003-036 application FAIL remains unchanged.",
   "next_features": [],
   "completion_gates": [
     "All twelve feature scopes are implemented and verified, including advanced picker/recorder and conditions/loops.",
@@ -105,14 +117,110 @@
     "Rendered desktop views, dialogs and reports are inspected for layout/readability.",
     "Readme, examples and release artifacts describe the final supported behavior and limitations."
   ],
-  "final_audit_items": [
-    "Check explicit representation of unexecuted dataset rows and matrix cells, beyond planned/completed counts.",
-    "Audit optional browser reuse isolation across multiple origins; fresh profiles remain the GUI default.",
-    "Inspect all new NFR and template/picker/recorder views as rendered, including report ZIP evidence links.",
-    "Recheck CSV encodings, large-file responsiveness, environment profile undo and legacy-workspace migration.",
-    "Rerun native Gradebook cases on both levels with source oracles unchanged; retain TC-003-036 failure.",
-    "On an empty workspace, hide legacy Gradebook forms and show an accurate unsaved/untitled status.",
-    "Check NFR mode controls clearly indicate that the NFR matrix selects Level/browser rather than the Functional fields.",
-    "Exercise recorder alert handling, manual close/reopen and application-close ownership beyond basic capture/picker/replay."
+  "final_audit_items": [],
+  "final_audit_results": [
+    {
+      "requirement": "Check explicit representation of unexecuted dataset rows and matrix cells, beyond planned/completed counts.",
+      "status": "verified",
+      "evidence": "artifacts/studio-release-audit.json"
+    },
+    {
+      "requirement": "Audit optional browser reuse isolation across multiple origins; fresh profiles remain the GUI default.",
+      "status": "verified",
+      "evidence": "artifacts/studio-release-audit.json"
+    },
+    {
+      "requirement": "Inspect all new NFR and template/picker/recorder views as rendered, including report ZIP evidence links.",
+      "status": "verified",
+      "evidence": "artifacts/studio-release-audit.json"
+    },
+    {
+      "requirement": "Recheck CSV encodings, large-file responsiveness, environment profile undo and legacy-workspace migration.",
+      "status": "verified",
+      "evidence": "artifacts/studio-release-audit.json"
+    },
+    {
+      "requirement": "Rerun native Gradebook cases on both levels with source oracles unchanged; retain TC-003-036 failure.",
+      "status": "verified",
+      "evidence": "artifacts/studio-release-audit.json"
+    },
+    {
+      "requirement": "On an empty workspace, hide legacy Gradebook forms and show an accurate unsaved/untitled status.",
+      "status": "verified",
+      "evidence": "artifacts/studio-release-audit.json"
+    },
+    {
+      "requirement": "Check NFR mode controls clearly indicate that the NFR matrix selects Level/browser rather than the Functional fields.",
+      "status": "verified",
+      "evidence": "artifacts/studio-release-audit.json"
+    },
+    {
+      "requirement": "Exercise recorder alert handling, manual close/reopen and application-close ownership beyond basic capture/picker/replay.",
+      "status": "verified",
+      "evidence": "artifacts/studio-release-audit.json"
+    }
+  ],
+  "completion_evidence": [
+    {
+      "requirement": "All twelve feature scopes are implemented and verified, including advanced picker/recorder and conditions/loops.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-final-verification.json"
+      ]
+    },
+    {
+      "requirement": "Imported arbitrary supported spreadsheet schemas can become editable executable tests without Gradebook columns.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-final-verification.json"
+      ]
+    },
+    {
+      "requirement": "Full command catalog, browser contexts, error/stop/cleanup paths and real GUI workflows have matching tests/evidence.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-final-verification.json",
+        "artifacts/studio-live-gui-verification.json"
+      ]
+    },
+    {
+      "requirement": "Level 1/2 exported Python packages execute outside this repository without the desktop app.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-delivered-example-verification.json",
+        "artifacts/studio-final-verification.json"
+      ]
+    },
+    {
+      "requirement": "Generic compatibility and elapsed-time NFRs can run with both level configurations.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-moodle-nfr-verification.json",
+        "artifacts/studio-final-verification.json"
+      ]
+    },
+    {
+      "requirement": "Gradebook native regression retains the original data/oracles and expected TC-003-036 failure.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-gradebook-regression.json"
+      ]
+    },
+    {
+      "requirement": "Rendered desktop views, dialogs and reports are inspected for layout/readability.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-visual-inspection.json"
+      ]
+    },
+    {
+      "requirement": "Readme, examples and release artifacts describe the final supported behavior and limitations.",
+      "status": "verified",
+      "evidence": [
+        "README.md",
+        "artifacts/studio-report-packages-verification.json",
+        "artifacts/studio-delivered-example-verification.json"
+      ]
+    }
   ]
 }

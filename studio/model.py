@@ -250,7 +250,7 @@ class Workspace:
 
     @classmethod
     def load(cls, path: Path):
-        return cls.from_dict(json.loads(path.read_text(encoding="utf-8")))
+        return cls.from_dict(json.loads(path.read_text(encoding="utf-8-sig")))
 
     def save(self, path: Path) -> None:
         self.from_dict(self.to_dict())

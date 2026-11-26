@@ -1,0 +1,307 @@
+{
+  "successful": true,
+  "verified_at": "2026-11-26T06:53:32.013021+00:00",
+  "objective": "General-purpose Testbox Studio with import mapping, editable executable steps, datasets, portable projects, Python export, NFR and visible playback",
+  "features": [
+    {
+      "id": "F01",
+      "name": "Portable mixed project and editable executable step model",
+      "status": "verified",
+      "tests": [
+        "test_final_ui.FinalUiTests.test_folder_case_management_persists_order_and_last_case_delete_clears_editor",
+        "test_generic_model.GenericModelTests.test_mixed_workspace_and_file_exchange_preserve_executable_and_manual_steps",
+        "test_generic_model.GenericModelTests.test_old_workspace_migrates_without_rewriting_cases_or_sources"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F02",
+      "name": "Generic Selenium runner, assertions, setup and cleanup",
+      "status": "verified",
+      "tests": [
+        "test_generic_browser.BrowserContractTests.test_dataset_execution_assertion_failure_evidence_and_cleanup",
+        "test_generic_browser.BrowserContractTests.test_frame_window_alert_upload_stored_variables_and_explicit_screenshot",
+        "test_generic_browser.BrowserContractTests.test_offscreen_native_click_waits_for_overlay_and_does_not_force_a_covered_element",
+        "test_input_readiness.InputReadinessTests.test_generic_input_retry_is_bounded_and_readonly_cannot_pass"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F03",
+      "name": "Steps editor, reorder, duplicate, enable/disable and undo",
+      "status": "verified",
+      "tests": [
+        "test_final_ui.FinalUiTests.test_folder_case_management_persists_order_and_last_case_delete_clears_editor",
+        "test_studio_editor.StudioEditorTests.test_edit_duplicate_reorder_toggle_and_save_actual_steps"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F04",
+      "name": "CSV/XLS/XLSX import wizard, sheet/header/column mapping and preview",
+      "status": "verified",
+      "tests": [
+        "test_final_ui.FinalUiTests.test_large_csv_read_keeps_the_event_loop_active",
+        "test_final_ui.FinalUiTests.test_utf16_and_selected_legacy_encoding_preserve_exact_values",
+        "test_import_mapping.MappingTests.test_invalid_row_mapping_reports_location_without_partial_import",
+        "test_import_mapping.MappingTests.test_sheet_choice_and_formula_rejection_are_explicit",
+        "test_studio_editor.StudioEditorTests.test_import_wizard_builds_a_foreign_steps_file_without_gradebook_columns"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F05",
+      "name": "Dataset and variable editors with data-driven execution",
+      "status": "verified",
+      "tests": [
+        "test_import_mapping.MappingTests.test_dataset_values_override_default_credentials",
+        "test_import_mapping.MappingTests.test_runtime_environment_preserves_declared_variable_case_and_dataset_precedence",
+        "test_studio_editor.StudioEditorTests.test_dataset_and_variables_grid_apply_and_undo_exact_values",
+        "test_studio_editor.StudioEditorTests.test_dataset_import_targets_selected_case_and_preserves_its_steps"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F06",
+      "name": "Locator library, checking and element highlighting",
+      "status": "verified",
+      "tests": [
+        "test_generic_browser.BrowserContractTests.test_locator_probe_counts_visible_matches_and_restores_previous_highlight",
+        "test_studio_editor.StudioEditorTests.test_locator_library_is_saved_to_the_selected_environment"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F07",
+      "name": "Visible/headless, slow playback, pause/resume, step and breakpoints",
+      "status": "verified",
+      "tests": [
+        "test_generic_browser.BrowserContractTests.test_child_runner_breakpoint_single_step_and_stop_preserve_cleanup",
+        "test_playback.PlaybackTests.test_pause_single_step_resume_breakpoint_and_stop",
+        "test_studio_editor.StudioEditorTests.test_playback_controls_write_versioned_commands_and_stop_request"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F08",
+      "name": "Environment profiles and preflight readiness",
+      "status": "verified",
+      "tests": [
+        "test_final_ui.FinalUiTests.test_environment_undo_redo_and_switch_to_current_restore_visible_values",
+        "test_readiness.ReadinessTests.test_connection_probe_uses_origin_not_the_test_action_path",
+        "test_studio_editor.StudioEditorTests.test_unreachable_website_blocks_browser_start_with_readable_error"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F09",
+      "name": "Per-step and per-dataset reports, screenshots and exports",
+      "status": "verified",
+      "tests": [
+        "test_generic_browser.BrowserContractTests.test_typed_credentials_are_masked_in_textual_failure_reports_and_logs",
+        "test_reporting.ReportingTests.test_html_and_csv_preserve_incomplete_status_row_identity_and_unexecuted_steps",
+        "test_reporting.ReportingTests.test_report_zip_makes_evidence_portable_and_excludes_input_snapshots"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F10",
+      "name": "Standalone Python/unittest export for Level 1 and Level 2",
+      "status": "verified",
+      "tests": [
+        "test_python_export.PortableBrowserTests.test_exported_levels_read_changed_csv_and_config_and_support_unittest_discovery",
+        "test_python_export.PortableBrowserTests.test_exported_upload_uses_copied_asset_after_original_removed",
+        "test_python_export.PythonExportTests.test_levels_runtime_and_csv_preserve_inputs_expected_and_source"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F11",
+      "name": "Compatibility and elapsed-time NFR configuration for both levels",
+      "status": "verified",
+      "tests": [
+        "test_nfr.NfrBrowserTests.test_compatibility_executes_chrome_and_edge_through_both_level_programs",
+        "test_nfr.NfrBrowserTests.test_elapsed_samples_limits_and_stop_are_reported_without_false_pass",
+        "test_studio_editor.StudioEditorTests.test_nfr_dialog_saves_boundaries_for_the_actual_case"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    },
+    {
+      "id": "F12",
+      "name": "Reusable templates, browser element picker/recorder, conditions and loops",
+      "status": "verified",
+      "tests": [
+        "test_flow.FlowBrowserTests.test_real_browser_repeat_conditions_and_portable_export_on_both_levels",
+        "test_recording.RecordingBrowserTests.test_alerts_manual_window_close_reopen_and_synthetic_events",
+        "test_recording.RecordingBrowserTests.test_native_events_picker_does_not_click_and_capture_survives_navigation",
+        "test_studio_editor.StudioEditorTests.test_template_creation_keeps_the_original_case_and_supports_undo"
+      ],
+      "evidence": "artifacts/studio-final-verification.json"
+    }
+  ],
+  "completion_gates": [
+    {
+      "requirement": "All twelve feature scopes are implemented and verified, including advanced picker/recorder and conditions/loops.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-final-verification.json"
+      ]
+    },
+    {
+      "requirement": "Imported arbitrary supported spreadsheet schemas can become editable executable tests without Gradebook columns.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-final-verification.json"
+      ]
+    },
+    {
+      "requirement": "Full command catalog, browser contexts, error/stop/cleanup paths and real GUI workflows have matching tests/evidence.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-final-verification.json",
+        "artifacts/studio-live-gui-verification.json"
+      ]
+    },
+    {
+      "requirement": "Level 1/2 exported Python packages execute outside this repository without the desktop app.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-delivered-example-verification.json",
+        "artifacts/studio-final-verification.json"
+      ]
+    },
+    {
+      "requirement": "Generic compatibility and elapsed-time NFRs can run with both level configurations.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-moodle-nfr-verification.json",
+        "artifacts/studio-final-verification.json"
+      ]
+    },
+    {
+      "requirement": "Gradebook native regression retains the original data/oracles and expected TC-003-036 failure.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-gradebook-regression.json"
+      ]
+    },
+    {
+      "requirement": "Rendered desktop views, dialogs and reports are inspected for layout/readability.",
+      "status": "verified",
+      "evidence": [
+        "artifacts/studio-visual-inspection.json"
+      ]
+    },
+    {
+      "requirement": "Readme, examples and release artifacts describe the final supported behavior and limitations.",
+      "status": "verified",
+      "evidence": [
+        "README.md",
+        "artifacts/studio-report-packages-verification.json",
+        "artifacts/studio-delivered-example-verification.json"
+      ]
+    }
+  ],
+  "development_checks": {
+    "PASS": 84,
+    "FAIL": 0,
+    "ERROR": 0,
+    "SKIP": 0
+  },
+  "current_sources_match_development_receipt": true,
+  "native_sources_match_receipt": {
+    "automation/isolation.py": "ea69107b1e8ec0392ca6adba13f2ac86b53d8cba412f166656ab9fde6229e334",
+    "automation/outcomes.py": "9f2c66bd41ea94445e583003e2723a660c8b3c751d874d354da5cf6e0d1a0b52",
+    "automation/privacy.py": "4b0812f8298007d88b28497cfebd816dbea64d7555defd1ac7915562a08a34c4",
+    "automation/reporting.py": "08573dd43e72000a3536cbf98ecd59573e4ad831393d325cdbbc349a2ba49b69",
+    "gradebook/__init__.py": "21369289d73168909cd3a535a13faeb93ad82ffceffca04e41798520bead2c10",
+    "gradebook/browser.py": "c88c5a9d50e62fb5de82623423551961af3a02c833d67fe61d0b5436029f26a2",
+    "gradebook/config.py": "d205a764a3ca3a6da8569b23f18cc6b2a515d624ba2d09ec1c102221c17e125e",
+    "gradebook/data.py": "5606de290d7468105183b4e27ee19a583e7cd277c1b5a255ef9de99ac90b2bdb",
+    "gradebook/page.py": "4a4e32029316d0a14f64c6fdae825050bcc709b87bf94b0032cc10706e9273ec",
+    "gradebook/runner.py": "45fcbb9d6e8f0e80767020143404a8bb07a89005e03fc9af794f73cab66ffead"
+  },
+  "native_csv_oracles_unchanged": true,
+  "known_application_defect": "TC-003-036 remains FAIL in both levels; never skipped or changed to accept a database error.",
+  "moodle_nfr_evidence": "artifacts/studio-moodle-nfr-verification.json",
+  "gui_evidence": "artifacts/studio-live-gui-verification.json",
+  "visual_evidence": "artifacts/studio-visual-inspection.json",
+  "package_evidence": "artifacts/studio-report-packages-verification.json",
+  "example_sha256": {
+    "gradebook-compatibility.json": "a98a03bf95ffc68be81820221464835e1482ed8f11edf86950ef9a3b206a0ec7",
+    "gradebook-compatibility.project.json": "f4de0fff4c34e1bfcf5cbec3a38d89a9fc3dd13f18bbaede222238daba9da342",
+    "gradebook-save-nfr.json": "97cc8af97faa8985a476b1a8e7dfcff927c3d669a96d7a1a7a14deefc16917a7",
+    "gradebook-save-nfr.project.json": "c799a19155f05dc5378d8e412df82da7d8b067f99d839e23fc03e514d76e704f",
+    "login-data.csv": "52531bac35b0abff65ddcd87d008a7bcd967e71ed9d0bdbdf5abbe24953672e5",
+    "login-steps.csv": "b0caf0bec690d88051a9c99cfba45a2c8bfd652520e2a325b23fa856fb97e2ae",
+    "login-template.json": "dc634d67b7f57002d67144789a8fc2091bdbcf1f91804c055c4f70095fff1e5a",
+    "repeat-login-data.csv": "e9f7851f9a4bc16b9c2524b3533a26a4b523b7a1fcf1c082040e9ce571e94a77",
+    "repeat-login-steps.csv": "e59090aab9ffff05abb4884732901396922ed4d3b77f7c437ab6db9c47ef2859"
+  },
+  "limitations": [
+    "Recorder captures the top document of the current Chrome tab; iframe/window/shadow-DOM recording needs manual steps. Engine frame/window actions are supported.",
+    "Foreign prose imports as disabled notes until explicit actions, locators and expected results are authored.",
+    "Elapsed-time samples are UI response measurements under this local fixture, not load-test claims.",
+    "Opera Chromium version must match the installed GX engine after browser updates."
+  ],
+  "invariant_evidence": [
+    {
+      "requirement": "Open existing Gradebook workspaces and preserve their data, expected assertions, folders and manual sources",
+      "status": "verified",
+      "evidence": "artifacts/studio-final-verification.json",
+      "tests": [
+        "test_old_workspace_migrates_without_rewriting_cases_or_sources",
+        "test_mixed_workspace_and_file_exchange_preserve_executable_and_manual_steps"
+      ]
+    },
+    {
+      "requirement": "Browser execution uses an immutable snapshot and only begins after an explicit Run",
+      "status": "verified",
+      "evidence": "artifacts/studio-final-verification.json",
+      "tests": [
+        "test_run_uses_current_immutable_steps_and_keeps_credentials_in_environment",
+        "test_first_launch_without_workspace_is_general_and_opens_no_browser"
+      ]
+    },
+    {
+      "requirement": "Missing variables, incomplete execution, assertion failures and cleanup failures cannot be reported as PASS",
+      "status": "verified",
+      "evidence": "artifacts/studio-final-verification.json",
+      "tests": [
+        "test_child_runner_breakpoint_single_step_and_stop_preserve_cleanup",
+        "test_elapsed_samples_limits_and_stop_are_reported_without_false_pass",
+        "test_summary_does_not_accept_missing_or_failing_samples"
+      ]
+    },
+    {
+      "requirement": "Existing user workspace files and running app instances are not overwritten or closed automatically",
+      "status": "verified",
+      "evidence": "artifacts/studio-final-verification.json",
+      "tests": [
+        "test_old_workspace_migrates_without_rewriting_cases_or_sources",
+        "test_application_close_waits_for_recorder_owned_session"
+      ]
+    },
+    {
+      "requirement": "General-purpose projects do not require Moodle-specific columns or credentials",
+      "status": "verified",
+      "evidence": "artifacts/studio-final-verification.json",
+      "tests": [
+        "test_import_wizard_builds_a_foreign_steps_file_without_gradebook_columns",
+        "test_first_launch_without_workspace_is_general_and_opens_no_browser"
+      ]
+    }
+  ],
+  "startup_and_branding": {
+    "application": "Testbox Studio",
+    "launcher": "Start-App.ps1",
+    "console_launcher": ".venv/Scripts/python.exe app.py",
+    "guide": "README.md",
+    "first_launch_and_gui_run_evidence": "artifacts/studio-live-gui-verification.json"
+  },
+  "repository": {
+    "target": "https://github.com/Funacius/testbox-studio",
+    "branch": "main",
+    "visibility": "private"
+  }
+}

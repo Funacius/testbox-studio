@@ -100,7 +100,7 @@ def main():
     if os.name != "nt":
         raise SystemExit("This development preview helper is for Windows")
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--view", choices=("steps", "locators", "report", "nfr", "templates", "recorder", "welcome", "flow"), default="steps")
+    parser.add_argument("--view", choices=("steps", "data", "small", "import", "loading", "locators", "report", "nfr", "templates", "recorder", "welcome", "flow"), default="steps")
     parser.add_argument("--report", type=Path)
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts/studio-steps-preview.png")
     args = parser.parse_args()
@@ -130,12 +130,14 @@ def main():
         path = Path(directory) / "preview.json"
         project.save(path)
         app = Studio(path)
-        app.geometry("1600x950+30+30")
+        app.geometry("1280x730+30+30" if args.view == "small" else "1600x950+30+30")
         if args.view != "welcome":
             app._show_node(uid)
+        if args.view in {"data", "small"}:
+            app.notebook.select(app.script_data_tab)
         dialog = None
         try:
-            if args.view not in {"steps", "welcome", "flow"}:
+            if args.view not in {"steps", "data", "small", "welcome", "flow"}:
                 capture(app, Path(directory) / "parent.png")
             if args.view == "locators":
                 from studio.locator_library import LocatorLibraryDialog
@@ -154,6 +156,22 @@ def main():
                     dialog = NfrDialog(app, records, config, records[0]["case_id"])
                 dialog.withdraw()
                 capture(dialog, args.output)
+            elif args.view == "import":
+                from studio.import_wizard import ImportWizard
+                with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"):
+                    dialog = ImportWizard(app, ROOT / "examples/login-steps.csv")
+                dialog.show_preview()
+                capture(dialog, args.output)
+            elif args.view == "loading":
+                from studio.background import BackgroundTask
+                with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"), patch("studio.background.BackgroundTask.start"):
+                    dialog = BackgroundTask(app, "Read spreadsheet", lambda *args: None, encoding="auto")
+                dialog.message.configure(text="Preview of the cancelable reader. CSV/Excel parsing runs in a worker; the workspace is updated only after confirmation.")
+                capture(dialog, args.output)
+                for control in (dialog.cancel_button, dialog.retry, dialog.encoding_box):
+                    if (not control.winfo_ismapped() or control.winfo_height() < 20 or
+                            control.winfo_rooty() + control.winfo_height() > dialog.winfo_rooty() + dialog.winfo_height()):
+                        raise AssertionError("Reader Cancel/Retry/encoding controls must remain visible")
             elif args.view == "templates":
                 from studio.templates import TemplateDialog
                 with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"):
@@ -181,6 +199,13 @@ def main():
                 capture(dialog, args.output)
             else:
                 capture(app, args.output)
+                if args.view == "small":
+                    canvas = app.script_data_body.master
+                    canvas.yview_moveto(1)
+                    app.update()
+                    if not app.script_editor.dataset.tree.bbox("2"):
+                        raise AssertionError("The last demo dataset row is not reachable at the minimum window height")
+                    capture(app, args.output)
         finally:
             if dialog and dialog.winfo_exists():
                 dialog.destroy()

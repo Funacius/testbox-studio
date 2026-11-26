@@ -12,6 +12,23 @@ from studio.importing import guess_header, headings, import_selection, map_datas
 
 
 class MappingTests(unittest.TestCase):
+    def test_runtime_environment_preserves_declared_variable_case_and_dataset_precedence(self):
+        from automation.runner import variables_for, preflight
+        from automation.schema import script_record, new_step
+        record = script_record("ENV-01")
+        record["actions_json"] = json.dumps([
+            new_step("type", target="@user", value="${username}"),
+            new_step("type", target="id=password", value="${password}"),
+            new_step("assert_text", target="id=token", expected="${ApiToken}")])
+        settings = {"locators": {"user": "id=${control}"}}
+        with patch.dict("os.environ", {"TESTBOX_VAR_username": "runtime-user", "TESTBOX_VAR_password": "runtime-password",
+                                       "TESTBOX_VAR_ApiToken": "runtime-token", "TESTBOX_VAR_control": "username"}):
+            preflight([record], settings)
+            values = variables_for(record, {}, settings, "fixture")
+            self.assertEqual([values[k] for k in ("username", "password", "ApiToken", "control")],
+                             ["runtime-user", "runtime-password", "runtime-token", "username"])
+            self.assertEqual(variables_for(record, {"username": "row-user"}, settings, "fixture")["username"], "row-user")
+
     def test_multiline_cases_header_and_custom_mapping(self):
         grid = [["Class report"], [], ["Test ID", "Test Case Name", "Action", "Selector", "Input", "Expected Result"],
                 ["QUIZ 1", "Start quiz", "open", "http://example.test", "", ""],

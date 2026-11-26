@@ -127,6 +127,17 @@ class RecorderSession:
             self.set_mode("idle")
         return events
 
+    def handle_alert(self, command, text=""):
+        if command not in {"accept_alert", "dismiss_alert"}:
+            raise ValueError("Choose accept_alert or dismiss_alert")
+        if self.driver is None:
+            raise ValueError("Open a recorder browser first")
+        alert = self.driver.switch_to.alert
+        if command == "accept_alert" and text:
+            alert.send_keys(text)
+        alert.accept() if command == "accept_alert" else alert.dismiss()
+        return new_step(command, value=text if command == "accept_alert" else "")
+
     def close(self):
         if self.driver is not None:
             from gradebook.browser import close_browser
@@ -134,3 +145,4 @@ class RecorderSession:
                 close_browser(self.driver)
             finally:
                 self.driver = None
+                self.script_id, self.mode = None, "idle"

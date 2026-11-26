@@ -21,6 +21,15 @@ def escaped(value):
     return html.escape(text(value), quote=True)
 
 
+def successful_report(document):
+    records = document.get("results", [])
+    metadata = document.get("metadata", {})
+    completed = sum(r.get("status") != "NOT_RUN" for r in records)
+    return bool(document.get("successful") and records and not metadata.get("stopped")
+        and all(r.get("status") == "PASS" for r in records)
+        and metadata.get("completed_executions", completed) == metadata.get("planned_executions", len(records)))
+
+
 def planned_results(record):
     """Keep unexecuted planned steps visible in interrupted/failed runs."""
     actual = list(record.get("step_results", []))
@@ -124,19 +133,19 @@ def report_html(document, output):
 body{{background:#202020;color:#e3e3e3;font:15px system-ui;margin:0;padding:25px}}h1{{color:#ea8a23}}h3{{font-size:15px}}
 header,.case{{background:#303030;border:1px solid #191919;border-radius:5px;padding:16px;margin:12px 0}}
 summary{{cursor:pointer;font-weight:600}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font:13px ui-monospace,monospace}}
-.badge{{display:inline-block;padding:4px 8px;margin-right:8px;background:#3d3d3d}}.PASS{{color:#9ac77b}}.FAIL,.ERROR{{color:#e58b8b}}.SKIP{{color:#e5b76a}}
+.badge{{display:inline-block;padding:4px 8px;margin-right:8px;background:#3d3d3d}}.PASS{{color:#9ac77b}}.FAIL,.ERROR{{color:#e58b8b}}.SKIP,.NOT_RUN{{color:#e5b76a}}
 input,select,button{{background:#242424;color:#eee;border:1px solid #666;padding:8px;margin:4px}}a{{color:#8ab5ed}}
 .scroll{{overflow-x:auto}}table{{border-collapse:collapse;width:100%;min-width:1000px}}td,th{{text-align:left;vertical-align:top;border:1px solid #555;padding:8px}}
 th{{background:#3d3d3d}}td pre{{max-width:350px;min-width:65px}}.meta{{color:#aaa}}#filters{{position:sticky;top:0;background:#202020;padding:8px;z-index:1}}
 </style><header><h1>Testbox Studio · {escaped(status)}</h1>
 <p>{escaped(metadata.get('executed_at', ''))}</p>
-<p>{escaped(counts)} · Planned: {escaped(metadata.get('planned_executions', len(records)))} · Completed: {len(records)}</p>
+<p>{escaped(counts)} · Planned: {escaped(metadata.get('planned_executions', len(records)))} · Completed: {escaped(metadata.get('completed_executions', sum(r['status'] != 'NOT_RUN' for r in records)))}</p>
 <p class="meta">Mode: {'headless' if metadata.get('headless') else 'visible'} · Source: {escaped(metadata.get('source_project', metadata.get('source_csv', '')))}</p>
 <p><a href="results.json">JSON</a> · <a href="results.csv">Case CSV</a> · <a href="steps.csv">Step CSV</a> · <a href="metrics.csv">Measurements CSV</a> · <a href="unittest.log">Unittest log</a></p>
 <p class="meta">Case duration includes setup/cleanup. Named measurements follow the configured timer boundaries.
 Interactive pauses and step delays affect elapsed measurements; review playback metadata before drawing performance conclusions.</p></header>
 {nfr_section}<div id="filters"><input id="search" placeholder="Search case, browser, text…" aria-label="Search report">
-<select id="status" aria-label="Filter status"><option value="">All statuses</option><option>PASS</option><option>FAIL</option><option>ERROR</option><option>SKIP</option></select>
+<select id="status" aria-label="Filter status"><option value="">All statuses</option><option>PASS</option><option>FAIL</option><option>ERROR</option><option>SKIP</option><option>NOT_RUN</option></select>
 <button id="expand">Expand visible</button><button id="collapse">Collapse all</button></div>
 {''.join(sections)}
 <script>
@@ -150,6 +159,7 @@ document.getElementById('collapse').onclick=()=>cases.forEach(row=>row.open=fals
 
 
 def write_report(document, output):
+    document = {**document, "successful": successful_report(document)}
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     (output / "results.json").write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

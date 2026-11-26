@@ -58,21 +58,22 @@
     flush, candidates
   };
   window.addEventListener('input', event => {
-    if (mode !== 'record') return;
+    if (mode !== 'record' || !event.isTrusted) return;
     const element = elementOf(event);
     if (!element || !element.matches('input,textarea')) return;
     const timer = pending.get(element); if (timer) clearTimeout(timer);
     pending.set(element, setTimeout(() => recordField(element), 350));
   }, true);
-  window.addEventListener('change', event => { if (mode === 'record') recordField(elementOf(event)); }, true);
+  window.addEventListener('change', event => { if (mode === 'record' && event.isTrusted) recordField(elementOf(event)); }, true);
   window.addEventListener('keydown', event => {
-    if (mode === 'record' && ['Enter', 'Tab', 'Escape'].includes(event.key)) {
+    if (mode === 'record' && event.isTrusted && ['Enter', 'Tab', 'Escape'].includes(event.key)) {
       flush();
       step('press_key', elementOf(event), {Enter:'ENTER',Tab:'TAB',Escape:'ESCAPE'}[event.key]);
       if (event.key === 'Enter') suppressClickUntil = Date.now() + 300;
     }
   }, true);
   window.addEventListener('click', event => {
+    if (!event.isTrusted) return;
     const element = elementOf(event);
     if (!(element instanceof Element)) return;
     if (mode === 'pick') {

@@ -51,6 +51,12 @@ Mapping có thể lưu theo tên profile trong project. Import được kiểm t
 khi áp dụng; lỗi dòng/cột không làm thay một phần workspace. Công thức XLSX
 trong vùng dữ liệu cần đổi thành giá trị literal trước khi nhập.
 
+CSV tự nhận UTF-8 và UTF-16/32 có BOM. Với file dùng encoding khác, chọn
+**CSV encoding** rồi **Read / Retry** hoặc **Reload CSV**; có UTF-8, UTF-16/32,
+Windows-1252 và Windows-1258. File Excel và CSV lớn được đọc ở tác vụ nền,
+có thể Cancel trước khi áp dụng vào workspace. Bảng dataset chia trang 500
+dòng khi cần; chỉnh sửa và Undo vẫn giữ dữ liệu của tất cả các trang.
+
 ### Thử luồng chung bằng website mẫu
 
 Mở terminal riêng tại thư mục Pro3 và chạy:
@@ -67,11 +73,38 @@ Website mẫu không cần Moodle/Docker và chỉ phục vụ ví dụ automati
 
 ### Tiến độ mở rộng app
 
-Đã triển khai phần lõi, import mapping, dataset/biến, môi trường, locator,
-playback, báo cáo, Python export, NFR và các công cụ soạn test nâng cao bên dưới.
-Lượt kiểm tra tích hợp và hồi quy Gradebook cuối cùng vẫn đang được hoàn thiện;
-các kết quả phát triển ở từng mốc không thay thế cho hồi quy bộ bài nộp.
-`data/studio-development.json` theo dõi phạm vi và các kiểm chứng tương ứng.
+Đã hoàn thành 12 nhóm tính năng trong `data/studio-development.json`, gồm
+import mapping, dataset/biến, chỉnh sửa step, môi trường, locator, playback,
+báo cáo, Python export, NFR, template, recorder/picker và điều kiện/vòng lặp.
+
+Kiểm chứng cuối ngày **26/11/2026**:
+
+| Phạm vi | Kết quả |
+| --- | --- |
+| Kiểm tra app, browser thực, GUI và Python export | **84/84 PASS**, mã nguồn giữ nguyên trong lượt kiểm tra |
+| Bấm Run thật từ GUI với 3 dòng dataset | **3/3 PASS**, hiển thị đúng Live steps và Case results |
+| Gradebook gốc Level 1 và Level 2 | Mỗi level **35 PASS + 1 FAIL** đúng TC-003-036, không ERROR/SKIP |
+| NFR Save → xuất hiện trong Gradebook, cả hai level | **6/6 PASS**, mọi bước cleanup đều thực hiện PASS |
+| Tương thích 5 case × 2 level × Chrome/Edge/Opera GX | **30/30 PASS** |
+| Gói Python mẫu chạy ngoài repository | **3/3 PASS ở mỗi level** |
+
+Bằng chứng: [kiểm tra app](artifacts/studio-final-verification.json),
+[GUI chạy thật](artifacts/studio-live-gui-verification.json),
+[hồi quy Gradebook](artifacts/studio-gradebook-regression.json),
+[NFR Moodle](artifacts/studio-moodle-nfr-verification.json) và
+[audit hoàn tất](artifacts/studio-release-audit.json).
+CSV/oracle gốc được giữ nguyên; lỗi database của Moodle vẫn là FAIL.
+Audit cuối xác nhận dữ liệu thử đã dọn xong, còn **0 manual grade items**.
+Các file `*attempt*.json` và kết quả ở các mốc cũ là lịch sử điều tra,
+không thay thế các bằng chứng cuối được dẫn ở đây.
+
+Báo cáo có thể giải nén và mở `report.html` trực tiếp:
+[Level 1](artifacts/gradebook-level1-report.zip),
+[Level 2](artifacts/gradebook-level2-report.zip),
+[NFR thời gian](artifacts/gradebook-elapsed-report.zip),
+[tương thích](artifacts/gradebook-compatibility-report.zip).
+Gói [Python mẫu](artifacts/testbox-login-python.zip) kèm hai level, CSV và
+README riêng; không cần cài desktop app để chạy gói đã xuất.
 
 ### Case templates
 
@@ -138,7 +171,10 @@ action/note bên trong như những step khác. Hoặc dùng **＋ Step** với 
 | `end_repeat` | — | — | — |
 
 `if_visible` kiểm tra trạng thái hiện tại; thêm wait trước đó nếu cần chờ
-trang cập nhật. Mỗi block phải đóng trong cùng phase. Repeat cho phép 0–100
+trang cập nhật. `assert_absent` chấp nhận phần tử không có hoặc đang ẩn;
+với trang tải bất đồng bộ, cần xác nhận trạng thái sẵn sàng trước khi kiểm tra
+âm tính. Ví dụ Gradebook chờ thấy đúng dòng do lượt chạy tạo trước khi xóa,
+rồi chờ dòng đó biến mất. Mỗi block phải đóng trong cùng phase. Repeat cho phép 0–100
 lần, chỉ số bắt đầu ở 1 và khôi phục biến cũ sau block (kể cả khi lỗi/Stop).
 Tối đa 8 block lồng nhau và giới hạn bảo thủ 10.000 step sau khai triển mỗi
 phase. Không thực thi biểu thức Python/eval.
@@ -158,8 +194,8 @@ Mốc kiểm tra công cụ soạn test: **68 development tests PASS**, gồm br
 thực, ghi/phát lại thao tác, chọn phần tử, chuyển trang, template và control
 flow trong Python export ở cả hai Level. Xem
 [studio-authoring-verification.json](artifacts/studio-authoring-verification.json).
-Đây là kiểm chứng bản triển khai các tính năng; final audit và hồi quy Moodle
-vẫn được theo dõi riêng trong `data/studio-development.json`.
+Đây là mốc kiểm chứng trước audit cuối. Kết quả mới nhất nằm ở phần tiến độ
+phía trên và `data/studio-development.json`.
 
 ### Điều khiển chạy và xem báo cáo
 
@@ -169,6 +205,16 @@ lực sau khi hành động hiện tại kết thúc. **Stop + cleanup** dừng 
 vẫn chạy cleanup; step chưa tới được ghi NOT_RUN, và báo cáo giữ số lượt dự
 kiến/đã thực hiện để thấy dataset còn chưa chạy. Cleanup không dừng ở
 breakpoint. CLI không dùng control file sẽ bỏ qua breakpoint.
+
+Kéo thanh chia ngang phía trên **Execution** để tăng vùng xem log/kết quả;
+dùng con lăn hoặc phím mũi tên trong bảng để xem các dòng còn lại.
+
+Dataset hoặc ô ma trận Level/browser/lần lặp chưa bắt đầu được ghi **NOT_RUN**,
+tách khỏi SKIP và số lượt đã thực hiện. Một run bị Stop hoặc thiếu kết quả
+không được báo PASS. Các case mặc định chạy bằng profile tạm riêng; tùy chọn
+CLI `--reuse-browser` giữ tiến trình browser nhưng tạo tab mới, xóa cookie,
+cache và storage của các origin đã truy cập giữa các case. Nếu không xác nhận
+được việc dọn trạng thái, runner tạo lại profile tạm.
 
 **View report** mở kết quả theo testcase, browser và dòng dataset, kèm từng
 step, expected/actual và evidence. Mỗi run sinh `results.json`, `results.csv`,
@@ -241,6 +287,34 @@ và fixture cũ; phép đo thời gian của native workflow cần được so�
 để đặt ranh giới rõ ràng. `python -m nonfunctional.compatibility` vẫn giữ
 preset lịch sử năm case Gradebook Level 2 cho bài nộp trước đây.
 
+Ví dụ cho phần Gradebook của Thái: mở
+`examples/gradebook-save-nfr.project.json` bằng **File → Open workspace…**.
+Nhập tài khoản giáo viên trong Run configuration, chọn **Elapsed-time NFR**
+rồi Run. Cấu hình mẫu chạy Chrome, cả hai level, 3 lần mỗi level; timer bắt
+đầu trước click Save và kết thúc khi dòng mới xuất hiện trong Gradebook.
+Mỗi lần dùng tên/ID riêng và chỉ xóa mục do lần chạy đó tạo. Giới hạn **5 giây**
+là ngưỡng minh họa có thể sửa trong NFR settings, không phải yêu cầu do đề bài
+ấn định. URL mặc định là Moodle cục bộ cổng 9501, course ID 2.
+
+Chạy cùng ví dụ bằng CLI:
+
+```powershell
+$env:TESTBOX_VAR_username = 'teacher01'
+$env:TESTBOX_VAR_password = '1234'
+.\.venv\Scripts\python.exe -m automation.nfr --project examples/gradebook-save-nfr.json --kind elapsed --headless
+```
+
+Ví dụ tương thích dùng 5 case Gradebook gốc:
+`examples/gradebook-compatibility.project.json` mở trong app, chọn **All cases**
+và **Compatibility NFR**. Mẫu chọn cả hai level và Chrome/Edge/Opera GX,
+tổng cộng 30 lượt. Máy khác cần có các browser được chọn và cấu hình Chromium
+của Opera đúng phiên bản cài đặt; có thể chỉ chọn Chrome và Edge trong NFR settings.
+CLI tương ứng:
+
+```powershell
+.\.venv\Scripts\python.exe -m automation.nfr --project examples/gradebook-compatibility.json --kind compatibility --headless
+```
+
 Kiểm tra sau khi thêm NFR: **55 development tests PASS**, gồm Chrome/Edge ở
 cả hai Level, giới hạn thời gian, thiếu mẫu, Stop và chỉnh sửa UI; xem
 [studio-nfr-verification.json](artifacts/studio-nfr-verification.json).
@@ -307,8 +381,9 @@ Mở app không khởi động kiểm thử hay thay đổi Moodle. Cách sử d
 6. **Export…:** chọn xuất phần đang chọn hoặc toàn workspace, rồi lưu dưới
    dạng `.csv`, `.xls` hoặc `.xlsx`. Xuất dữ liệu không thay thế thao tác lưu
    workspace; folder rỗng được giữ trong workspace JSON.
-7. **Khi muốn chạy kiểm thử:** bật Moodle Project 2, kiểm tra URL/course và
-   tài khoản có quyền sửa Gradebook. Trong **Run configuration**, chọn Level,
+7. **Khi muốn chạy kiểm thử:** bật website cần kiểm tra và chuẩn bị tài khoản,
+   dữ liệu mà các step sử dụng. Với bộ Gradebook mẫu, bật Moodle Project 2,
+   kiểm tra URL/course và quyền sửa Gradebook. Trong **Run configuration**, chọn Level,
    trình duyệt và chế độ. **Headless (background)** mặc định bật để chạy nền.
    Chọn **Selected items** hoặc **All cases**, rồi bấm
    **Run**. Mode NFR dùng ma trận trong **NFR settings…**. Yêu cầu môi trường
@@ -322,6 +397,10 @@ lại để thấy phiên bản mới. Tên app là **Testbox Studio**; tên fea
 liệu và workflow vẫn thể hiện đúng chức năng Gradebook hiện đang hỗ trợ.
 
 ## Chuẩn bị trước khi bấm Run
+
+Các bước Moodle/Docker dưới đây dành cho bộ Gradebook. Với testcase Steps
+cho website khác, chỉ cần website đó hoạt động và các URL, locator, biến,
+dataset, tài khoản được cấu hình đúng; không cần bật Moodle.
 
 1. Mở **Docker Desktop**, chờ Docker Engine chạy. Sau đó mở PowerShell tại
    thư mục Pro3 và bật container Moodle đã có:
@@ -595,9 +674,10 @@ the actual test assertions run in the Python/unittest process.
 
 Run the suites sequentially against Course 1; each suite records baseline item
 IDs and checks cleanup. Browser sessions use fresh profiles rather than the
-user's normal Chrome, Edge or Opera profile. With `--reuse-browser`, one profile
-per browser is reused for the suite, while cookies and web storage are cleared
-before each case. Every case still authenticates and checks its own data and
+user's normal Chrome, Edge or Opera profile. With `--reuse-browser`, the owned
+process is reused with a new tab; cookies, cache and observed-origin storage
+are cleared before each case. A reset failure starts a fresh temporary profile.
+Every case still authenticates and checks its own data and
 cleanup. This avoids repeated browser startup/shutdown overhead.
 
 Headless sessions use a fixed 1440 × 900 CSS viewport and device scale factor
@@ -606,10 +686,10 @@ application. WebDriver commands have a 60-second transport limit in addition
 to page/element waits. Browser teardown closes the owned temporary browser
 through its debugging connection before stopping its driver service.
 
-Opera GX 139.0.6053.63 on the inspected machine embeds Chromium
-155.0.8059.85. The Opera adapter therefore uses ChromeDriver for Chromium 155,
+Opera GX 140.0.6074.48 inspected on 26 November 2026 embeds Chromium
+157.0.8103.79. The Opera adapter therefore uses ChromeDriver for Chromium 157,
 not a driver chosen from the Opera product version. The current site settings
-contain `opera_chromium_version: "155"`. Update that setting after a GX engine
+contain `opera_chromium_version: "157"`. Update that setting after a GX engine
 update. The default binary location is the Windows per-user Opera GX install;
 override it with `opera_binary` in site JSON or `TESTBOX_OPERA_BINARY`.
 `TESTBOX_OPERA_CHROMIUM_VERSION` overrides the configured engine version.
@@ -767,7 +847,7 @@ levels. See the verification results below and the
 [captured error page](artifacts/F003-D01-maximum-empty.png). Project 2 outcomes
 are reference material, separate from these new Python executions.
 
-## Verification results
+## Earlier Gradebook verification — 23 November 2026
 
 Verified on **23 November 2026**, against the existing `pro2-moodle` Docker
 fixture: Moodle 5.1.8, Course 1 / ID 2, English UI and Asia/Bangkok timezone.
@@ -833,7 +913,7 @@ and is **not a response-time benchmark**.
 ## Packaging
 
 Keep `level1/` and `level2/` separated in the submission ZIP, and include
-`gradebook/`, `nonfunctional/`, `data/`, `tools/`, `studio/`, `app.py`,
+`gradebook/`, `automation/`, `nonfunctional/`, `data/`, `tools/`, `studio/`, `examples/`, `app.py`,
 `Start-App.ps1`, the requirements files and this
 README at the archive root. The shared Python package is required by both
 levels; neither level folder is standalone. Do not include `.venv`, browser

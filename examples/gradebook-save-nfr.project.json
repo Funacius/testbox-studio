@@ -1,0 +1,112 @@
+{
+  "version": 2,
+  "name": "Gradebook save NFR example",
+  "nodes": [
+    {
+      "uid": "79f26871a9314816b2ff3983e1a9ae51",
+      "kind": "folder",
+      "name": "NFR - Gradebook save",
+      "children": [
+        {
+          "uid": "2b157fd9ba9845248794a128fc83df03",
+          "kind": "case",
+          "name": "Gradebook save response and owned-item cleanup",
+          "record": {
+            "case_id": "GRADEBOOK-SAVE-NFR",
+            "title": "Gradebook save response and owned-item cleanup",
+            "workflow": "steps",
+            "item_name": "",
+            "minimum": "",
+            "maximum": "",
+            "grade_type": "",
+            "inputs_json": "{}",
+            "expected_json": "{}",
+            "expected_result": "",
+            "actions_json": "[{\"id\": \"5305019c56a54fd688889f0ce91988be\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"open\", \"target\": \"/login/index.php\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"login-initialized\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"wait_visible\", \"target\": \"css=.input-group #password\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"Wait for the password toggle template to replace the original input.\"}, {\"id\": \"51b69359c2904165ae5df084cef568f8\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"type\", \"target\": \"@username\", \"value\": \"${username}\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"37b80fa6abc24bc78d497f06c18c5408\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"type\", \"target\": \"@password\", \"value\": \"${password}\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"f0afbd386d9046068c97e6ba9c24c8ca\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"click\", \"target\": \"@login_button\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"daa4dd37e5e14728ae1cdc6330327ef6\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"wait_visible\", \"target\": \"@logged_in\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"9477c5cb49f44dbf8f985764d55d2116\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"open\", \"target\": \"/grade/edit/tree/item.php?courseid=${course_id}\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"c9b8747eb83143009238b0f3bea7b38b\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"select_value\", \"target\": \"@gradetype\", \"value\": \"1\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"0260a50685c743ef9c12af54f6b9f7f8\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"assert_enabled\", \"target\": \"@grademin\", \"value\": \"\", \"expected\": \"true\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"7bb92866cd704081a1377f1a8b18cf6e\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"type\", \"target\": \"@itemname\", \"value\": \"${runtime_id}\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"8ca39644ad1d4a92b2b2d7de1303fe94\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"type\", \"target\": \"@idnumber\", \"value\": \"${runtime_id}\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"e162b876268e484e913f9e9656ca4243\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"type\", \"target\": \"@grademin\", \"value\": \"0\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"a94b02efe0dd4800868668d68b804ba3\", \"enabled\": true, \"phase\": \"setup\", \"command\": \"type\", \"target\": \"@grademax\", \"value\": \"100\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"save\", \"enabled\": true, \"phase\": \"test\", \"command\": \"click\", \"target\": \"@save\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"5f3ea9ff05174442909c5cfe6ba3b940\", \"enabled\": true, \"phase\": \"test\", \"command\": \"wait_visible\", \"target\": \"@gradebook_ready\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"saved\", \"enabled\": true, \"phase\": \"test\", \"command\": \"assert_visible\", \"target\": \"xpath=//tr[starts-with(@id,'grade-item-ig') and .//div[contains(concat(' ',normalize-space(@class),' '),' manual ')] and .//*[normalize-space()='${runtime_id}']]\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"7ad73518f20d420f9e424fa609411622\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"open\", \"target\": \"/grade/edit/tree/index.php?id=${course_id}\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"b6f3e6bc0e314073826aea5ccadf6e78\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"wait_visible\", \"target\": \"@gradebook_ready\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"cleanup-owned-row\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"wait_visible\", \"target\": \"xpath=//tr[starts-with(@id,'grade-item-ig') and .//div[contains(concat(' ',normalize-space(@class),' '),' manual ')] and .//*[normalize-space()='${runtime_id}']]\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"Confirm the saved owned row is available before evaluating deletion.\"}, {\"id\": \"03eb762a6c774c41b882a1d0bdabc3ce\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"if_visible\", \"target\": \"xpath=//tr[starts-with(@id,'grade-item-ig') and .//div[contains(concat(' ',normalize-space(@class),' '),' manual ')] and .//*[normalize-space()='${runtime_id}']]\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"f30674d2ee3f4d7399e265f65e29b8c0\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"click\", \"target\": \"xpath=//tr[starts-with(@id,'grade-item-ig') and .//div[contains(concat(' ',normalize-space(@class),' '),' manual ')] and .//*[normalize-space()='${runtime_id}']]//button[@data-bs-toggle='dropdown']\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"a7aeeeea9f59441782f8984f75bd855e\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"click\", \"target\": \"xpath=//tr[starts-with(@id,'grade-item-ig') and .//div[contains(concat(' ',normalize-space(@class),' '),' manual ')] and .//*[normalize-space()='${runtime_id}']]//a[@aria-label='Delete']\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"dd80e09959a6457eb7e728f05cb1ecd7\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"wait_visible\", \"target\": \"@confirm_delete\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"5cc390ecbd0a4d66806b5dd055460675\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"click\", \"target\": \"@confirm_delete\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"9a16595448624ee99503f6ba2005022a\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"wait_absent\", \"target\": \"xpath=//tr[starts-with(@id,'grade-item-ig') and .//div[contains(concat(' ',normalize-space(@class),' '),' manual ')] and .//*[normalize-space()='${runtime_id}']]\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"208fbb284e62411981f9a5a4aeaeaa5c\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"end_if\", \"target\": \"\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}, {\"id\": \"c9770248e2794d07af5d5082ba481e0b\", \"enabled\": true, \"phase\": \"cleanup\", \"command\": \"assert_absent\", \"target\": \"xpath=//tr[starts-with(@id,'grade-item-ig') and .//div[contains(concat(' ',normalize-space(@class),' '),' manual ')] and .//*[normalize-space()='${runtime_id}']]\", \"value\": \"\", \"expected\": \"\", \"timeout\": 15, \"breakpoint\": false, \"description\": \"\"}]",
+            "dataset_json": "[{}]",
+            "variables_json": "{}",
+            "precondition": "",
+            "notes": "Measures click Save through appearance in Gradebook. Uses a run-specific item name/ID and removes only that row. Supply teacher credentials through Run configuration or TESTBOX_VAR_username/password.",
+            "known_defect": "",
+            "source_sheet": "",
+            "source_row": ""
+          },
+          "steps": []
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "base_url": "http://127.0.0.1:9501",
+    "locators": {
+      "username": [
+        "id",
+        "username"
+      ],
+      "password": [
+        "id",
+        "password"
+      ],
+      "login_button": [
+        "id",
+        "loginbtn"
+      ],
+      "logged_in": [
+        "css selector",
+        "#user-menu-toggle, .usermenu [data-bs-toggle='dropdown']"
+      ],
+      "gradebook_ready": [
+        "css selector",
+        "body#page-grade-edit-tree-index"
+      ],
+      "itemname": [
+        "id",
+        "id_itemname"
+      ],
+      "idnumber": [
+        "id",
+        "id_idnumber"
+      ],
+      "grademin": [
+        "id",
+        "id_grademin"
+      ],
+      "grademax": [
+        "id",
+        "id_grademax"
+      ],
+      "gradetype": [
+        "id",
+        "id_gradetype"
+      ],
+      "save": [
+        "id",
+        "id_submitbutton"
+      ],
+      "confirm_delete": [
+        "css selector",
+        ".modal.show [data-action='save']"
+      ]
+    },
+    "variables": {
+      "course_id": "2"
+    },
+    "nfr": {
+      "levels": [
+        1,
+        2
+      ],
+      "browsers": [
+        "chrome"
+      ],
+      "repetitions": 3,
+      "measurements": {
+        "GRADEBOOK-SAVE-NFR": {
+          "start": "save",
+          "end": "saved",
+          "maximum_seconds": 5
+        }
+      }
+    }
+  }
+}

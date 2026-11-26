@@ -11,7 +11,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from urllib.parse import urljoin
 
-from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException, StaleElementReferenceException, TimeoutException, WebDriverException
+from selenium.common.exceptions import ElementClickInterceptedException, InvalidElementStateException, NoSuchElementException, StaleElementReferenceException, TimeoutException, WebDriverException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
@@ -128,9 +128,21 @@ class GradebookPage:
                 self.driver.get(self.url("login"))
                 self.wait.until(lambda _: self.visible("logged_in") or self.visible("username"))
                 if not self.visible("logged_in"):
+                    # Eager navigation exposes the original password input before
+                    # core/togglesensitive asynchronously replaces its outerHTML.
+                    # Wait for Moodle's own pending-work tracker before typing;
+                    # otherwise a successful send_keys can be discarded later.
+                    self.trace.append("Wait for Moodle login initialization")
+                    self.wait.until(lambda driver: driver.execute_script(
+                        "return document.readyState === 'complete' && "
+                        "(!window.M || !M.util || !Array.isArray(M.util.pending_js) || M.util.pending_js.length === 0);"),
+                        "Moodle login initialization did not finish")
                     self.type_text("username", username)
                     self.type_text("password", password)
                     if not self.visible("logged_in"):
+                        if (self.element("username").get_property("value") != username or
+                                self.element("password").get_property("value") != password):
+                            raise RuntimeError("Login inputs changed before submission; credentials were not submitted")
                         self.click("login_button")
                 self.wait.until(lambda _: self.visible("logged_in") or self.visible("login_error"))
                 if self.visible("login_error"):
@@ -171,23 +183,34 @@ class GradebookPage:
     def type_text(self, key: str, value: str) -> None:
         if key not in {"username", "password"}:
             self.trace.append(f"Enter {key} = {value!r}")
-        field = self.element(key)
-        self.wait.until(lambda _: self.enabled(key), f"Field is not editable: {key}")
-        field.clear()
-        if value:
-            field.send_keys(value)
-            if field.get_property("value") != value:
-                if not self.site.get("allow_interaction_fallbacks", False):
-                    raise RuntimeError(f"Native text entry was blocked for {key}; check browser-owned dialogs")
-                # Some Windows IME/browser combinations acknowledge SendKeys
-                # without inserting its text. Chromium's text-input command
-                # emits the input event and avoids that keyboard-layout path.
-                self.trace.append(f"Use Chromium text input fallback for {key}")
+        reported = False
+        def enter(_):
+            nonlocal reported
+            try:
+                field = self.driver.find_element(*self.locator(key))
+                if not field.is_displayed() or not field.is_enabled() or field.get_property("readOnly"):
+                    return False
                 field.clear()
-                self.driver.execute_script("arguments[0].focus()", field)
-                self.driver.execute_cdp_cmd("Input.insertText", {"text": value})
+                if value:
+                    field.send_keys(value)
+                    if field.get_property("value") != value:
+                        if not self.site.get("allow_interaction_fallbacks", False):
+                            raise RuntimeError(f"Native text entry was blocked for {key}; check browser-owned dialogs")
+                        self.trace.append(f"Use Chromium text input fallback for {key}")
+                        field.clear()
+                        self.driver.execute_script("arguments[0].focus()", field)
+                        self.driver.execute_cdp_cmd("Input.insertText", {"text": value})
+                return field
+            except (NoSuchElementException, StaleElementReferenceException, InvalidElementStateException):
+                if not reported:
+                    self.trace.append(f"Wait for stable native input: {key}")
+                    reported = True
+                return False
+        field = self.wait.until(enter, f"Field did not become editable for native input: {key}")
         actual = field.get_property("value")
         if actual != value:
+            if key == "password":
+                raise RuntimeError("Password field did not retain the configured credential")
             raise RuntimeError(f"Could not enter exact data in {key}: expected {value!r}, got {actual!r}")
         # Trigger Moodle's change handlers without trimming spaces or changing data.
         self.driver.execute_script(

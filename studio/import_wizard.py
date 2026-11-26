@@ -7,12 +7,37 @@ from tkinter import messagebox, ttk
 
 from studio.importing import FIELDS, guess_header, headings, import_selection, read_grids, suggest_mapping
 from studio.theme import PANEL, dark_text
+from studio.background import BackgroundTask, CSV_ENCODINGS
+
+
+def load_grids(parent, path, encoding="auto"):
+    if path.suffix.lower() == ".csv" and path.stat().st_size <= 128 * 1024:
+        try:
+            return read_grids(path, encoding)
+        except UnicodeError:
+            pass
+    job = BackgroundTask(parent, "Read spreadsheet", lambda cancelled, choice: read_grids(path, choice, cancelled),
+                         encoding=encoding if path.suffix.lower() == ".csv" else None)
+    if job.error:
+        raise ValueError(str(job.error)) from job.error
+    return job.result
 
 
 class ImportWizard(tk.Toplevel):
-    def __init__(self, parent, path, profiles=None, selected_case=None):
-        grids = read_grids(path)
+    def __init__(self, parent, path, profiles=None, selected_case=None, grids=None):
         super().__init__(parent)
+        self.withdraw()
+        self.result = None
+        try:
+            grids = grids if grids is not None else load_grids(parent, path)
+            if grids is None:
+                self.destroy()
+                return
+            if not grids:
+                raise ValueError("This file contains no sheets")
+        except Exception as exc:
+            self.destroy()
+            raise ValueError(f"Cannot read spreadsheet: {exc}") from exc
         self.title("Import · sheets, columns and preview")
         self.configure(bg=PANEL)
         self.geometry(f"1100x{min(800, self.winfo_screenheight() - 120)}")
@@ -48,6 +73,13 @@ class ImportWizard(tk.Toplevel):
         ttk.Checkbutton(options, text="Blank Case IDs continue the previous case", variable=self.continue_ids).pack(side="left")
         ttk.Checkbutton(options, text=f"Dataset → selected case ({selected_case or 'none'})", variable=self.use_selected,
                         state="normal" if selected_case else "disabled").pack(side="left", padx=14)
+        if path.suffix.lower() == ".csv":
+            encoding_row = ttk.Frame(body)
+            encoding_row.pack(fill="x", pady=(0, 7))
+            self.csv_encoding = tk.StringVar(self, grids[0].get("csv_encoding", "auto"))
+            ttk.Label(encoding_row, text="CSV encoding").pack(side="left")
+            ttk.Combobox(encoding_row, textvariable=self.csv_encoding, values=CSV_ENCODINGS, width=18, state="readonly").pack(side="left", padx=8)
+            ttk.Button(encoding_row, text="Reload CSV", command=self.reload_csv, style="Small.TButton").pack(side="left")
         profiles = ttk.Frame(body)
         profiles.pack(fill="x", pady=(0, 10))
         ttk.Label(profiles, text="Mapping profile").pack(side="left", padx=(0, 8))
@@ -90,11 +122,22 @@ class ImportWizard(tk.Toplevel):
         ttk.Button(buttons, text="Preview mapped data", command=self.show_preview).pack(side="right")
         self.sheet_changed()
         self.bind("<Escape>", lambda _: self.destroy())
+        self.deiconify()
         self.grab_set()
         self.wait_window()
 
     def sheet(self):
         return next(g for g in self.grids if g["name"] == self.sheet_name.get())
+
+    def reload_csv(self):
+        try:
+            grids = load_grids(self, self.path, self.csv_encoding.get())
+            if grids is not None:
+                self.grids = grids
+                self.csv_encoding.set(grids[0].get("csv_encoding", "auto"))
+                self.sheet_changed()
+        except (OSError, ValueError, UnicodeError) as exc:
+            self.text(str(exc))
 
     def sheet_changed(self, _=None):
         try:
@@ -148,6 +191,16 @@ class ImportWizard(tk.Toplevel):
         return import_selection(self.path, self.sheet(), int(self.header.get()) - 1, self.mode.get(),
                                 {key: v.get() for key, v in self.mapping.items()}, self.continue_ids.get())
 
+    def build_responsive(self):
+        if len(self.sheet()["rows"]) <= 2000 and self.path.stat().st_size <= 128 * 1024 and self.mode.get() != "Project 2 Gradebook":
+            return self.build()
+        sheet, header, mode = self.sheet(), int(self.header.get()) - 1, self.mode.get()
+        mapping, continuation = {key: v.get() for key, v in self.mapping.items()}, self.continue_ids.get()
+        job = BackgroundTask(self, "Validate mapped data", lambda cancelled, _: import_selection(self.path, sheet, header, mode, mapping, continuation))
+        if job.error:
+            raise ValueError(str(job.error)) from job.error
+        return job.result
+
     def text(self, value):
         self.preview.configure(state="normal")
         self.preview.delete("1.0", "end")
@@ -156,20 +209,26 @@ class ImportWizard(tk.Toplevel):
 
     def show_preview(self):
         try:
-            result = self.build()
+            result = self.build_responsive()
+            if result is None:
+                return
             if result["kind"] == "dataset":
                 summary = f"{len(result['dataset'])} data rows. Column mapping:\n" + json.dumps(result["columns"], ensure_ascii=False, indent=2)
                 summary += "\n\nFirst rows:\n" + json.dumps(result["dataset"][:3], ensure_ascii=False, indent=2)
             else:
                 summary = f"{len(result['records'])} cases; {result['drafts']} manual steps imported as disabled notes.\n"
                 summary += json.dumps(result["records"][:2], ensure_ascii=False, indent=2)
+            if len(summary) > 12000:
+                summary = summary[:12000] + "\n\n[Preview shortened. Full values are retained for import.]"
             self.text(summary)
         except (ValueError, KeyError, TypeError, OSError) as exc:
             self.text(str(exc))
 
     def submit(self):
         try:
-            result = self.build()
+            result = self.build_responsive()
+            if result is None:
+                return
             result["use_selected"] = self.use_selected.get()
             if self.profile.get().strip():
                 result["profile"] = (self.profile.get().strip(), dict(header=int(self.header.get()) - 1, mode=self.mode.get(),

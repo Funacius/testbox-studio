@@ -5,7 +5,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
-from automation.reporting import evidence_path, planned_results, text, zip_report
+from automation.reporting import evidence_path, planned_results, text, zip_report, successful_report
 from studio.theme import GREEN, PANEL, RED, YELLOW, dark_text
 
 
@@ -24,14 +24,14 @@ class ReportViewer(tk.Toplevel):
         self.current_steps = []
         body = ttk.Frame(self, padding=16)
         body.pack(fill="both", expand=True)
-        title = "Stopped / incomplete" if document["metadata"].get("stopped") else "PASS" if document.get("successful") else "FAIL / incomplete"
+        title = "Stopped / incomplete" if document["metadata"].get("stopped") else "PASS" if successful_report(document) else "FAIL / incomplete"
         ttk.Label(body, text="Execution report · " + title, style="Title.TLabel").pack(anchor="w")
         ttk.Label(body, text=text(document.get("counts", {})) + "  ·  " + document["metadata"].get("executed_at", ""),
                   style="Muted.TLabel").pack(anchor="w", pady=(4, 8))
         controls = ttk.Frame(body)
         controls.pack(fill="x", pady=(0, 9))
         self.filter = tk.StringVar(self, "All")
-        choices = ttk.Combobox(controls, textvariable=self.filter, values=("All", "PASS", "FAIL", "ERROR", "SKIP"), state="readonly", width=12)
+        choices = ttk.Combobox(controls, textvariable=self.filter, values=("All", "PASS", "FAIL", "ERROR", "SKIP", "NOT_RUN"), state="readonly", width=12)
         choices.pack(side="left")
         choices.bind("<<ComboboxSelected>>", lambda _: self.refresh())
         ttk.Button(controls, text="Open HTML report", command=lambda: self.open_path(output / "report.html")).pack(side="right")

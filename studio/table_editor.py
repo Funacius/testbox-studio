@@ -45,6 +45,7 @@ class TableEditor(ttk.Frame):
         self.fixed_columns = fixed_columns
         self.columns, self.rows = list(fixed_columns or []), []
         self.history, self.future = [], []
+        self.page, self.page_size = 0, 500
         toolbar = ttk.Frame(self)
         toolbar.pack(fill="x", pady=(0, 6))
         for label, fn in (("＋ Row", self.add_row), ("Copy row", self.copy_row), ("Delete row", self.delete_row),
@@ -57,7 +58,17 @@ class TableEditor(ttk.Frame):
                 ttk.Button(controls, text=label, command=fn, style="Small.TButton").pack(side="left", padx=(0, 4))
         ttk.Button(controls, text="Undo", command=self.undo, style="Small.TButton").pack(side="left")
         ttk.Button(controls, text="Redo", command=self.redo, style="Small.TButton").pack(side="left", padx=4)
+        navigation = ttk.Frame(self)
+        self.navigation = navigation
+        navigation.pack(side="bottom", fill="x", pady=4)
+        self.page_label = ttk.Label(navigation, style="Muted.TLabel")
+        self.page_label.pack(side="left")
+        self.next_page = ttk.Button(navigation, text="Next rows →", command=lambda: self.change_page(1), style="Small.TButton")
+        self.next_page.pack(side="right")
+        self.previous_page = ttk.Button(navigation, text="← Previous rows", command=lambda: self.change_page(-1), style="Small.TButton")
+        self.previous_page.pack(side="right", padx=6)
         frame = ttk.Frame(self)
+        self.table_frame = frame
         frame.pack(fill="both", expand=True)
         self.tree = ttk.Treeview(frame, show="headings", selectmode="browse", height=6)
         self.tree.grid(row=0, column=0, sticky="nsew")
@@ -81,6 +92,7 @@ class TableEditor(ttk.Frame):
         self.history.clear()
         self.future.clear()
         self.column_index = None
+        self.page = 0
         self.refresh()
 
     def records(self):
@@ -92,6 +104,18 @@ class TableEditor(ttk.Frame):
         self.future.clear()
 
     def refresh(self, selected=None):
+        if len(self.rows) > self.page_size:
+            self.navigation.pack(side="bottom", fill="x", pady=4, before=self.table_frame)
+        else:
+            self.navigation.pack_forget()
+        last_page = max(0, (len(self.rows) - 1) // self.page_size)
+        if selected is not None and 0 <= selected < len(self.rows):
+            self.page = selected // self.page_size
+        self.page = min(max(0, self.page), last_page)
+        start, stop = self.page * self.page_size, min(len(self.rows), (self.page + 1) * self.page_size)
+        self.page_label.configure(text=f"Rows {start + 1 if self.rows else 0}–{stop} of {len(self.rows)}")
+        self.previous_page.configure(state="normal" if self.page else "disabled")
+        self.next_page.configure(state="normal" if self.page < last_page else "disabled")
         self.tree.delete(*self.tree.get_children())
         keys = ["n", *[f"c{i}" for i in range(len(self.columns))]]
         self.tree.configure(columns=keys)
@@ -101,11 +125,15 @@ class TableEditor(ttk.Frame):
             key = f"c{index}"
             self.tree.heading(key, text=name)
             self.tree.column(key, width=180, stretch=True, minwidth=90)
-        for index, row in enumerate(self.rows):
-            self.tree.insert("", "end", iid=str(index), values=[index + 1, *row])
+        for index in range(start, stop):
+            self.tree.insert("", "end", iid=str(index), values=[index + 1, *self.rows[index]])
         if selected is not None and self.tree.exists(str(selected)):
             self.tree.selection_set(str(selected))
             self.tree.see(str(selected))
+
+    def change_page(self, direction):
+        self.page += direction
+        self.refresh()
 
     def selected_row(self):
         selection = self.tree.selection()

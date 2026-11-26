@@ -36,6 +36,9 @@ def check_date_precondition(case: Case) -> None:
 
 
 class GradebookCase(unittest.TestCase):
+    @property
+    def secret_values(self):
+        return {os.environ.get("MOODLE_PASSWORD", "1234")} - {""}
     def __init__(self, case: Case, level: int, browser: str, site: dict,
                  output: Path, run_id: str, headless: bool = False, on_event=None, shared_drivers=None):
         super().__init__("runTest")
@@ -79,12 +82,8 @@ class GradebookCase(unittest.TestCase):
             self.driver = create_browser(self.browser, self.site, self.headless)
             self.addCleanup(close_browser, self.driver)
         else:
-            if self.browser not in self.shared_drivers:
-                self.shared_drivers[self.browser] = create_browser(self.browser, self.site, self.headless)
-            self.driver = self.shared_drivers[self.browser]
-            self.driver.delete_all_cookies()
-            if self.driver.current_url.startswith(self.site["base_url"]):
-                self.driver.execute_script("localStorage.clear();sessionStorage.clear();")
+            from automation.isolation import owned_reused_browser
+            self.driver = owned_reused_browser(self.shared_drivers, self.browser, self.site, self.headless)
         self.capabilities = {k: self.driver.capabilities.get(k) for k in ("browserName", "browserVersion", "platformName")}
         self.capabilities["window"] = self.driver.get_window_rect()
         self.capabilities["viewport"] = self.driver.execute_script(
@@ -123,7 +122,8 @@ class GradebookCase(unittest.TestCase):
         finally:
             directory = self.output / "logs"
             directory.mkdir(parents=True, exist_ok=True)
-            (directory / f"{self.id()}.txt").write_text("\n".join(self.page.trace) + "\n", encoding="utf-8")
+            from automation.privacy import redact
+            (directory / f"{self.id()}.txt").write_text(redact("\n".join(self.page.trace) + "\n", self.secret_values), encoding="utf-8")
 
     def runTest(self):
         try:
@@ -195,14 +195,15 @@ class CsvResult(unittest.TextTestResult):
         super().stopTest(test)
 
 
-def write_results(result: CsvResult, output: Path, metadata: dict) -> None:
+def write_results(result: CsvResult, output: Path, metadata: dict, planned_tests=None):
     from automation.reporting import write_report
+    from automation.outcomes import complete_test_results, status_counts
     output.mkdir(parents=True, exist_ok=True)
-    document = {"metadata": metadata, "successful": result.wasSuccessful() and not result.skipped and not metadata.get("stopped", False),
-                "counts": {status: sum(r["status"] == status for r in result.records)
-                           for status in ("PASS", "FAIL", "ERROR", "SKIP")},
-                "results": result.records}
+    records = complete_test_results(result.records, planned_tests) if planned_tests is not None else result.records
+    document = {"metadata": metadata, "successful": bool(records) and result.wasSuccessful() and not result.skipped and not metadata.get("stopped", False)
+                and all(r["status"] == "PASS" for r in records), "counts": status_counts(records), "results": records}
     write_report(document, output)
+    return document
 
 
 def build_parser(default_level: int) -> argparse.ArgumentParser:
@@ -277,8 +278,9 @@ def main(default_level: int = 1, argv=None, compatibility: bool = False) -> int:
     planned = len(browsers) * len(cases)
     emit("run_start", total=planned, output=str(output), run_id=run_id)
     shared_drivers = {} if args.reuse_browser else None
-    suite = unittest.TestSuite(GradebookCase(case, args.level, browser, site, output, run_id, args.headless, emit, shared_drivers)
-                               for browser in browsers for case in cases)
+    tests = [GradebookCase(case, args.level, browser, site, output, run_id, args.headless, emit, shared_drivers)
+             for browser in browsers for case in cases]
+    suite = unittest.TestSuite(tests)
     try:
         with (output / "unittest.log").open("w", encoding="utf-8") as log:
             result = unittest.TextTestRunner(stream=log, verbosity=2,
@@ -297,11 +299,14 @@ def main(default_level: int = 1, argv=None, compatibility: bool = False) -> int:
                     interaction_fallbacks_enabled=site.get("allow_interaction_fallbacks", False),
                     automation_password_manager_enabled=False)
     metadata["reuse_browser"] = args.reuse_browser
-    metadata["session_isolation"] = "cookies and web storage cleared before every case" if args.reuse_browser else "fresh temporary profile for every case"
+    metadata["session_isolation"] = "new tab, global cookies/cache and observed-origin storage cleared; fresh profile if reset fails" if args.reuse_browser else "fresh temporary profile for every case"
     metadata["planned_executions"] = planned
     metadata["completed_executions"] = result.testsRun
     metadata["stopped"] = result.testsRun < planned
-    write_results(result, output, metadata)
+    document = write_results(result, output, metadata, tests)
+    for record in document["results"]:
+        if record["status"] == "NOT_RUN":
+            emit("case_not_run", **record)
     successful = result.wasSuccessful() and not result.skipped and result.testsRun == planned
     if compatibility:
         # A skipped case is incomplete compatibility coverage, not a passing NFR.

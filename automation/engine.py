@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException, InvalidElementStateException, NoSuchElementException, StaleElementReferenceException, TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
@@ -65,6 +65,24 @@ class StepEngine:
             return all(not e.is_displayed() for e in self.driver.find_elements(*self.target(target)))
         except StaleElementReferenceException:
             return False
+
+    def native_click(self, target, timeout):
+        def attempt(driver):
+            try:
+                element = self.unique(target, clickable=True)
+                if not element:
+                    return False
+                driver.execute_script("arguments[0].scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});", element)
+                exposed = driver.execute_script(
+                    "const e=arguments[0],r=e.getBoundingClientRect(),t=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);"
+                    "return !!t && (t===e || e.contains(t));", element)
+                if not exposed:
+                    return False
+                element.click()
+                return True
+            except (ElementClickInterceptedException, StaleElementReferenceException):
+                return False
+        self.wait(timeout).until(attempt, "Element did not become exposed for a native click: " + target)
 
     def run_phase(self, steps, phase):
         from automation.flow import CONDITIONS, CONTROL, MAX_EXPANDED_STEPS, check_budget, flow_plan, repeat_count
@@ -184,6 +202,9 @@ class StepEngine:
             record["input_value"] = resolve(step["value"], self.variables)
             record["expected"] = resolve(step["expected"], self.variables)
             actual = action() if action else self.execute(step)
+            if self.settings.get("isolation_logging") and step["command"] != "close_window":
+                from automation.isolation import remember_origins
+                remember_origins(self.driver)
             self.secret_values.update(credential_values(self.variables))
             record.update(status="PASS", actual=actual)
             if step["command"] == "screenshot":
@@ -242,9 +263,7 @@ class StepEngine:
             self.driver.get(url)
             return "Navigation completed"
         if cmd == "click":
-            element = self.wait(timeout).until(lambda _: self.unique(target, clickable=True))
-            self.highlight(element)
-            element.click()
+            self.native_click(target, timeout)
             return "Clicked element"
         if cmd == "press_key":
             from selenium.webdriver.common.keys import Keys
@@ -254,13 +273,21 @@ class StepEngine:
             self.element(target, timeout).send_keys(getattr(Keys, value))
             return "Sent key " + value
         if cmd in {"type", "type_exact"}:
-            field = self.element(target, timeout)
-            if field.get_attribute("type") == "password" and value:
-                self.secret_values.add(value)
-            self.highlight(field)
-            field.clear()
-            if value:
-                field.send_keys(value)
+            def enter(_):
+                try:
+                    field = self.unique(target, visible=True)
+                    if not field or not field.is_enabled() or field.get_property("readOnly"):
+                        return False
+                    if field.get_attribute("type") == "password" and value:
+                        self.secret_values.add(value)
+                    self.highlight(field)
+                    field.clear()
+                    if value:
+                        field.send_keys(value)
+                    return field
+                except (StaleElementReferenceException, InvalidElementStateException):
+                    return False
+            field = self.wait(timeout).until(enter, "Field did not become ready for native text input")
             actual = field.get_property("value")
             if cmd == "type_exact" and actual != value:
                 raise RuntimeError("Field did not receive the exact input value")
@@ -283,7 +310,7 @@ class StepEngine:
             desired = self.boolean(value)
             self.highlight(field)
             if field.is_selected() != desired:
-                field.click()
+                self.native_click(target, timeout)
             self.wait(timeout).until(lambda _: self.element(target, timeout).is_selected() == desired)
             return f"Checkbox set to {desired}"
         if cmd in {"wait_visible", "assert_visible"}:

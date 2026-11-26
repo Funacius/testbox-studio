@@ -134,14 +134,8 @@ class RecorderDialog(tk.Toplevel):
                     elif name == "mode":
                         session.set_mode(*args)
                     elif name == "alert":
-                        if not session.driver:
-                            raise ValueError("Open a recorder browser first")
                         command, text = args
-                        alert = session.driver.switch_to.alert
-                        if command == "accept_alert" and text:
-                            alert.send_keys(text)
-                        alert.accept() if command == "accept_alert" else alert.dismiss()
-                        manual = new_step(command, value=text if command == "accept_alert" else "")
+                        manual = session.handle_alert(command, text)
                     elif name in {"finish", "close"}:
                         if session.driver:
                             try:

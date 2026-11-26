@@ -85,9 +85,9 @@ class Studio(tk.Tk):
             self.tree.focus(first)
             self._show_node(first)
         else:
-            self.selection_title.configure(text="Create a test case, use a template, or import your file")
-            self._set_text(self.source_text, "Use + Test case for editable steps, or Tools > Case templates. Import CSV/XLS/XLSX to map your steps and data.\n\nSet the website URL before running. Existing Gradebook samples are available from Tools > Load Gradebook sample.", True)
-            self.notebook.select(self.source_tab)
+            self._empty_editor()
+        if not self.workspace_path.exists():
+            self.saved_label.configure(text="UNTITLED · NOT SAVED", fg=MUTED)
         self.protocol("WM_DELETE_WINDOW", self._close)
         self.after(100, self._poll_events)
         self.after(60, self.deiconify)
@@ -238,7 +238,7 @@ class Studio(tk.Tk):
         scroll = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
         scroll.pack(side="right", fill="y")
         self.tree.configure(yscrollcommand=scroll.set)
-        for tag, color in [("folder", MUTED), ("PASS", GREEN), ("FAIL", RED), ("ERROR", RED), ("SKIP", YELLOW), ("RUNNING", ACCENT)]:
+        for tag, color in [("folder", MUTED), ("PASS", GREEN), ("FAIL", RED), ("ERROR", RED), ("SKIP", YELLOW), ("NOT_RUN", YELLOW), ("RUNNING", ACCENT)]:
             self.tree.tag_configure(tag, foreground=color)
         self.tree.bind("<<TreeviewSelect>>", self._on_select)
         self.tree.bind("<Button-3>", self._context_menu)
@@ -288,7 +288,8 @@ class Studio(tk.Tk):
         self.expected_text.bind("<<Modified>>", self._text_changed)
         bottom = ttk.Frame(self.center)
         bottom.pack(side="bottom", fill="x", pady=(12, 0), before=self.notebook)
-        ttk.Button(bottom, text="Apply changes", style="Primary.TButton", command=self._apply).pack(side="right")
+        self.apply_button = ttk.Button(bottom, text="Apply changes", style="Primary.TButton", command=self._apply)
+        self.apply_button.pack(side="right")
         ttk.Button(bottom, text="Case templates…", command=self._templates).pack(side="left")
         self.editor_hint = ttk.Label(bottom, text="Expected assertions are edited separately.", style="Muted.TLabel", font=("Segoe UI", 8))
         self.editor_hint.pack(side="left", padx=10)
@@ -325,7 +326,8 @@ class Studio(tk.Tk):
         self.source_text.configure(state="disabled")
         self.script_data_tab = ttk.Frame(self.notebook, padding=(0, 10))
         self.script_steps_tab = ttk.Frame(self.notebook, padding=(0, 10))
-        self.script_editor = ScriptDataEditor(self.script_data_tab, self._editor_changed)
+        self.script_data_body = self._scroll_panel(self.script_data_tab, width=650)
+        self.script_editor = ScriptDataEditor(self.script_data_body, self._editor_changed)
         self.script_editor.pack(fill="both", expand=True)
         self.steps_editor = StepsEditor(self.script_steps_tab, self._editor_changed)
         self.steps_editor.pack(fill="both", expand=True)
@@ -337,6 +339,15 @@ class Studio(tk.Tk):
     def _case_tabs(self, script):
         legacy = [(self.overview_tab, "Test data"), (self.steps_tab, "Steps"), (self.json_tab, "JSON / Expected")]
         generic = [(self.script_data_tab, "Test data"), (self.script_steps_tab, "Steps")]
+        if script is None:
+            for frame, _ in legacy + generic:
+                self.notebook.hide(frame)
+            self.apply_button.configure(state="disabled")
+            self.notebook.tab(self.source_tab, text="Workspace")
+            self.notebook.select(self.source_tab)
+            return
+        self.apply_button.configure(state="normal")
+        self.notebook.tab(self.source_tab, text="Source")
         for frame, _ in legacy if script else generic:
             self.notebook.hide(frame)
         for index, (frame, title) in enumerate(generic if script else legacy):
@@ -367,6 +378,7 @@ class Studio(tk.Tk):
             widget = ttk.Combobox(self.inspector, textvariable=variable, values=choices, state="readonly", width=23) if choices else ttk.Entry(self.inspector, textvariable=variable, show="●" if key == "password" else "", width=25)
             widget.pack(fill="x", pady=(0, 5))
             self.run_widgets[key] = widget
+        self.run_vars["mode"].trace_add("write", lambda *_: self._mode_controls())
         self.headless = tk.BooleanVar(self, True)
         ttk.Checkbutton(self.inspector, text="Headless (background)", variable=self.headless).pack(anchor="w", pady=(5, 0))
         self.start_paused = tk.BooleanVar(self, False)
@@ -393,6 +405,13 @@ class Studio(tk.Tk):
         ttk.Label(self.inspector, text="Run uses a snapshot of the selected cases in folder order.\n\nBrowser tests start only when you press Run. Stop finishes the current case and cleanup.",
                   style="Muted.TLabel", wraplength=210, font=("Segoe UI", 9)).pack(anchor="w", pady=(9, 0))
         self._gradebook_inspector(has_gradebook)
+
+    def _mode_controls(self):
+        nfr = self.run_vars["mode"].get() != "Functional"
+        for key in ("level", "browser"):
+            self.run_widgets[key].configure(state="disabled" if nfr else "readonly")
+        self.run_labels["level"].configure(text="Level (use NFR settings)" if nfr else "Automation level")
+        self.run_labels["browser"].configure(text="Browser (use NFR settings)" if nfr else "Browser")
 
     def _gradebook_inspector(self, visible):
         widgets = [self.run_labels["course_id"], self.run_widgets["course_id"]]
@@ -438,7 +457,7 @@ class Studio(tk.Tk):
             self.result_tree.heading(key, text=label)
             self.result_tree.column(key, width=width, stretch=key == "title")
         self.result_tree.pack(fill="both", expand=True)
-        for tag, color in [("PASS", GREEN), ("FAIL", RED), ("ERROR", RED), ("SKIP", YELLOW), ("RUNNING", ACCENT)]:
+        for tag, color in [("PASS", GREEN), ("FAIL", RED), ("ERROR", RED), ("SKIP", YELLOW), ("NOT_RUN", YELLOW), ("RUNNING", ACCENT)]:
             self.result_tree.tag_configure(tag, foreground=color)
         self.result_tree.bind("<Double-1>", self._result_detail)
 
@@ -566,7 +585,7 @@ class Studio(tk.Tk):
             self.editor_uid = uid if node["kind"] == "case" else None
             self.editor_dirty = False
             if node["kind"] == "folder":
-                self._case_tabs(False)
+                self._case_tabs(None)
                 self._gradebook_inspector(any(not is_script(row) for row in self.workspace.rows([uid])))
                 for key in self.vars:
                     self.vars[key].set("")
@@ -914,12 +933,7 @@ class Studio(tk.Tk):
             self.tree.selection_set(first)
             self._show_node(first)
         else:
-            self.selection_title.configure(text="Empty workspace")
-            for text in (self.expected_text, self.inputs_text, self.assertions_text):
-                self._set_text(text, "")
-            for var in self.vars.values():
-                var.set("")
-            self.steps_tree.delete(*self.steps_tree.get_children())
+            self._empty_editor()
 
     def _move_dialog(self):
         if not self._commit() or not self._primary():
@@ -1017,6 +1031,7 @@ class Studio(tk.Tk):
             return
         self.future.append(self.workspace.to_dict())
         self.workspace = Workspace.from_dict(self.history.pop())
+        self._sync_settings_view()
         self.editor_uid = None
         self._mark_dirty()
         self._rebuild_tree()
@@ -1027,6 +1042,7 @@ class Studio(tk.Tk):
             return
         self.history.append(self.workspace.to_dict())
         self.workspace = Workspace.from_dict(self.future.pop())
+        self._sync_settings_view()
         self.editor_uid = None
         self._mark_dirty()
         self._rebuild_tree()
@@ -1037,6 +1053,15 @@ class Studio(tk.Tk):
         if uid:
             self.tree.selection_set(uid)
             self._show_node(uid)
+        else:
+            self._empty_editor()
+
+    def _empty_editor(self):
+        self.editor_uid, self.editor_dirty = None, False
+        self.selection_title.configure(text="Create a test case, use a template, or import your file")
+        self._case_tabs(None)
+        self._gradebook_inspector(any(n["kind"] == "case" and not is_script(n["record"]) for n, _ in self.workspace.walk()))
+        self._set_text(self.source_text, "Use + Test case for editable steps, or Tools > Case templates. Import CSV/XLS/XLSX to map your steps and data.\n\nSet the website URL before running. Existing Gradebook samples are available from Tools > Load Gradebook sample.", True)
 
     def _save(self, save_as=False):
         if not self._commit():
@@ -1074,6 +1099,8 @@ class Studio(tk.Tk):
             self.run_vars[key].set("")
         self.environment.set("(current)")
         self.environment_box.configure(values=["(current)"])
+        self.run_vars["mode"].set("Functional")
+        self._sync_settings_view()
         self.workspace_path = DEFAULT_WORKSPACE.with_name("untitled.project.json")
         self.history.clear()
         self.future.clear()
@@ -1089,7 +1116,7 @@ class Studio(tk.Tk):
         self.steps_tree.delete(*self.steps_tree.get_children())
 
         self.steps_editor.load([])
-        self._case_tabs(False)
+        self._case_tabs(None)
         self._set_text(self.source_text, "Create an editable test case with + Test case, or import steps and data from CSV/XLS/XLSX.", True)
         self.notebook.select(self.source_tab)
         self._gradebook_inspector(False)
@@ -1111,11 +1138,9 @@ class Studio(tk.Tk):
             self._show_first()
             self.saved_label.configure(text="WORKSPACE SAVED", fg=GREEN)
             self.status.set(f"Opened: {name}")
-            if "base_url" in workspace.settings:
-                self.run_vars["base_url"].set(workspace.settings["base_url"])
-            self.environment_box.configure(values=["(current)", *workspace.settings.get("environments", {})])
-            self.environment.set(workspace.settings.get("active_environment", "(current)"))
-            self._select_environment()
+            self._sync_settings_view()
+            self.run_vars["username"].set("")
+            self.run_vars["password"].set("")
         except (OSError, ValueError, KeyError, TypeError) as exc:
             messagebox.showerror("Open failed", str(exc), parent=self)
 
@@ -1260,18 +1285,30 @@ class Studio(tk.Tk):
         checked_settings(settings)
         return settings
 
-    def _select_environment(self, _=None):
-        selected = self.workspace.settings.get("environments", {}).get(self.environment.get())
-        if selected:
-            self.run_vars["base_url"].set(selected.get("base_url", ""))
-            if "browser" in selected:
-                self.run_vars["browser"].set(selected["browser"])
-            self.headless.set(selected.get("headless", True))
-            self.slow_ms.set(str(selected.get("slow_ms", 0)))
-            self.highlight_steps.set(selected.get("highlight", self.workspace.settings.get("highlight", False)))
+    def _sync_settings_view(self):
+        profiles = self.workspace.settings.get("environments", {})
+        active = self.workspace.settings.get("active_environment", "(current)")
+        self.environment_box.configure(values=["(current)", *profiles])
+        self.environment.set(active if active in profiles else "(current)")
+        self._apply_environment_values()
+
+    def _apply_environment_values(self):
+        values = {**self.workspace.settings, **self.workspace.settings.get("environments", {}).get(self.environment.get(), {})}
+        legacy = any(n["kind"] == "case" and not is_script(n["record"]) for n, _ in self.workspace.walk())
+        self.run_vars["base_url"].set(values.get("base_url", "http://127.0.0.1:9501" if legacy else ""))
+        self.run_vars["course_id"].set(str(values.get("course_id", "2" if legacy else "")))
+        self.run_vars["browser"].set(values.get("browser", "Chrome"))
+        self.headless.set(values.get("headless", True))
+        self.slow_ms.set(str(values.get("slow_ms", 0)))
+        self.highlight_steps.set(values.get("highlight", False))
+
+    def _select_environment(self, _=None, remember=True):
         if self.workspace.settings.get("active_environment", "(current)") != self.environment.get():
+            if remember:
+                self._checkpoint()
             self.workspace.settings["active_environment"] = self.environment.get()
             self._mark_dirty()
+        self._apply_environment_values()
 
     def _save_environment(self):
         values = self._effective_settings()
@@ -1298,7 +1335,7 @@ class Studio(tk.Tk):
         self.workspace.settings.setdefault("environments", {})[row["name"]] = profile
         self.environment_box.configure(values=["(current)", *self.workspace.settings["environments"]])
         self.environment.set(row["name"])
-        self._select_environment()
+        self._select_environment(remember=False)
         self._mark_dirty()
 
     def _check_connection(self):
@@ -1541,6 +1578,15 @@ class Studio(tk.Tk):
                     self.run_rows[key] = {"item": item, "event": event}
                     self.run_label.configure(text=f"{self.run_count}/{self.run_total} · {case_id} · {browser}")
                     self._log(f"START  {case_id} · {browser}", "info")
+                elif kind == "case_not_run":
+                    key = self._execution_key(event)
+                    if key not in self.run_rows:
+                        item = self.result_tree.insert("", "end", values=(self._execution_label(event), browser, "NOT_RUN", "—", event["title"]), tags=("NOT_RUN",))
+                        self.run_rows[key] = {"item": item, "event": event}
+                    self.execution_states[key] = "NOT_RUN"
+                    if self.statuses.get(case_id) not in {"FAIL", "ERROR", "SKIP"}:
+                        self.statuses[case_id] = "NOT_RUN"
+                    self._rebuild_tree()
                 elif kind == "step":
                     self._log(f"{case_id} / {browser}  ›  {event['message']}", "step")
                 elif kind == "step_start":
@@ -1564,7 +1610,7 @@ class Studio(tk.Tk):
                     self.run_count += 1
                     self.progress.configure(value=self.run_count)
                     self.execution_states[self._execution_key(event)] = event["status"]
-                    ranking = {"PASS": 0, "SKIP": 1, "RUNNING": 2, "FAIL": 3, "ERROR": 4}
+                    ranking = {"PASS": 0, "NOT_RUN": 1, "SKIP": 1, "RUNNING": 2, "FAIL": 3, "ERROR": 4}
                     self.statuses[case_id] = max((state for key, state in self.execution_states.items() if key[0] == case_id), key=ranking.get)
                     self._rebuild_tree()
                     row = self.run_rows.get(self._execution_key(event))
@@ -1692,13 +1738,22 @@ class Studio(tk.Tk):
             recorder.cancel()
             self.after(150, self._close)
             return
+        library = next((child for child in self.winfo_children() if isinstance(child, LocatorLibraryDialog)), None)
+        if library:
+            library.close()
+            self.after(150, self._close)
+            return
         if self._confirm_discard():
             self.destroy()
 
     def destroy(self):
         try:
             for callback in self.tk.call("after", "info"):
-                self.after_cancel(callback)
+                # Some ttk timers contain a Tcl command list rather than a
+                # registered Python callback. Tkinter.after_cancel assumes the
+                # latter; cancel both kinds directly, then normal destruction
+                # releases the widgets' registered Python commands.
+                self.tk.call("after", "cancel", callback)
             self.update_idletasks()
         except tk.TclError:
             pass

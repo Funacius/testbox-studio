@@ -23,7 +23,17 @@ from datetime import datetime
 def variables_for(record, row, settings, run_id):
     values = dict(settings.get("variables", {}))
     values.update({key[len("TESTBOX_VAR_"):]: value for key, value in os.environ.items() if key.startswith("TESTBOX_VAR_")})
-    values.update(script_data(record)["variables"])
+    data = script_data(record)
+    # Windows normalizes environment keys to uppercase during process launch.
+    # Look up the names used by the project through os.environ itself, whose
+    # lookup follows the host's case rules, and preserve project variable case.
+    names = set(values) | set(data["variables"]) | set(row)
+    names.update(match[1] for match in VARIABLE.finditer(json.dumps([data["steps"], settings.get("locators", {})])))
+    for name in names:
+        value = os.environ.get("TESTBOX_VAR_" + name)
+        if value is not None:
+            values[name] = value
+    values.update(data["variables"])
     values.update(row)
     values.update(base_url=settings.get("base_url", ""), run_id=run_id,
                   case_id=record["case_id"], runtime_id=f"TB-{run_id}-{record['case_id']}")
@@ -82,9 +92,10 @@ class ScriptCase(unittest.TestCase):
         super().__init__("runTest")
         self.record, self.row, self.row_index = record, row, row_index
         self.data = script_data(record, runnable=True)
+        from automation.outcomes import report_plan
         self.case = SimpleNamespace(case_id=record["case_id"], title=record["title"],
                                     expected_result=record.get("expected_result", ""),
-                                    expected={"steps": self.data["steps"]}, known_defect=record.get("known_defect", ""))
+                                    expected=report_plan({"steps": self.data["steps"]}), known_defect=record.get("known_defect", ""))
         self.browser, self.settings, self.output, self.run_id = browser, settings, output, run_id
         self.level, self.headless, self.shared_drivers, self.on_event = level, headless, shared_drivers, on_event
         self.runtime_id = f"TB-{run_id}-{record['case_id']}-{row_index}"
@@ -112,27 +123,17 @@ class ScriptCase(unittest.TestCase):
             except ExecutionStopped as exc:
                 raise unittest.SkipTest(str(exc)) from exc
         settings = {"window": [1440, 900], **self.settings}
-        if self.shared_drivers is not None and self.browser in self.shared_drivers:
-            self.driver = self.shared_drivers[self.browser]
-            handles = self.driver.window_handles
-            for handle in handles[1:]:
-                self.driver.switch_to.window(handle)
-                self.driver.close()
-            self.driver.switch_to.window(handles[0])
-            self.driver.switch_to.default_content()
-            self.driver.delete_all_cookies()
-            if urlsplit(self.driver.current_url).scheme in {"http", "https"}:
-                self.driver.execute_script("localStorage.clear();sessionStorage.clear();")
-            self.driver.get("about:blank")
+        if self.shared_drivers is not None:
+            from automation.isolation import owned_reused_browser
+            settings["isolation_logging"] = True
+            self.driver = owned_reused_browser(self.shared_drivers, self.browser, settings, self.headless)
         else:
             self.driver = create_browser(self.browser, settings, self.headless)
-            if self.shared_drivers is not None:
-                self.shared_drivers[self.browser] = self.driver
-            else:
-                self.addCleanup(close_browser, self.driver)
+            self.addCleanup(close_browser, self.driver)
         self.capabilities = {k: self.driver.capabilities.get(k) for k in ("browserName", "browserVersion", "platformName")}
         self.capabilities["viewport"] = self.driver.execute_script("return {width:innerWidth,height:innerHeight,devicePixelRatio:devicePixelRatio}")
         self.capabilities["userAgent"] = self.driver.execute_script("return navigator.userAgent")
+        self.capabilities["session_isolation"] = getattr(self.driver, "_testbox_isolation", "fresh temporary profile")
         if self.browser == "opera" and "OPR/" not in self.capabilities["userAgent"]:
             raise RuntimeError("Requested Opera GX, but this session does not identify as Opera")
         values = variables_for(self.record, self.row, settings, self.run_id)
@@ -271,7 +272,10 @@ def main(argv=None):
                     site_base_url=settings.get("base_url", ""), interactive_playback=bool(controller),
                     pause_seconds=round(controller.pause_seconds, 6) if controller else 0,
                     slow_ms=settings.get("slow_ms", 0))
-    write_results(result, output, metadata)
+    document = write_results(result, output, metadata, tests)
+    for record in document["results"]:
+        if record["status"] == "NOT_RUN":
+            emit("case_not_run", **record)
     successful = result.wasSuccessful() and not result.skipped and not stopped
     emit("run_end", successful=successful, stopped=stopped, output=str(output), total=result.testsRun)
     print(f"Ran {result.testsRun} checks; results: {output}")

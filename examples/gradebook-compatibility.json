@@ -1,0 +1,106 @@
+{
+  "records": [
+    {
+      "case_id": "TC-003-007",
+      "title": "Reject equal Minimum and Maximum grades",
+      "workflow": "validation",
+      "item_name": "F003 007",
+      "minimum": "100",
+      "maximum": "100",
+      "grade_type": "Value",
+      "inputs_json": "{\"fields\": {\"grademin\": \"100\", \"grademax\": \"100\", \"itemname\": \"F003 007\", \"idnumber\": \"F003-TC007\"}, \"selects\": {}, \"checks\": {}, \"dates\": {}, \"grade_type\": \"Value\"}",
+      "expected_json": "{\"saved\": {\"fields\": {\"grademin\": \"100\", \"grademax\": \"100\", \"itemname\": \"F003 007\", \"idnumber\": \"F003-TC007\"}, \"selects\": {}, \"checks\": {}, \"dates\": {}, \"grade_type\": \"Value\"}, \"error\": {\"field\": \"grademin\", \"text\": \"The minimum must be lower than the maximum\"}}",
+      "expected_result": "1. Gradebook setup is visible; the existing manual-item count is recorded.\n2. The full form is shown; Value is selected and numeric controls are enabled.\n3. The supplied test data is entered. The ID number identifies this case without changing the name-length data.\n4. Min/Max are editable, Scale is disabled, and the specified values are entered.\n5. The form remains available and a visible inline message says: The minimum must be lower than the maximum\n6. No additional item is present.",
+      "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+      "notes": "BVA equality / decision R2. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+      "known_defect": "",
+      "source_sheet": "003 - Moodle Grading",
+      "source_row": "42"
+    },
+    {
+      "case_id": "TC-003-011",
+      "title": "Save Value type with custom range [10,50]",
+      "workflow": "create",
+      "item_name": "F003 011",
+      "minimum": "10",
+      "maximum": "50",
+      "grade_type": "Value",
+      "inputs_json": "{\"fields\": {\"grademin\": \"10\", \"grademax\": \"50\", \"itemname\": \"F003 011\", \"idnumber\": \"F003-TC011\"}, \"selects\": {}, \"checks\": {}, \"dates\": {}, \"grade_type\": \"Value\"}",
+      "expected_json": "{\"saved\": {\"fields\": {\"grademin\": \"10\", \"grademax\": \"50\", \"itemname\": \"F003 011\", \"idnumber\": \"F003-TC011\"}, \"selects\": {}, \"checks\": {}, \"dates\": {}, \"grade_type\": \"Value\"}}",
+      "expected_result": "1. Gradebook setup is visible; the existing manual-item count is recorded.\n2. The full form is shown; Value is selected and numeric controls are enabled.\n3. The supplied test data is entered. The ID number identifies this case without changing the name-length data.\n4. Min/Max are editable, Scale is disabled, and the specified values are entered.\n5. The same item is stored with the exact ID number, name and Grade type; numeric range is [10,50] for Value, or the selected scale is retained.\n6. Only this case's item is deleted; its row disappears and the original manual-item count is restored.",
+      "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+      "notes": "ECP / decision R1 / main flow. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+      "known_defect": "",
+      "source_sheet": "003 - Moodle Grading",
+      "source_row": "66"
+    },
+    {
+      "case_id": "TC-003-012",
+      "title": "Save a Scale item with the named scale",
+      "workflow": "create",
+      "item_name": "F003 012",
+      "minimum": "",
+      "maximum": "",
+      "grade_type": "Scale",
+      "inputs_json": "{\"fields\": {\"itemname\": \"F003 012\", \"idnumber\": \"F003-TC012\"}, \"selects\": {}, \"checks\": {}, \"dates\": {}, \"grade_type\": \"Scale\", \"scale\": \"Separate and Connected ways of knowing\"}",
+      "expected_json": "{\"saved\": {\"fields\": {\"itemname\": \"F003 012\", \"idnumber\": \"F003-TC012\"}, \"selects\": {}, \"checks\": {}, \"dates\": {}, \"grade_type\": \"Scale\", \"scale\": \"Separate and Connected ways of knowing\"}}",
+      "expected_result": "1. Gradebook setup is visible; the existing manual-item count is recorded.\n2. The full form is shown; Value is selected and numeric controls are enabled.\n3. The supplied test data is entered. The ID number identifies this case without changing the name-length data.\n4. Scale is editable; Min/Max are disabled; the named scale is selected.\n5. The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained.\n6. Only this case's item is deleted; its row disappears and the original manual-item count is restored.",
+      "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+      "notes": "ECP Scale / decision R3 / alternative flow. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+      "known_defect": "",
+      "source_sheet": "003 - Moodle Grading",
+      "source_row": "72"
+    },
+    {
+      "case_id": "TC-003-018",
+      "title": "Recover from invalid bounds on the same form",
+      "workflow": "recover",
+      "item_name": "F003 018",
+      "minimum": "80",
+      "maximum": "40",
+      "grade_type": "Value",
+      "inputs_json": "{\"fields\": {\"grademin\": \"80\", \"grademax\": \"40\", \"itemname\": \"F003 018\", \"idnumber\": \"F003-TC018\"}, \"selects\": {}, \"checks\": {}, \"dates\": {}, \"grade_type\": \"Value\", \"recovery\": {\"grademin\": \"0\", \"grademax\": \"100\"}}",
+      "expected_json": "{\"saved\": {\"fields\": {\"grademin\": \"0\", \"grademax\": \"100\", \"itemname\": \"F003 018\", \"idnumber\": \"F003-TC018\"}, \"selects\": {}, \"checks\": {}, \"dates\": {}, \"grade_type\": \"Value\"}, \"error\": {\"field\": \"grademin\", \"text\": \"The minimum must be lower than the maximum\"}}",
+      "expected_result": "1. Gradebook setup is visible; the existing manual-item count is recorded.\n2. The full form is shown; Value is selected and numeric controls are enabled.\n3. The supplied test data is entered. The ID number identifies this case without changing the name-length data.\n4. Min/Max are editable, Scale is disabled, and the specified values are entered.\n5. The exact relation error is shown before editing; the form then contains valid bounds.\n6. The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained.\n7. Only this case's item is deleted; its row disappears and the original manual-item count is restored.",
+      "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+      "notes": "Use-case error-recovery / decision R2 then R1. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+      "known_defect": "",
+      "source_sheet": "003 - Moodle Grading",
+      "source_row": "108"
+    },
+    {
+      "case_id": "TC-003-029",
+      "title": "Save Hidden and Locked enabled",
+      "workflow": "create",
+      "item_name": "F003 029",
+      "minimum": "0",
+      "maximum": "100",
+      "grade_type": "Value",
+      "inputs_json": "{\"fields\": {\"grademin\": \"0\", \"grademax\": \"100\", \"itemname\": \"F003 029\", \"idnumber\": \"F003-TC029\"}, \"selects\": {}, \"checks\": {\"hidden\": true, \"locked\": true}, \"dates\": {}, \"grade_type\": \"Value\"}",
+      "expected_json": "{\"saved\": {\"fields\": {\"grademin\": \"0\", \"grademax\": \"100\", \"itemname\": \"F003 029\", \"idnumber\": \"F003-TC029\"}, \"selects\": {}, \"checks\": {\"hidden\": true, \"locked\": true}, \"dates\": {}, \"grade_type\": \"Value\"}}",
+      "expected_result": "1. Gradebook setup is visible; the existing manual-item count is recorded.\n2. The full form is shown; Value is selected and numeric controls are enabled.\n3. The supplied test data is entered. The ID number identifies this case without changing the name-length data.\n4. Min/Max are editable, Scale is disabled, and the specified values are entered.\n5. The checkbox is checked and its change/click handlers run.\n6. The checkbox is checked and its change/click handlers run.\n7. The same item is stored with the exact ID number, name and Grade type; numeric range is [0,100] for Value, or the selected scale is retained.\n8. The saved checkbox is checked.\n9. The saved checkbox is checked.\n10. Only this case's item is deleted; its row disappears and the original manual-item count is restored.",
+      "precondition": "Moodle 5.1.8 at http://127.0.0.1:9501, English UI, Asia/Bangkok. Log in at /login/index.php as teacher01 / 1234 (or run 00_Setup_Login first). Course 1 id=2; teacher01 has Editing teacher rights. Site grade_report_showmin=1. Single grade category using Natural aggregation; no student grades on test items. Global scale \"Separate and Connected ways of knowing\" exists. Use the full URL /grade/edit/tree/item.php?courseid=2, not the quick-add dialog. ID number F003-TCnnn must be unused for the case; remove only leftover test data from an interrupted run. For case 030 run before 31 Dec 2030. Existing unrelated items may remain.",
+      "notes": "ECP Boolean On; Off covered by default cases. Each successful case reopens the exact saved item, verifies its values and deletes only that item through the UI.",
+      "known_defect": "",
+      "source_sheet": "003 - Moodle Grading",
+      "source_row": "191"
+    }
+  ],
+  "settings": {
+    "base_url": "http://127.0.0.1:9501",
+    "course_id": "2",
+    "opera_chromium_version": "157",
+    "nfr": {
+      "levels": [
+        1,
+        2
+      ],
+      "browsers": [
+        "chrome",
+        "edge",
+        "opera"
+      ],
+      "repetitions": 1
+    }
+  }
+}

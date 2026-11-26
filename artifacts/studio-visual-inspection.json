@@ -1,67 +1,75 @@
 {
-  "scope": "Owned Tk views and real generated HTML reports inspected visually; remaining final-audit issues are tracked separately",
+  "scope": "Rendered desktop views, actual GUI execution and generated reports reviewed for readability; reader controls and small-window dataset reachability also checked by the capture helper.",
   "images": [
     {
-      "path": "artifacts/studio-flow-preview.png",
-      "width": 1616,
-      "height": 1009,
-      "sha256": "b778fe673aed99effbb5aed6679a85bb1d1e1f832278d6939f4c5594bc556fee"
-    },
-    {
-      "path": "artifacts/studio-html-report-preview.png",
-      "width": 1440,
-      "height": 1200,
-      "sha256": "f9625e9f49ad0c11514d9181de9c223e0c1a952c9bafe96ad29495c944f64a12"
+      "path": "artifacts/studio-steps-preview.png",
+      "sha256": "4ff16e175cc796b4e2166b50dc97a0b2e128e7eda587739bc1698bef51d630c8"
     },
     {
       "path": "artifacts/studio-locators-preview.png",
-      "width": 1016,
-      "height": 769,
       "sha256": "43382de31a5d0a081f3bcabe3756e96b29712eb378595653ac3d72be39a9d7dd"
     },
     {
-      "path": "artifacts/studio-nfr-preview.png",
-      "width": 916,
-      "height": 739,
-      "sha256": "32c0af24e1fe3a9e7c5beaa606b027b34e70f1dcb10b16ac39be60f5be839f82"
-    },
-    {
-      "path": "artifacts/studio-nfr-report-preview.png",
-      "width": 1440,
-      "height": 1100,
-      "sha256": "a7b56552b6721000f358e4971af682b085a185c6e40629ff52ad4cb52973735e"
-    },
-    {
-      "path": "artifacts/studio-recorder-preview.png",
-      "width": 1156,
-      "height": 889,
-      "sha256": "d7ce6f2fdaabd101eaa40afa8761f9a471169b91463713dd70a8f976a71ed938"
-    },
-    {
       "path": "artifacts/studio-report-preview.png",
-      "width": 1216,
-      "height": 839,
-      "sha256": "c0f5dbeb09ef3655c7aa303b51124007627dc19c4c93407f361491bf7b47a21c"
+      "sha256": "8e014d606e1621a64cf81c97e0b87bd0ed11e92796da6b867bba8d49f8a8a92e"
     },
     {
-      "path": "artifacts/studio-steps-preview.png",
-      "width": 1616,
-      "height": 1009,
-      "sha256": "5fba03da5253a9ee6e9e49b164ac285489457fc667ae3ef4992e2bf4116b0469"
+      "path": "artifacts/studio-nfr-preview.png",
+      "sha256": "b924d584f993589fca2c0e60a53c02f59bd126bad5b5fe66404c90232fc44ebd"
     },
     {
       "path": "artifacts/studio-templates-preview.png",
-      "width": 1066,
-      "height": 759,
       "sha256": "ef626ee44e40bef5cc7ac66913f3856a7b7833969bca276e2d485e106aff9baf"
     },
     {
+      "path": "artifacts/studio-recorder-preview.png",
+      "sha256": "d7ce6f2fdaabd101eaa40afa8761f9a471169b91463713dd70a8f976a71ed938"
+    },
+    {
       "path": "artifacts/studio-welcome-preview.png",
-      "width": 1616,
-      "height": 1009,
-      "sha256": "d570fcf12d128464c5d7422fd7e3e178d5feddaf20fffb4ead80396acfcb180f"
+      "sha256": "f8406436a042dc82a15c8a70688c56e28d4ec98262ba4e4fe6ae2f7f682b882b"
+    },
+    {
+      "path": "artifacts/studio-flow-preview.png",
+      "sha256": "b778fe673aed99effbb5aed6679a85bb1d1e1f832278d6939f4c5594bc556fee"
+    },
+    {
+      "path": "artifacts/studio-data-preview.png",
+      "sha256": "9cb4d54494328d0f4ed4d0a10457ec185946c6abcbd18e77ac60590c8fec363a"
+    },
+    {
+      "path": "artifacts/studio-loading-preview.png",
+      "sha256": "5c3c1e40ab0e67dc3eafaeafbfdcda27cb93eecdd59399e6a8459a5ab7a9f3f1"
+    },
+    {
+      "path": "artifacts/studio-import-preview.png",
+      "sha256": "5299fe75ea3f199cf10d618656a29062e6fe8f448ca9821c81c9830331d60bf5"
+    },
+    {
+      "path": "artifacts/studio-small-window-preview.png",
+      "sha256": "919a94151ed111af5339a5dcb9a6e0cb1e064f69d33dc2cf7f228d7d6fac0e20"
+    },
+    {
+      "path": "artifacts/studio-html-report-preview.png",
+      "sha256": "7b32ed1f996640d194416f0516206aa1221ac4eb76f8b516a62175e1d4ce5eb6"
+    },
+    {
+      "path": "artifacts/studio-live-steps-preview.png",
+      "sha256": "a3731cbc66b4ec3b8560276688188d63d17bc86bb744c2ad27bdd26d89e14f81"
+    },
+    {
+      "path": "artifacts/studio-live-results-preview.png",
+      "sha256": "7925d1db6c993cd509c4299cd9d3ba4f5b7562742bb3a0b39d4d0380ee8f0ced"
+    },
+    {
+      "path": "artifacts/studio-preview.png",
+      "sha256": "9c5abaf1b1c67b8e0df7507f2a548f6f49d58c6271ef02117cc4b1393dff261a"
+    },
+    {
+      "path": "artifacts/studio-moodle-nfr-report-preview.png",
+      "sha256": "e21ff862716336cd0e4b2d6525bf091cd0728a4ad197c76bf4c022542c088eef"
     }
   ],
-  "verification": "artifacts/studio-authoring-verification.json",
-  "note": "Recorder footer clipping found in initial capture was corrected before the 68-test verification. Preview dialogs are mapped with no activation; no unrelated desktop images are captured."
+  "verification": "artifacts/studio-final-verification.json",
+  "note": "Only owned windows captured. Data table scrolling, visible Cancel/Retry/encoding controls, empty editor state, native/generic switching, recorder and NFR dialogs reviewed."
 }

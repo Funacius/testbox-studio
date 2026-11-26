@@ -1,0 +1,51 @@
+{
+  "successful": true,
+  "reason": "Recover only seven owned items from earlier NFR example whose instantaneous conditional skipped cleanup. Example now waits positively for the saved row before deleting.",
+  "before": [
+    "315",
+    "316",
+    "317",
+    "318",
+    "319",
+    "320",
+    "321"
+  ],
+  "deleted": [
+    {
+      "item_id": "315",
+      "runtime_id": "TB-20261126-132643-a00597bc-GRADEBOOK-SAVE-NFR-0",
+      "ownership_report": "results\\studio-moodle-nfr-smoke\\nfr-20261126-132642-bc6613fe\\results.json"
+    },
+    {
+      "item_id": "316",
+      "runtime_id": "TB-20261126-132731-9ac2a531-GRADEBOOK-SAVE-NFR-0",
+      "ownership_report": "results\\studio-moodle-nfr-20261126-132730\\elapsed\\nfr-20261126-132730-de17bdb7\\results.json"
+    },
+    {
+      "item_id": "317",
+      "runtime_id": "TB-20261126-132740-8eeb1b84-GRADEBOOK-SAVE-NFR-0",
+      "ownership_report": "results\\studio-moodle-nfr-20261126-132730\\elapsed\\nfr-20261126-132730-de17bdb7\\results.json"
+    },
+    {
+      "item_id": "318",
+      "runtime_id": "TB-20261126-132749-593c0995-GRADEBOOK-SAVE-NFR-0",
+      "ownership_report": "results\\studio-moodle-nfr-20261126-132730\\elapsed\\nfr-20261126-132730-de17bdb7\\results.json"
+    },
+    {
+      "item_id": "319",
+      "runtime_id": "TB-20261126-132758-411e360b-GRADEBOOK-SAVE-NFR-0",
+      "ownership_report": "results\\studio-moodle-nfr-20261126-132730\\elapsed\\nfr-20261126-132730-de17bdb7\\results.json"
+    },
+    {
+      "item_id": "320",
+      "runtime_id": "TB-20261126-132806-bd377735-GRADEBOOK-SAVE-NFR-0",
+      "ownership_report": "results\\studio-moodle-nfr-20261126-132730\\elapsed\\nfr-20261126-132730-de17bdb7\\results.json"
+    },
+    {
+      "item_id": "321",
+      "runtime_id": "TB-20261126-132816-dc5a21ca-GRADEBOOK-SAVE-NFR-0",
+      "ownership_report": "results\\studio-moodle-nfr-20261126-132730\\elapsed\\nfr-20261126-132730-de17bdb7\\results.json"
+    }
+  ],
+  "after": []
+}

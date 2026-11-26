@@ -125,7 +125,10 @@ class NfrBrowserTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertTrue(report["metadata"]["stopped"])
             self.assertFalse(report["successful"])
-            self.assertEqual(report["results"], [])
+            self.assertEqual(report["counts"]["NOT_RUN"], 2)
+            self.assertEqual(report["metadata"]["completed_executions"], 0)
+            self.assertEqual({r["level"] for r in report["results"]}, {1, 2})
+            self.assertTrue(all(r["status"] == "NOT_RUN" for r in report["results"]))
         with tempfile.TemporaryDirectory() as directory:
             result, report = self.run_matrix(directory, "elapsed", config, slow=100)
             self.assertEqual(result.returncode, 2)
