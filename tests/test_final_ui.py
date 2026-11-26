@@ -41,6 +41,26 @@ class FinalUiTests(unittest.TestCase):
         app.run_vars["mode"].set("Functional")
         self.assertEqual(str(app.run_widgets["browser"].cget("state")), "readonly")
 
+    def test_browser_controls_and_legacy_profiles_use_only_chrome_and_edge(self):
+        from studio.nfr_dialog import NfrDialog
+        app = self.app
+        self.assertEqual(tuple(app.run_widgets["browser"].cget("values")), ("Chrome", "Edge", "Both"))
+        app.workspace.settings = {"browser": "Opera GX", "nfr": {"browsers": ["chrome", "edge", "opera"]}}
+        app._sync_settings_view()
+        self.assertEqual(app.run_vars["browser"].get(), "Chrome")
+        self.assertEqual(app._effective_settings()["nfr"]["browsers"], ["chrome", "edge"])
+        self.assertEqual(app.workspace.settings["nfr"]["browsers"], ["chrome", "edge", "opera"])
+        with patch("tkinter.Toplevel.wait_window"), patch("tkinter.Toplevel.grab_set"), patch("tkinter.Toplevel.deiconify"):
+            dialog = NfrDialog(app, [], {"browsers": ["opera"]})
+        try:
+            self.assertEqual(set(dialog.browsers), {"chrome", "edge"})
+            self.assertTrue(all(var.get() for var in dialog.browsers.values()))
+            dialog.submit()
+            self.assertEqual(dialog.result["browsers"], ["chrome", "edge"])
+        finally:
+            if dialog.winfo_exists():
+                dialog.destroy()
+
     def test_environment_undo_redo_and_switch_to_current_restore_visible_values(self):
         app = self.app
         app.workspace.settings = dict(base_url="http://default.test", browser="Chrome", environments={

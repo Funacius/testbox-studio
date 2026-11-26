@@ -73,11 +73,18 @@ Website mẫu không cần Moodle/Docker và chỉ phục vụ ví dụ automati
 
 ### Tiến độ mở rộng app
 
+Giao diện hiện chỉ chọn **Chrome**, **Edge** hoặc **Both** (chạy cả hai).
+NFR cũng chỉ có Chrome và Edge. Profile cũ chọn Opera được mở bằng Chrome;
+ma trận NFR cũ chứa Opera được dùng thành Chrome + Edge trong giao diện.
+Tab Steps Gradebook có thanh cuộn dọc/ngang; kéo thanh cuộn hoặc dùng con lăn
+để xem các bước còn lại. Bản sửa giao diện đã qua **26 kiểm tra GUI** và kiểm tra
+kéo thanh cuộn thật tới bước cuối: [bằng chứng](artifacts/studio-scroll-verification.json).
+
 Đã hoàn thành 12 nhóm tính năng trong `data/studio-development.json`, gồm
 import mapping, dataset/biến, chỉnh sửa step, môi trường, locator, playback,
 báo cáo, Python export, NFR, template, recorder/picker và điều kiện/vòng lặp.
 
-Kiểm chứng cuối ngày **26/11/2026**:
+Kiểm chứng bản nền `091878f` ngày **26/11/2026** (trước bản sửa giao diện trên):
 
 | Phạm vi | Kết quả |
 | --- | --- |
@@ -143,7 +150,7 @@ Mở **Tools → Browser recorder / picker…**:
    recorded steps**. Browser tạm được đóng trước khi áp dụng. Sửa thêm ở Steps,
    Data rows/Variables và Run khi đã chuẩn bị website cùng dữ liệu cần thiết.
 
-Recorder dùng Chrome; playback vẫn có Chrome/Edge/Opera GX theo cấu hình.
+Recorder dùng Chrome; playback trong app chọn Chrome/Edge hoặc cả hai.
 Recorder hiện ghi ở document chính của tab hiện tại. Iframe, tab mới, shadow
 DOM và editor phức tạp cần thêm/chỉnh step thủ công; engine có các lệnh frame,
 default_content và switch_window. Luôn kiểm tra selector và assertion sau khi
@@ -306,9 +313,8 @@ $env:TESTBOX_VAR_password = '1234'
 
 Ví dụ tương thích dùng 5 case Gradebook gốc:
 `examples/gradebook-compatibility.project.json` mở trong app, chọn **All cases**
-và **Compatibility NFR**. Mẫu chọn cả hai level và Chrome/Edge/Opera GX,
-tổng cộng 30 lượt. Máy khác cần có các browser được chọn và cấu hình Chromium
-của Opera đúng phiên bản cài đặt; có thể chỉ chọn Chrome và Edge trong NFR settings.
+và **Compatibility NFR**. Mẫu chọn cả hai level và Chrome/Edge,
+tổng cộng 20 lượt. Máy chạy cần cài hai browser này.
 CLI tương ứng:
 
 ```powershell
@@ -430,9 +436,9 @@ dataset, tài khoản được cấu hình đúng; không cần bật Moodle.
    Execution và Open results để phân biệt ERROR kết nối với FAIL assertion.
 
 Python/Selenium trên máy hiện tại đã được cài sẵn. Internet có thể cần khi
-Selenium Manager tải driver phù hợp sau khi browser cập nhật. Opera GX còn cần
-Chromium version phù hợp trong site settings; nên xác nhận Chrome hoạt động
-trước, rồi mới chọn Opera GX.
+Selenium Manager tải driver phù hợp sau khi browser cập nhật. Trong app,
+chọn Chrome, Edge hoặc Both. Các hướng dẫn Opera ở phần CLI bên dưới dành
+cho các bản export/lệnh cũ.
 
 ## Project 3 — Feature 003: Gradebook — Bùi Quốc Thái
 
@@ -485,7 +491,8 @@ when an actual Run is started.
   the current executable Gradebook workflow.
 - **Run configuration:** Level 1/2, Chrome/Edge/both, site/course, credentials,
   site JSON and functional/compatibility mode.
-  Opera GX is also available as an experimental Chromium adapter. Headless
+  The desktop interface offers Chrome and Edge. An older experimental Opera
+  adapter is retained for existing CLI exports. Headless
   mode is enabled by default so runs can continue while other applications
   occupy the display. NFR settings select levels, browsers and repetitions;
   compatibility needs at least two distinct browsers.

@@ -308,7 +308,6 @@
   "settings": {
     "base_url": "http://127.0.0.1:9501",
     "course_id": "2",
-    "opera_chromium_version": "157",
     "nfr": {
       "levels": [
         1,
@@ -316,8 +315,7 @@
       ],
       "browsers": [
         "chrome",
-        "edge",
-        "opera"
+        "edge"
       ],
       "repetitions": 1
     }

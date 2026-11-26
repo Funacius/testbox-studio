@@ -9,6 +9,13 @@ from automation.schema import is_script, script_data
 from studio.theme import PANEL
 
 
+def gui_nfr_config(config):
+    config = deepcopy(config)
+    if isinstance(config, dict) and isinstance(config.get("browsers"), list) and "opera" in config["browsers"]:
+        config["browsers"] = ["chrome", "edge"]
+    return config
+
+
 class NfrDialog(tk.Toplevel):
     def __init__(self, parent, records, config, selected_case=None):
         super().__init__(parent)
@@ -19,7 +26,7 @@ class NfrDialog(tk.Toplevel):
         self.geometry("900x700")
         self.result = None
         self.records = {r["case_id"]: r for r in records if is_script(r)}
-        self.config = deepcopy(config)
+        self.config = gui_nfr_config(config)
         self.current_case = None
         self.step_ids = {}
         body = ttk.Frame(self, padding=22)
@@ -39,7 +46,7 @@ class NfrDialog(tk.Toplevel):
         browsers.pack(fill="x", pady=16)
         ttk.Label(browsers, text="Browsers").pack(side="left", padx=(0, 12))
         self.browsers = {}
-        for key, label in (("chrome", "Chrome"), ("edge", "Edge"), ("opera", "Opera GX")):
+        for key, label in (("chrome", "Chrome"), ("edge", "Edge")):
             variable = tk.BooleanVar(self, key in self.config.get("browsers", ["chrome", "edge"]))
             self.browsers[key] = variable
             ttk.Checkbutton(browsers, text=label, variable=variable).pack(side="left", padx=8)

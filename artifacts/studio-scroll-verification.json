@@ -1,0 +1,49 @@
+{
+  "successful": true,
+  "mousewheel_before": [
+    0.0,
+    0.2222222222222222
+  ],
+  "mousewheel_after": [
+    0.1111111111111111,
+    0.3333333333333333
+  ],
+  "vertical_after_drag": [
+    0.7777777777777778,
+    1.0
+  ],
+  "horizontal_after_drag": [
+    0.2782485875706215,
+    1.0
+  ],
+  "last_step_visible": true,
+  "browser_choices": [
+    "Chrome",
+    "Edge",
+    "Both"
+  ],
+  "verified_at": "2026-11-26T07:31:17.698367+00:00",
+  "base_release": "091878f",
+  "gui_test_count": 26,
+  "gui_test_result": "PASS",
+  "gui_test_command": ".venv/Scripts/python.exe -m unittest tests.test_final_ui tests.test_studio_editor -v",
+  "nfr_browsers": [
+    "chrome",
+    "edge"
+  ],
+  "source_sha256": {
+    "studio\\app.py": "1eaac555fb8597174f5a785c90f393ab445f6cea3f8e7bab903aeb95c96f32a1",
+    "studio\\theme.py": "fa05faa5bacc7e08afed756770e2bb098299388966d9f60becdec4aa56ba79c7",
+    "studio\\nfr_dialog.py": "5eef6d4d5a1b059d34d11f89675e325a386e6957adb88482ec234a46abca0f6c",
+    "tests\\test_final_ui.py": "a14bd40a7be8685aa6dad211c3c447cc66d233a55b9c239f0c30c12f17e7903b"
+  },
+  "previews": [
+    "artifacts/studio-gradebook-steps-scroll-before.png",
+    "artifacts/studio-gradebook-steps-scroll-after.png",
+    "artifacts/studio-two-browser-nfr-preview.png"
+  ],
+  "example_sha256": {
+    "examples/gradebook-compatibility.json": "69ffd25638e602a513684ce4c51723c2c59804b19f011f28ad39560668924ed2",
+    "examples/gradebook-compatibility.project.json": "3bc07822181edaa71684fed868ac760883365316429c641f845487f240e2cdce"
+  }
+}

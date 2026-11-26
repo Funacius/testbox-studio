@@ -28,7 +28,7 @@ from automation.readiness import checked_settings, website_status
 from automation.playback import write_control
 from studio.locator_library import LocatorLibraryDialog
 from studio.report_viewer import ReportViewer
-from studio.nfr_dialog import NfrDialog
+from studio.nfr_dialog import NfrDialog, gui_nfr_config
 from studio.templates import TemplateDialog, instantiate
 from studio.recorder_dialog import RecorderDialog
 from studio.theme import (ACCENT, BG, BORDER, FIELD, GREEN, MUTED, PANEL, RED,
@@ -39,6 +39,11 @@ FILE_TYPES = [("Test data", "*.csv *.xls *.xlsx"), ("CSV", "*.csv"),
 DEFAULT_WORKSPACE = ROOT / "workspace/testbox.project.json"
 LEGACY_WORKSPACE = ROOT / "workspace/gradebook.project.json"
 BANGKOK = timezone(timedelta(hours=7))
+GUI_BROWSERS = ("Chrome", "Edge", "Both")
+
+
+def gui_browser(value):
+    return {"chrome": "Chrome", "edge": "Edge", "both": "Both"}.get(str(value).lower(), "Chrome")
 
 
 class Studio(tk.Tk):
@@ -300,13 +305,17 @@ class Studio(tk.Tk):
         self.steps_tree = ttk.Treeview(frame, columns=("number", "action", "expected"), show="headings", selectmode="browse", height=8)
         for key, label, width in [("number", "#", 38), ("action", "ACTION", 350), ("expected", "EXPECTED RESULT", 320)]:
             self.steps_tree.heading(key, text=label)
-            self.steps_tree.column(key, width=width, stretch=key != "number")
-        self.steps_tree.pack(side="left", fill="both", expand=True)
-        scroll = ttk.Scrollbar(frame, orient="vertical", command=self.steps_tree.yview)
-        scroll.pack(side="right", fill="y")
-        self.steps_tree.configure(yscrollcommand=scroll.set)
+            self.steps_tree.column(key, width=width, minwidth=38 if key == "number" else 300, stretch=key != "number")
+        self.steps_tree.grid(row=0, column=0, sticky="nsew")
+        self.steps_scroll_y = ttk.Scrollbar(frame, orient="vertical", command=self.steps_tree.yview)
+        self.steps_scroll_x = ttk.Scrollbar(frame, orient="horizontal", command=self.steps_tree.xview)
+        self.steps_scroll_y.grid(row=0, column=1, sticky="ns")
+        self.steps_scroll_x.grid(row=1, column=0, sticky="ew")
+        self.steps_tree.configure(yscrollcommand=self.steps_scroll_y.set, xscrollcommand=self.steps_scroll_x.set)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
         self.steps_tree.bind("<Double-1>", self._step_detail)
-        ttk.Label(self.steps_tab, text="Double-click a row for full details. Live actions appear below when Run is pressed.", style="Muted.TLabel", wraplength=660, font=("Segoe UI", 8)).pack(anchor="w", pady=(9, 0))
+        ttk.Label(self.steps_tab, text="Double-click a row for full details. Live actions appear below when Run is pressed.", style="Muted.TLabel", wraplength=660, font=("Segoe UI", 8)).pack(side="bottom", anchor="w", pady=(9, 0), before=frame)
         panes = ttk.Panedwindow(self.json_tab, orient="horizontal")
         panes.pack(fill="both", expand=True)
         texts = []
@@ -365,7 +374,7 @@ class Studio(tk.Tk):
         has_gradebook = any(n["kind"] == "case" and not is_script(n["record"]) for n, _ in self.workspace.walk())
         settings = [("mode", "Mode", "Functional", ("Functional", "Compatibility NFR", "Elapsed-time NFR")),
                     ("level", "Automation level", "Level 2", ("Level 1", "Level 2")),
-                    ("browser", "Browser", "Chrome", ("Chrome", "Edge", "Opera GX", "Both")),
+                    ("browser", "Browser", "Chrome", GUI_BROWSERS),
                     ("base_url", "Base URL", self.workspace.settings.get("base_url", "http://127.0.0.1:9501" if has_gradebook else ""), None),
                     ("course_id", "Course ID (Gradebook)", "2" if has_gradebook else "", None),
                     ("username", "Username", os.environ.get("TESTBOX_VAR_username", os.environ.get("MOODLE_USERNAME", "teacher01") if has_gradebook else ""), None),
@@ -1276,6 +1285,8 @@ class Studio(tk.Tk):
         for key in ("variables", "locators"):
             settings[key] = {**settings.get(key, {}), **environment.get(key, {})}
         settings.update({key: value for key, value in environment.items() if key not in {"variables", "locators"}})
+        if "nfr" in settings:
+            settings["nfr"] = gui_nfr_config(settings["nfr"])
         settings["base_url"] = self.run_vars["base_url"].get().strip()
         try:
             settings["slow_ms"] = float(self.slow_ms.get())
@@ -1297,7 +1308,7 @@ class Studio(tk.Tk):
         legacy = any(n["kind"] == "case" and not is_script(n["record"]) for n, _ in self.workspace.walk())
         self.run_vars["base_url"].set(values.get("base_url", "http://127.0.0.1:9501" if legacy else ""))
         self.run_vars["course_id"].set(str(values.get("course_id", "2" if legacy else "")))
-        self.run_vars["browser"].set(values.get("browser", "Chrome"))
+        self.run_vars["browser"].set(gui_browser(values.get("browser", "Chrome")))
         self.headless.set(values.get("headless", True))
         self.slow_ms.set(str(values.get("slow_ms", 0)))
         self.highlight_steps.set(values.get("highlight", False))
@@ -1315,7 +1326,7 @@ class Studio(tk.Tk):
         dialog = FormDialog(self, "Save environment", [
             ("name", "Environment name", "Local" if self.environment.get() == "(current)" else self.environment.get(), None),
             ("base_url", "Base URL", self.run_vars["base_url"].get(), None),
-            ("browser", "Browser", self.run_vars["browser"].get(), ("Chrome", "Edge", "Opera GX", "Both")),
+            ("browser", "Browser", self.run_vars["browser"].get(), GUI_BROWSERS),
             ("display", "Display", "Headless" if self.headless.get() else "Visible", ("Headless", "Visible")),
             ("width", "Viewport width", str(values.get("window", [1440, 900])[0]), None),
             ("height", "Viewport height", str(values.get("window", [1440, 900])[1]), None),
@@ -1362,7 +1373,7 @@ class Studio(tk.Tk):
                     row = data["dataset"][index] if data["dataset"] else {}
                     variables = variables_for(record, row, {**settings, "variables": variables}, "locator-preview")
             browser = self.run_vars["browser"].get()
-            browser = "opera" if browser == "Opera GX" else "chrome" if browser == "Both" else browser.lower()
+            browser = "chrome" if browser == "Both" else browser.lower()
             dialog = LocatorLibraryDialog(self, settings, browser, variables)
             if dialog.result is not None:
                 self._checkpoint()
@@ -1477,7 +1488,7 @@ class Studio(tk.Tk):
             command = [str(executable), "-u", "-m", "gradebook.runner",
                        "--data", str(data_path), "--output", str(run_home), "--events", "--reuse-browser", "--stop-file", str(self.stop_file)]
             level = int(self.run_vars["level"].get()[-1])
-            browser_name = "opera" if self.run_vars["browser"].get() == "Opera GX" else self.run_vars["browser"].get().lower()
+            browser_name = self.run_vars["browser"].get().lower()
             command += ["--level", str(level), "--browser", browser_name]
             if self.headless.get():
                 command.append("--headless")
@@ -1496,7 +1507,7 @@ class Studio(tk.Tk):
                 preflight(rows, probe)
                 project_path = run_home / "project-snapshot.json"
                 project_path.write_text(json.dumps(dict(records=rows, settings=settings), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-                browser_name = "opera" if self.run_vars["browser"].get() == "Opera GX" else self.run_vars["browser"].get().lower()
+                browser_name = self.run_vars["browser"].get().lower()
                 command = [str(executable), "-u", "-m", "automation.runner", "--project", str(project_path),
                            "--level", str(level), "--browser", browser_name, "--output", str(run_home), "--events", "--stop-file", str(self.stop_file)]
                 if level == 2:

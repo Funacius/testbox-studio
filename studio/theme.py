@@ -61,9 +61,13 @@ def apply_theme(root):
     style.configure("TNotebook.Tab", background=PANEL, foreground=MUTED, padding=(17, 10))
     style.map("TNotebook.Tab", background=[("selected", SURFACE)], foreground=[("selected", TEXT)])
     style.configure("TPanedwindow", background=BG)
-    style.configure("Vertical.TScrollbar", background=BORDER, troughcolor=PANEL, arrowcolor=MUTED,
-                    borderwidth=0, width=10)
-    style.configure("Horizontal.TScrollbar", background=BORDER, troughcolor=PANEL, arrowcolor=MUTED)
+    for name in ("Vertical.TScrollbar", "Horizontal.TScrollbar"):
+        style.configure(name, background="#737373", troughcolor=FIELD, arrowcolor=TEXT,
+                        bordercolor=FIELD, lightcolor=FIELD, darkcolor=FIELD,
+                        borderwidth=0, arrowsize=14, width=14, gripcount=0)
+        # Clam inherits a white active background unless explicitly mapped.
+        style.map(name, background=[("disabled", SURFACE), ("pressed", "#aaaaaa"), ("active", "#929292")],
+                  arrowcolor=[("disabled", MUTED), ("active", "#ffffff")])
     style.configure("TProgressbar", background=ACCENT, troughcolor=FIELD, borderwidth=0)
     style.configure("TCheckbutton", background=PANEL, foreground=TEXT)
     style.map("TCheckbutton", background=[("active", PANEL)])
