@@ -1,0 +1,34 @@
+{
+  "scope": "Native Gradebook connectivity/precondition smoke only, not the required full regression",
+  "report": "results/studio-native-smoke/level2-20261126-113949-dd34ccdd/results.json",
+  "counts": {
+    "PASS": 1,
+    "FAIL": 0,
+    "ERROR": 0,
+    "SKIP": 0
+  },
+  "case_id": "TC-003-001",
+  "level": 2,
+  "browser": "chrome",
+  "status": "PASS",
+  "cleanup_error": "",
+  "capabilities": {
+    "browserName": "chrome",
+    "browserVersion": "158.0.8127.88",
+    "platformName": "windows",
+    "window": {
+      "height": 900,
+      "width": 1440,
+      "x": 10,
+      "y": 10
+    },
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 900,
+      "width": 1440
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36"
+  },
+  "source_matches_authoring_verification": true,
+  "remaining": "Full 36-case Level 1 and Level 2 regression remains required; preserve known TC-003-036 failure."
+}
